@@ -1,9 +1,5 @@
-import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart'
+import TrendCharts from '@/components/charts/TrendCharts'
 
 export default function Page() {
-  return (
-    <>
-      <RechartsRadarChart />
-    </>
-  )
+  return <TrendCharts />
 }

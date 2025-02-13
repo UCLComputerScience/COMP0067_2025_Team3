@@ -22,6 +22,7 @@ import {
   ResponsiveContainer
 } from '@/libs/Recharts'
 import type { TooltipProps } from '@/libs/Recharts'
+import CustomLegend from '../CustomLegend'
 
 interface DataEntry {
   subject: string
@@ -30,9 +31,8 @@ interface DataEntry {
 
 // Props for the radar chart component
 interface Props {
-  // data?: { subject: string; [key: string]: number | string }[]
   data?: DataEntry[]
-  height?: number
+  legend?: boolean
 }
 
 // Styled Component Imports
@@ -41,7 +41,7 @@ const AppRecharts = dynamic(() => import('@/libs/styles/AppRecharts'))
 // Vars
 const demoData = [
   {
-    subject: 'NSMK',
+    subject: 'Neuromusculoskeletal',
     '04/06/2024': 41,
     '06/04/2025': 65
   },
@@ -82,6 +82,8 @@ const demoData = [
   }
 ]
 
+const colors = ['#16B1FF', '#8C57FF', '#56CA00']
+
 const CustomTooltip = (props: TooltipProps<any, any>) => {
   // Props
   const { active, payload } = props
@@ -108,14 +110,12 @@ const CustomTooltip = (props: TooltipProps<any, any>) => {
   return null
 }
 
-const RechartsRadarChart = ({ data = demoData, height = 350 }: Props) => {
-  const dateKeys = Object.keys(demoData[0]).filter(key => key !== 'subject')
-  const colors = ['#16B1FF', '#8C57FF', '#56CA00']
-
+const RechartsRadarChart = ({ data = demoData, legend = true }: Props) => {
+  const dateKeys = Object.keys(data[0]).filter(key => key !== 'subject')
   return (
     <>
       <AppRecharts>
-        <div className={`bs-[${height}px]`}>
+        <div className={`bs-[350px]`}>
           <ResponsiveContainer>
             <RadarChart cx='50%' cy='50%' data={data} style={{ direction: 'ltr' }}>
               <PolarGrid />
@@ -135,19 +135,7 @@ const RechartsRadarChart = ({ data = demoData, height = 350 }: Props) => {
           </ResponsiveContainer>
         </div>
       </AppRecharts>
-      {/* Legend */}
-      <div className='flex justify-center mbe-4'>
-        {dateKeys.map((key, index) => (
-          <Box
-            key={key}
-            className='flex items-center mie-5 gap-1.5'
-            sx={{ '& i': { color: colors[index % colors.length] } }}
-          >
-            <i className='ri-circle-fill text-xs' />
-            <Typography variant='body2'>{key}</Typography>
-          </Box>
-        ))}
-      </div>
+      {legend && <CustomLegend keys={dateKeys} colors={colors} />}
     </>
   )
 }
