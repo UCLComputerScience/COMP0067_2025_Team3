@@ -8,7 +8,6 @@ import List from '@mui/material/List'
 import Menu from '@mui/material/Menu'
 import ListItem from '@mui/material/ListItem'
 import MenuItem from '@mui/material/MenuItem'
-// import ListItemText from '@mui/material/ListItemText'
 import ListItemButton from '@mui/material/ListItemButton'
 import { Typography } from '@mui/material'
 
@@ -21,11 +20,11 @@ const demoOptions = [
 
 interface Props {
   options?: string[]
+  selectedIndex: number
+  setSelectedIndex: React.Dispatch<React.SetStateAction<number>>
 }
 
-const MenuSelected = ({ options = demoOptions }: Props) => {
-  // States
-  const [selectedIndex, setSelectedIndex] = useState<number>(0)
+const MenuSelected = ({ options = demoOptions, selectedIndex, setSelectedIndex }: Props) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
   const handleClickListItem = (event: MouseEvent<HTMLElement>) => {
@@ -52,9 +51,7 @@ const MenuSelected = ({ options = demoOptions }: Props) => {
           aria-label='Total Trends'
         >
           <ListItemButton>
-            <Typography variant='h5'>
-              {selectedIndex === 0 ? 'Total Trend' : `Total Trend of ${options[selectedIndex]}`}
-            </Typography>
+            <Typography variant='h5'>{`Total Trend of ${options[selectedIndex]}`}</Typography>
           </ListItemButton>
         </ListItem>
       </List>

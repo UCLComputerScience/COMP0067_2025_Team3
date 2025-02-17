@@ -3,9 +3,10 @@ import { toast } from 'react-toastify'
 
 interface EnhancedTableToolbarProps {
   numSelected: number
+  handleDisplayDataOnClick: (numSelected: number) => void
 }
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const { numSelected } = props
+  const { numSelected, handleDisplayDataOnClick } = props
   return (
     <Toolbar
       sx={[
@@ -41,9 +42,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             variant='outlined'
             color='primary'
             startIcon={<i className='ri-pie-chart-line' />}
-            onClick={() => {
-              if (numSelected > 3) toast.warn('You can display a maximum of 3 questionnaire data.')
-            }}
+            onClick={() => handleDisplayDataOnClick(numSelected)}
           >
             Display Data
           </Button>

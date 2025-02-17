@@ -120,7 +120,7 @@ const RechartsRadarChart = ({ data = demoData, legend = true }: Props) => {
             <RadarChart cx='50%' cy='50%' data={data} style={{ direction: 'ltr' }}>
               <PolarGrid />
               <PolarAngleAxis dataKey='subject' />
-              <PolarRadiusAxis />
+              <PolarRadiusAxis domain={[0, 100]} />
               <Tooltip content={CustomTooltip} />
               {dateKeys.map((key, index) => (
                 <Radar

@@ -21,6 +21,7 @@ interface Props {
   data: Data[]
   selected: readonly string[]
   setSelected: React.Dispatch<React.SetStateAction<readonly string[]>>
+  handleDisplayDataOnClick: (numSelected: number) => void
 }
 
 const formatDate = (dateString: string): string => {
@@ -35,7 +36,7 @@ const formatDate = (dateString: string): string => {
   })
 }
 
-const RecordListTable = ({ data, selected, setSelected }: Props) => {
+const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick }: Props) => {
   const [order, setOrder] = React.useState<Order>('asc')
   const [orderBy, setOrderBy] = React.useState<keyof Data>('date')
   const [page, setPage] = React.useState(0)
@@ -98,7 +99,7 @@ const RecordListTable = ({ data, selected, setSelected }: Props) => {
           Export
         </Button>
       </CardContent> */}
-      <EnhancedTableToolbar numSelected={selected.length} />
+      <EnhancedTableToolbar numSelected={selected.length} handleDisplayDataOnClick={handleDisplayDataOnClick} />
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby='tableTitle' size='medium'>
           <EnhancedTableHead
