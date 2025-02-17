@@ -1,6 +1,5 @@
 import { prisma } from '../client'
 import { Role } from '@prisma/client'
-import { time } from 'console'
 import { v4 as uuidv4 } from 'uuid'
 
 const patient1SubmissionUuid1 = uuidv4()
@@ -11,28 +10,38 @@ const getRandomResponseValue = () => {
   return responseValues[randomIndex]
 }
 
-async function createQuestionResponses(patientId: string, submissionId: string = uuidv4()) {
+// Function to generate a random date within the last 30 days
+function getRandomDateWithinDays(days: number = 30): Date {
+  const now = new Date()
+  const pastDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000) // Days in the past
+  return new Date(pastDate.getTime() + Math.random() * (now.getTime() - pastDate.getTime()))
+}
+
+async function createQuestionResponses(
+  patientId: string,
+  submissionId: string = uuidv4(),
+  timestamp: Date = getRandomDateWithinDays() // Generate random date
+) {
   const questions = await prisma.question.findMany({
-    select: {
-      id: true
-    }
+    select: { id: true }
   })
 
-  const responsesData = questions.map(question => {
-    return {
-      userId: patientId,
-      questionId: question.id,
-      submissionId: submissionId,
-      score: getRandomResponseValue(),
-      label: ''
-    }
-  })
+  const responsesData = questions.map(question => ({
+    userId: patientId,
+    questionId: question.id,
+    submissionId,
+    score: getRandomResponseValue(),
+    label: '',
+    createdAt: timestamp // Assigning random timestamp
+  }))
 
   const createdResponses = await prisma.response.createMany({
     data: responsesData
   })
 
-  console.log(`Created ${createdResponses.count} responses for patient1 - submissionId: ${submissionId}.`)
+  console.log(
+    `Created ${createdResponses.count} responses for patient ${patientId} - submissionId: ${submissionId} at ${timestamp}.`
+  )
 }
 
 export async function initialiseUsersAndResponses() {
