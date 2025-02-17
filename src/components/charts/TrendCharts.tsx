@@ -4,7 +4,7 @@ import CustomLegend from './CustomLegend'
 import RechartsBarChart from './recharts/RechartsBarChart'
 import RechartsRadarChart from './recharts/RechartsRadarChart'
 import SelectedMenu from '../menu/SelectedMenu'
-import { SetStateAction, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface DataEntry {
   subject: string
@@ -73,7 +73,7 @@ const demoData = [
 ]
 
 const TrendCharts = ({ data = demoData }: Props) => {
-  const [options, setOptions] = useState<string[]>([])
+  const [options, setOptions] = useState<string[]>(['Neuromusculoskeletal'])
   const [domainData, setDomainData] = useState<DomainData[]>([])
   const [selectedDomainIndex, setSelectedDomainIndex] = useState<number>(0)
   const [keys, setKeys] = useState<string[]>([])

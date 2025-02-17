@@ -41,7 +41,7 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
     'depression'
   ]
 
-  // Group submissions by formatted date and sort by submission time
+  // Group submissions by formatted date
   const groupedByDate: Record<string, DataItem[]> = {}
 
   data.forEach(item => {
@@ -52,16 +52,14 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
     groupedByDate[formattedDate].push(item)
   })
 
-  // Sort each date's submissions by timestamp
-  Object.keys(groupedByDate).forEach(date => {
-    groupedByDate[date].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  })
-
   const result: TransformedDataItem[] = subjects.map(subject => {
     const transformed: TransformedDataItem = { subject: capitalizeFirstLetter(subject) }
 
-    Object.entries(groupedByDate).forEach(([formattedDate, submissions]) => {
+    Object.keys(groupedByDate).forEach(formattedDate => {
+      const submissions = groupedByDate[formattedDate]
+
       submissions.forEach((item, index) => {
+        // Unique key if there are multiple submissions on the same date
         const uniqueKey = submissions.length > 1 ? `${formattedDate} - ${index + 1}` : formattedDate
         transformed[uniqueKey] = item[subject]
       })
@@ -83,7 +81,7 @@ const formatDate = (dateString: string): string => {
   return `${month}/${day}/${year}`
 }
 
-// Helper function to capitalize the first letter of each word in the subject
+// Helper function to capitalize the first letter of each word in the subject, so work for
 const capitalizeFirstLetter = (str: string): string => {
   return str.replace(/([A-Z])/g, ' $1').replace(/^./, str[0].toUpperCase())
 }
@@ -93,6 +91,7 @@ const Records = ({ data }: Props) => {
   const [chartData, setChartData] = React.useState<TransformedDataItem[]>()
 
   useEffect(() => {
+    console.log(data)
     setChartData(transformData(data.slice(0, 2)))
   }, [])
 
