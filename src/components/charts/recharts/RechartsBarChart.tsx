@@ -90,7 +90,7 @@ const RechartsBarChart = ({ data = demoData, barSize = 15, legend = true }: Prop
             >
               <CartesianGrid strokeDasharray='3 3' />
               <XAxis dataKey='date' reversed={theme.direction === 'rtl'} />
-              <YAxis orientation={theme.direction === 'rtl' ? 'right' : 'left'} />
+              <YAxis orientation={theme.direction === 'rtl' ? 'right' : 'left'} domain={[0, 100]} />
               <Tooltip content={CustomTooltip} />
               <Bar dataKey='total' stackId='a' fill='#826af9' radius={[15, 15, 0, 0]}>
                 {data.map((_, index) => (
