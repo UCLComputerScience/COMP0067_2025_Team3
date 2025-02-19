@@ -12,3 +12,164 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id             String @id @default(uuid()) @db.Uuid
+  email          String @unique
+  hashedPassword String
+  firstName      String
+  lastName       String
+
+  // clinician attribute
+  profession         String?
+  registrationNumber String?
+  institution        String?
+
+  // researcher attribute
+  applications          Application[]
+  dataAccessPermissions DataAccessPermission[]
+
+  // patient
+  agreedForResearch Boolean?
+  dateOfBirth       DateTime?
+  patientInfo       PatientInfo[]
+  responses         Response[]
+
+  // other attributes
+  createdAt DateTime      @default(now())
+  role      Role          @default(PATIENT)
+  status    AccountStatus @default(ACTIVE)
+
+  // relationships
+  clinicianPatients ClinicianPatient[] @relation("PatientToClinician")
+  patientClinicians ClinicianPatient[] @relation("ClinicianToPatient")
+}
+
+model PatientInfo {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+
+  updatedAt    DateTime @updatedAt
+  submissionId String
+
+  age                   Int?
+  sex                   String?
+  gender                String?
+  isSexMatchingGender   Boolean?
+  ethnicity             String?
+  residenceCountry      String?
+  employment            String?
+  education             String?
+  activityLevel         String?
+  weeklyExerciseMinutes Int?
+  diagnosis             String?
+  diagnosedBy           String?
+  medications           String?
+  otherConditions       String?
+}
+
+model ClinicianPatient {
+  patientId   String @db.Uuid
+  clinicianId String @db.Uuid
+  patient     User   @relation(fields: [patientId], references: [id], name: "PatientToClinician")
+  clinician   User   @relation(fields: [clinicianId], references: [id], name: "ClinicianToPatient")
+
+  @@id([patientId, clinicianId])
+}
+
+model Question {
+  id       Int     @id @default(autoincrement())
+  question String
+  note     String?
+  domain   String
+  code     String
+
+  responses Response[]
+}
+
+model Response {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+
+  score Int
+  label String
+
+  submissionId String
+}
+
+model Application {
+  id        Int               @id @default(autoincrement())
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  status    ApplicationStatus @default(PENDING)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+
+  title             String
+  question          String
+  institution       String?
+  expectedStartDate DateTime
+  expectedEndDate   DateTime
+  summary           String
+
+  // temp, eventually stored in the cloud service, and stored the path here
+  ethicalFilePath String
+  otherFilePaths  Json
+}
+
+model DataAccessPermission {
+  id           Int    @id @default(autoincrement())
+  researcher   User   @relation(fields: [researcherId], references: [id])
+  researcherId String @db.Uuid
+
+  dataField DataField
+  hasAccess Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt DateTime
+}
+
+enum Role {
+  ADMIN
+  PATIENT
+  CLINICIAN
+  RESEARCHER
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DataField {
+  AGE
+  SEX
+  GENDER
+  ISSEXMATCHINGGENDER
+  ETHNICITY
+  RESIDENCECOUNTRY
+  DIAGNOSIS
+  DIAGNOSEDBY
+  MEDICATIONS
+  OTHERCONDITIONS
+  ACTIVITYLEVEL
+  EDUCATION
+  EMPLOYMENT
+  EXERCISELEVEL
+  LONGITUDINAL
+}

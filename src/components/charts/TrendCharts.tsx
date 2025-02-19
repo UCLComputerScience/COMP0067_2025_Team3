@@ -15,7 +15,21 @@ interface Props {
   data?: DataEntry[]
 }
 
-const demoDomainData = [
+interface DomainData {
+  date: string
+  total: number
+}
+
+const convertToDomainData = (data: DataEntry) => {
+  return Object.entries(data)
+    .filter(([key]) => key !== 'subject')
+    .map(([date, total]) => ({
+      date,
+      total: total as number
+    }))
+}
+
+const demoData = [
   {
     subject: 'Neuromusculoskeletal',
     '04/06/2024': 41,
@@ -58,30 +72,37 @@ const demoDomainData = [
   }
 ]
 
-const demoTotalData = [
-  {
-    date: '04/06/2024',
-    total: 80
-  },
-  {
-    date: '06/04/2025',
-    total: 100
-  }
-]
+const TrendCharts = ({ data = demoData }: Props) => {
+  const [options, setOptions] = useState<string[]>(['Neuromusculoskeletal'])
+  const [domainData, setDomainData] = useState<DomainData[]>([])
+  const [selectedDomainIndex, setSelectedDomainIndex] = useState<number>(0)
+  const [keys, setKeys] = useState<string[]>([])
 
-const TrendCharts = ({ data = demoDomainData }: Props) => {
-  const [options, setOptions] = useState<string[]>([])
   useEffect(() => {
+    console.log(data)
     setOptions(
-      data.reduce<string[]>(
-        (acc, e) => {
-          acc.push(e.subject)
-          return acc
-        },
-        ['Total']
-      )
+      data.reduce<string[]>((acc, e) => {
+        acc.push(e.subject)
+        return acc
+      }, [])
     )
-  }, data)
+  }, [])
+
+  useEffect(() => {
+    const currKeys = Object.keys(data[0]).filter(e => e !== 'subject')
+    setKeys(currKeys)
+  }, [data])
+
+  useEffect(() => {
+    const foundEntry = data.find(e => e.subject === options[selectedDomainIndex])
+
+    if (foundEntry) {
+      const transformedDomainData = convertToDomainData(foundEntry)
+      setDomainData(transformedDomainData)
+    } else {
+      console.warn('No matching subject found')
+    }
+  }, [selectedDomainIndex, data])
 
   return (
     <>
@@ -92,16 +113,20 @@ const TrendCharts = ({ data = demoDomainData }: Props) => {
               <Typography variant='h5'>Total Trend by Domains</Typography>
             </Grid2>
             <Grid2 size={5} sx={{ mb: 8 }}>
-              <SelectedMenu options={options} />
+              <SelectedMenu
+                options={options}
+                selectedIndex={selectedDomainIndex}
+                setSelectedIndex={setSelectedDomainIndex}
+              />
             </Grid2>
             <Grid2 size={7}>
-              <RechartsRadarChart legend={false} />
+              <RechartsRadarChart legend={false} data={data} />
             </Grid2>
             <Grid2 size={5}>
-              <RechartsBarChart legend={false} />
+              <RechartsBarChart legend={false} data={domainData} />
             </Grid2>
             <Grid2 size={12} sx={{ mt: 8 }}>
-              <CustomLegend keys={['04/06/2024', '06/04/2025']} colors={['#16B1FF', '#8C57FF', '#56CA00']} />
+              <CustomLegend keys={keys} colors={['#16B1FF', '#8C57FF', '#56CA00']} />
             </Grid2>
           </Grid2>
         </CardContent>
