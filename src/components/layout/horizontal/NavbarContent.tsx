@@ -1,13 +1,18 @@
 'use client'
 
 // Third-party Imports
+import Image from 'next/image'
+
+import Link from 'next/link'
+
 import classnames from 'classnames'
 
 // Component Imports
+import MenuItem from '@mui/material/MenuItem'
+
 import NavToggle from './NavToggle'
-import Logo from '@components/layout/shared/Logo'
 import ModeDropdown from '@components/layout/shared/ModeDropdown'
-import UserDropdown from '@components/layout/shared/UserDropdown'
+import SpiderLogo from '@components/layout/horizontal/spider_logo_1.png'
 
 // Hook Imports
 import useHorizontalNav from '@menu/hooks/useHorizontalNav'
@@ -26,11 +31,19 @@ const NavbarContent = () => {
       <div className='flex items-center gap-4'>
         <NavToggle />
         {/* Hide Logo on Smaller screens */}
-        {!isBreakpointReached && <Logo />}
+        {!isBreakpointReached && <Image src={SpiderLogo} alt='Spider Logo' objectFit='cover' width={200} height={50} />}
       </div>
       <div className='flex items-center'>
+        <MenuItem component={Link} href='/'>
+          Home
+        </MenuItem>
+        <MenuItem component={Link} href='/about'>
+          The Spider
+        </MenuItem>
+        <MenuItem component={Link} href='/login'>
+          Log In
+        </MenuItem>
         <ModeDropdown />
-        <UserDropdown />
       </div>
     </div>
   )

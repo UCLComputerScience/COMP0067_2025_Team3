@@ -81,14 +81,7 @@ const HorizontalMenu = () => {
           renderExpandedMenuItemIcon: { icon: <i className='ri-circle-line' /> },
           menuSectionStyles: verticalMenuSectionStyles(verticalNavOptions, theme)
         }}
-      >
-        <MenuItem href='/' icon={<i className='ri-home-smile-line' />}>
-          Home
-        </MenuItem>
-        <MenuItem href='/about' icon={<i className='ri-information-line' />}>
-          About
-        </MenuItem>
-      </Menu>
+      ></Menu>
 
       {/* <Menu
         rootStyles={menuRootStyles(theme)}

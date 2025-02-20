@@ -5,10 +5,13 @@ import dynamic from 'next/dynamic'
 
 // MUI Imports
 import Box from '@mui/material/Box'
+
 // import Card from '@mui/material/Card'
 import Divider from '@mui/material/Divider'
+
 // import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
+
 // import CardContent from '@mui/material/CardContent'
 
 // Component Imports
@@ -112,6 +115,7 @@ const CustomTooltip = (props: TooltipProps<any, any>) => {
 
 const RechartsRadarChart = ({ data = demoData, legend = true }: Props) => {
   const dateKeys = Object.keys(data[0]).filter(key => key !== 'subject')
+
   return (
     <>
       <AppRecharts>

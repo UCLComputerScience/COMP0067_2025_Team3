@@ -5,10 +5,13 @@ import dynamic from 'next/dynamic'
 
 // MUI Imports
 import Box from '@mui/material/Box'
+
 // import Card from '@mui/material/Card'
 import Divider from '@mui/material/Divider'
+
 // import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
+
 // import CardContent from '@mui/material/CardContent'
 import { useTheme } from '@mui/material/styles'
 
@@ -18,7 +21,7 @@ import type { TooltipProps } from '@/libs/Recharts'
 import CustomLegend from '../CustomLegend'
 
 interface DataEntry {
-  date: String
+  date: string
   total: number
 }
 
