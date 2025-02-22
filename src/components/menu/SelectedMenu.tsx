@@ -9,7 +9,7 @@ import Menu from '@mui/material/Menu'
 import ListItem from '@mui/material/ListItem'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemButton from '@mui/material/ListItemButton'
-import { Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 
 const demoOptions = [
   'Show some love to MUI',
@@ -51,7 +51,10 @@ const MenuSelected = ({ options = demoOptions, selectedIndex, setSelectedIndex }
           aria-label='Total Trends'
         >
           <ListItemButton>
-            <Typography variant='h5'>{`Total Trend of ${options[selectedIndex]}`}</Typography>
+            <Box component='span' sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant='h5' sx={{ mr: 2 }}>{`Total Trend of ${options[selectedIndex]}`}</Typography>
+              <i className='ri-arrow-down-s-line'></i>
+            </Box>
           </ListItemButton>
         </ListItem>
       </List>

@@ -29,6 +29,7 @@ type TransformedDataItem = {
   [date: string]: string | number
 }
 
+//TODO: sorted by date in asc order for better trend graph display.
 const transformData = (data: DataItem[]): TransformedDataItem[] => {
   const subjects: (keyof Omit<DataItem, 'submissionId' | 'date'>)[] = [
     'neuromusculoskeletal',
