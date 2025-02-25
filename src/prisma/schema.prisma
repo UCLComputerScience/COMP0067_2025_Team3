@@ -20,6 +20,9 @@ model User {
   firstName      String
   lastName       String
 
+  phoneNumber String?
+  address     String?
+
   // clinician attribute
   profession         String?
   registrationNumber String?
@@ -32,6 +35,7 @@ model User {
   // patient
   agreedForResearch Boolean?
   dateOfBirth       DateTime?
+  hostipalNumber    String?
   patientInfo       PatientInfo[]
   responses         Response[]
 
