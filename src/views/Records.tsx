@@ -3,7 +3,7 @@
 import { Data } from '@/app/(dashboard)/my-records/page'
 import TrendCharts from '@/components/charts/TrendCharts'
 import RecordListTable from '@/components/record-list-table'
-import { Box, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import React, { useEffect } from 'react'
 import { toast } from 'react-toastify'
 
@@ -92,9 +92,10 @@ const Records = ({ data }: Props) => {
   const [chartData, setChartData] = React.useState<TransformedDataItem[]>()
 
   useEffect(() => {
-    console.log(data)
-    setChartData(transformData(data.slice(0, 2)))
-  }, [])
+    if (data) {
+      setChartData(transformData(data.slice(0, 2)))
+    }
+  }, [data])
 
   const handleDisplayDataOnClick = (numSelected: number) => {
     if (numSelected > 3) {
@@ -107,9 +108,6 @@ const Records = ({ data }: Props) => {
 
   return (
     <>
-      <Typography variant='h2' gutterBottom sx={{ ml: 2, mb: 3 }}>
-        My Records
-      </Typography>
       <Box component='div' sx={{ mb: 6 }}>
         <TrendCharts data={chartData} />
       </Box>
