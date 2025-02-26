@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // MUI Imports
 import Button from '@mui/material/Button'
@@ -27,6 +27,11 @@ type FileProp = {
   size: number
 }
 
+interface Props {
+  files?: File[] // Controlled files array
+  onChange?: (files: File[]) => void // Called when files are changed
+}
+
 // Styled Dropzone Component
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
@@ -41,9 +46,15 @@ const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   }
 }))
 
-const FileUpload = () => {
+const FileUpload = ({ files: propFiles, onChange }: Props) => {
   // States
-  const [files, setFiles] = useState<File[]>([])
+  const [files, setFiles] = useState<File[]>(propFiles || [])
+
+  useEffect(() => {
+    if (propFiles) {
+      setFiles(propFiles)
+    }
+  }, [propFiles])
 
   // Hooks
   const { getRootProps, getInputProps } = useDropzone({
@@ -54,7 +65,9 @@ const FileUpload = () => {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
     onDrop: (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles.map((file: File) => Object.assign(file)))
+      const updatedFiles = [...files, ...acceptedFiles]
+      setFiles(updatedFiles)
+      if (onChange) onChange(updatedFiles) // Notify parent of file change
     }
   })
 
@@ -67,10 +80,9 @@ const FileUpload = () => {
   }
 
   const handleRemoveFile = (file: FileProp) => {
-    const uploadedFiles = files
-    const filtered = uploadedFiles.filter((i: FileProp) => i.name !== file.name)
-
-    setFiles([...filtered])
+    const updatedFiles = files.filter(f => f.name !== file.name)
+    setFiles(updatedFiles)
+    if (onChange) onChange(updatedFiles) // Notify parent of file change
   }
 
   const fileList = files.map((file: FileProp) => (
@@ -96,6 +108,7 @@ const FileUpload = () => {
 
   const handleRemoveAllFiles = () => {
     setFiles([])
+    if (onChange) onChange([])
   }
 
   return (

@@ -1,9 +1,9 @@
-import ApplicationForm from '@/components/ApplicationForm'
+import DataAccessApplicationForm from '@/components/DataAccessApplicationForm'
 
 const Page = () => {
   return (
     <>
-      <ApplicationForm />
+      <DataAccessApplicationForm />
     </>
   )
 }
