@@ -1,10 +1,7 @@
-//The data of birth shows current date and not actual date from the database 
+//The date of birth shows current date and not actual date from the database 
 // save doesnt work for date of birth as well because of that
 
 // have not checked edge cases (no information on profile etc) and validation
-
-// address phone num and hospital num missing from the database
-
 
 // bigger break above pass requirements
 // bullet points instead of '-'
@@ -15,8 +12,6 @@
 // Add clinician button and backend 
 // Clinician table --> icon color=warning and add organisation
 
-// Add data sharing research consent  (fetch data for the button)
-
 // change use of grid to grid2
 
 'use client'
@@ -24,7 +19,7 @@
 import { Box, Button, Card, CardContent, Grid, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
 import React, { useState, useEffect} from 'react'
 import { UserData } from '@/app/(dashboard)/patient-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword} from '@/actions/userActions'
+import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch} from '@/actions/userActions'
 
 
 // HARDCODED CLINICIAN DATA 
@@ -57,22 +52,27 @@ interface Props {
       })
 
     const [passwordError, setPasswordError] = useState<string | null>(null)
+    const [agreedForResearch, setAgreedForResearch] = useState(!!formData?.agreedForResearch);
 
     useEffect(() => {
-        setFormData(initialData)
+        setFormData(initialData);
       }, [initialData])
     
       if (!formData) {
         return <div>Loading...</div> // Render loading until user data is available
       }
+
+    useEffect(() => {
+      setAgreedForResearch(!!formData?.agreedForResearch);
+    }, [formData])
   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
     }
   
-    const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData({ ...formData, [e.target.name]: e.target.checked })
-    }
+    // const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //   setFormData({ ...agreedForResearch, [e.target.name]: e.target.checked })
+    // }
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
@@ -112,6 +112,7 @@ interface Props {
         });
     };
 
+    
     const getStatusColor = (status: string) => {
         switch (status) {
           case "Connected": return 'success';
@@ -120,7 +121,25 @@ interface Props {
           default: return 'primary';
         }
       };
-  
+    
+      const handleResearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.checked;
+        setAgreedForResearch(newValue); 
+    
+        try {
+            const response = await saveResearch({ agreedForResearch: newValue }, { id: formData.id });
+    
+            if (!response.success) {
+                throw new Error('Failed to update research consent');
+            }
+    
+            setAgreedForResearch(!!response.value?.agreedForResearch);
+        } catch (error) {
+            console.error("Failed to update research consent:", error);
+            setAgreedForResearch(!newValue); // Revert state if API call fails
+        }
+    };
+
     return (
         <>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -140,16 +159,16 @@ interface Props {
                     <TextField fullWidth label="Email" name="email" value={formData.email} onChange={handleChange} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField fullWidth label="Phone Number" name="phoneNumber" value='' onChange={handleChange} />
+                    <TextField fullWidth label="Phone Number" name="phoneNumber" value={formData.phoneNumber || ""} onChange={handleChange} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField fullWidth label="Address" name="address" value='' onChange={handleChange} />
+                    <TextField fullWidth label="Address" name="address" value={formData.address || ""} onChange={handleChange} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+                    <TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth || ""} onChange={handleChange} InputLabelProps={{ shrink: true }} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField fullWidth label="Hospital Number" name="hospitalNumber" value='' onChange={handleChange} />
+                    <TextField fullWidth label="Hospital Number" name="hospitalNumber" value={formData.hospitalNumber || ""} onChange={handleChange} />
                 </Grid>
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
@@ -308,14 +327,14 @@ interface Props {
             Data Privacy
           </Typography>
           <FormGroup>
-            <FormControlLabel control={<Switch color = 'success' />} label="I consent to be contacted about my data being used for research" />
+            <FormControlLabel control={<Switch checked={!!agreedForResearch} color = 'success' onChange={handleResearch} />} label="I consent to be contacted about my data being used for research" />
           </FormGroup>
-            {/* Save Data Privacy Settings Button */}
+            {/* Save Data Privacy Settings Button
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                    <Button variant="contained" color="primary"> 
+                    <Button variant="contained" color="primary" onClick={{handleSaveResearch}}> 
                         Save Changes
-                    </Button>
-            </Box>
+                    </Button> */}
+            {/* </Box> */}
         </Card>
       </Box>
     </>
@@ -323,3 +342,5 @@ interface Props {
 }
 
   export default UserProfile
+
+

@@ -7,11 +7,11 @@ export interface UserData {
     firstName: string
     lastName: string
     email: string
-    // phoneNumber: string
-    // address: string
-    // hospitalNumber: string
-    // agreedForResearch: boolean
-    dateOfBirth: Date | null
+    phoneNumber?: string | null
+    address?: string | null
+    hospitalNumber?: string | null
+    agreedForResearch?: boolean | null
+    dateOfBirth?: Date | null
 }
 
 const getCurrentUserFake = async () => {
@@ -36,20 +36,26 @@ const getUserProfile = async (userId: string) => {
         firstName: true,
         lastName: true,
         email: true,
-        // phoneNumber: true,
-        // address: true,
-        // hospitalNumber: true,
-        // agreedForResearch: true,
+        phoneNumber: true,
+        address: true,
+        hostipalNumber: true,
+        agreedForResearch: true,
         dateOfBirth: true
       }
     })
+    // Log the fetched user data to the console
+    console.log("User Profile fetched from DB:", userProfile)
 
     return {
         id: userProfile?.id ?? '',
         firstName: userProfile?.firstName ?? '',
         lastName: userProfile?.lastName ?? '',
         email: userProfile?.email ?? '',
-        dateOfBirth: userProfile?.dateOfBirth ?? null,  // Fallback if dateOfBirth is null
+        agreedForResearch: userProfile?.agreedForResearch ?? null,
+        dateOfBirth: userProfile?.dateOfBirth ?? null,  
+        phoneNumber: userProfile?.phoneNumber ?? null,
+        address: userProfile?.address ?? null,
+        hostipalNumber: userProfile?.hostipalNumber ?? null,
     }
 }
 

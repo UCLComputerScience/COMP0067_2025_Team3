@@ -9,7 +9,10 @@ export async function saveUserProfile(formData: {
     firstName: string;
     lastName: string;
     email: string;
-    dateOfBirth: Date | null;
+    phoneNumber?: string | null;
+    address?: string | null;
+    hostipallNumber?: string | null;
+    dateOfBirth?: Date | null;
 }) {
     try {
         await prisma.user.update({
@@ -18,7 +21,10 @@ export async function saveUserProfile(formData: {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
-                dateOfBirth: formData.dateOfBirth
+                phoneNumber: formData.phoneNumber === "" ? null : formData.phoneNumber,
+                address: formData.address === "" ? null : formData.address,
+                hostipalNumber: formData.hostipallNumber === "" ? null : formData.hostipallNumber,
+                dateOfBirth: formData.dateOfBirth ? null : formData.dateOfBirth,
             },
         });
 
@@ -39,6 +45,10 @@ export async function resetUserProfile(userId: string) {
                 firstName: true,
                 lastName: true,
                 email: true,
+                phoneNumber: true, 
+                address: true,
+                hostipalNumber: true,
+                agreedForResearch: false,
                 dateOfBirth: true,
             },
         });
@@ -82,3 +92,20 @@ export const changeUserPassword = async (userId: string, { currentPassword, newP
   
     return true // Password updated successfully
   }
+
+
+// Save User Profile Settings
+export async function saveResearch(agreedForResearch: {agreedForResearch: boolean}, formData: {id: string}) {
+    try {
+        await prisma.user.update({
+            where: { id: formData.id },
+            data: {
+                agreedForResearch: agreedForResearch.agreedForResearch
+            },
+        });
+        return { success: true, value : agreedForResearch };
+    } catch (error) {
+        console.error('Error saving user profile:', error);
+        return { success: false, message: 'Failed to update profile' };
+    }
+}
