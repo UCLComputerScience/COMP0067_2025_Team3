@@ -79,7 +79,6 @@ const TrendCharts = ({ data = demoData }: Props) => {
   const [keys, setKeys] = useState<string[]>([])
 
   useEffect(() => {
-    console.log(data)
     setOptions(
       data.reduce<string[]>((acc, e) => {
         acc.push(e.subject)
