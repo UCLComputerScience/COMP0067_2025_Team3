@@ -2,21 +2,32 @@
 
 import { Breadcrumbs, Typography } from '@mui/material'
 import { usePathname } from 'next/navigation'
-import Link from './Link'
+import Link from '../Link'
+import { useEffect, useState } from 'react'
 
 const BreadcrumbDynamic = () => {
   const paths = usePathname()
-  const pathNames = paths.split('/').filter(path => path)
+  const [clientPath, setClientPath] = useState<string[] | []>([])
 
   const formatLinkName = (linkName: string): string => {
-    const cleanedName = linkName.replace(/-/g, ' ') // Replace all hyphens with spaces
-    return cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1)
+    return linkName
+      .replace(/-/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
   }
 
-  console.log('pathName:', pathNames)
-  console.log('paths:', paths)
+  useEffect(() => {
+    const pathNames = paths.split('/').filter(path => path)
+    setClientPath(pathNames)
+  }, [paths])
 
-  if (pathNames.length === 1 && pathNames[0] === 'home') return null
+  // debug
+  // console.log('pathName:', pathNames)
+  // console.log('paths:', paths)
+
+  if (clientPath.length === 0) return null
+  if (clientPath.length === 1 && clientPath[0] === 'home') return null
 
   return (
     <Breadcrumbs aria-label='breadcrumb' sx={{ mb: 4 }}>
@@ -25,8 +36,8 @@ const BreadcrumbDynamic = () => {
         <Link href={'/home'}>Home</Link>
       </Typography>
 
-      {pathNames.map((link, index) => {
-        let href = `/${pathNames.slice(0, index + 1).join('/')}`
+      {clientPath.map((link, index) => {
+        let href = `/${clientPath.slice(0, index + 1).join('/')}`
         let itemLink = formatLinkName(link)
 
         if (paths === href) {

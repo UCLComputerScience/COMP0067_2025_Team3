@@ -15,12 +15,12 @@ import Navigation from '@components/layout/vertical/Navigation'
 import Header from '@components/layout/horizontal/Header'
 import Navbar from '@components/layout/vertical/Navbar'
 import VerticalFooter from '@components/layout/vertical/Footer'
-import HorizontalFooter from '@components/layout/horizontal/Footer'
+// import HorizontalFooter from '@components/layout/horizontal/Footer'
 import ScrollToTop from '@core/components/scroll-to-top'
+import BreadcrumbWrapper from '@/components/breadcrumb/BreadcrumbWrapper'
 
 // Util Imports
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
-import BreadcrumbDynamic from '@/components/BreadcrumbDynamic'
 
 const Layout = async (props: ChildrenType) => {
   const { children } = props
@@ -41,7 +41,7 @@ const Layout = async (props: ChildrenType) => {
         }
         horizontalLayout={
           <HorizontalLayout header={<Header />}>
-            <BreadcrumbDynamic />
+            <BreadcrumbWrapper />
             {children}
           </HorizontalLayout>
         }
