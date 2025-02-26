@@ -13,7 +13,8 @@ const BreadcrumbDynamic = () => {
     return cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1)
   }
 
-  console.log(pathNames)
+  console.log('pathName:', pathNames)
+  console.log('paths:', paths)
 
   if (pathNames.length === 1 && pathNames[0] === 'home') return null
 
@@ -23,6 +24,7 @@ const BreadcrumbDynamic = () => {
         <i className='ri-home-smile-line' style={{ color: 'grey' }} />
         <Link href={'/home'}>Home</Link>
       </Typography>
+
       {pathNames.map((link, index) => {
         let href = `/${pathNames.slice(0, index + 1).join('/')}`
         let itemLink = formatLinkName(link)
@@ -31,9 +33,9 @@ const BreadcrumbDynamic = () => {
           return <Typography key={index}>{itemLink}</Typography>
         }
         return (
-          <Typography key={index}>
-            <Link href={href}>{itemLink}</Link>
-          </Typography>
+          <Link href={href} key={index}>
+            {itemLink}
+          </Link>
         )
       })}
     </Breadcrumbs>
