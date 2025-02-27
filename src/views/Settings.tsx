@@ -3,47 +3,48 @@
 
 // have not checked edge cases (no information on profile etc) and validation
 
-// bigger break above pass requirements
-// bullet points instead of '-'
 // *Could have* --> requirements changing to green as they are satisfied 
 
 // fix backend and test changing passwords and new password meeting the requirements 
 
 // Add clinician button and backend 
-// Clinician table --> icon color=warning and add organisation
 
-// change use of grid to grid2
 
 'use client'
 
-import { Box, Button, Card, CardContent, Grid, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
+import { Box, Button, Card, CardContent, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
+import Grid from '@mui/material/Grid2'
 import React, { useState, useEffect} from 'react'
-import { UserData } from '@/app/(dashboard)/patient-settings/page'
+import { ClinicianData, UserData } from '@/app/(dashboard)/patient-settings/page'
 import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch} from '@/actions/userActions'
 
 
-// HARDCODED CLINICIAN DATA 
-interface Clinician {
-    name: string;
-    organisation: string;
-    email: string;
-    profession: string;
-    status: "Connected" | "Pending" | "Invited"; // Restrict possible values
-    shareData: boolean;
-  }
-  const clinicians: Clinician[] = [
-    { name: "Jordan Stevenson", organisation:"UCL", email: "Jacinthe_Blick@hotmail.com", profession: "Doctor", status: "Connected", shareData: true },
-    { name: "Dorothy Lockman", organisation:"UCL", email: "dorothy_lockman@hotmail.com", profession: "Physician", status: "Connected", shareData: true },
-    { name: "Wiki Hannah", organisation:"UCL", email: "wiki@hotmail.com", profession: "Physician", status: "Pending", shareData: false },
-    { name: "Hannah Wiki", organisation:"UCL", email: "hannah@hotmail.com", profession: "Doctor", status: "Invited", shareData: false }
-  ];
+import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
+
+// // HARDCODED CLINICIAN DATA 
+// interface Clinician {
+//     name: string;
+//     organisation: string;
+//     email: string;
+//     profession: string;
+//     status: "Connected" | "Pending" | "Invited"; // Restrict possible values
+//     shareData: boolean;
+//   }
+//   const clinicians: Clinician[] = [
+//     { name: "Jordan Stevenson", organisation:"UCL", email: "Jacinthe_Blick@hotmail.com", profession: "Doctor", status: "Connected", shareData: true },
+//     { name: "Dorothy Lockman", organisation:"UCL", email: "dorothy_lockman@hotmail.com", profession: "Physician", status: "Connected", shareData: true },
+//     { name: "Wiki Hannah", organisation:"UCL", email: "wiki@hotmail.com", profession: "Physician", status: "Pending", shareData: false },
+//     { name: "Hannah Wiki", organisation:"UCL", email: "hannah@hotmail.com", profession: "Doctor", status: "Invited", shareData: false }
+//   ];
 
 
 interface Props {
-    initialData: UserData
+    initialData: UserData;
+    clinicians: ClinicianData [];
   }
 
-  const UserProfile = ({ initialData }: Props) => {
+  const UserProfile = ({ initialData, clinicians =[]}: Props) => {
     const [formData, setFormData] = useState <UserData | null>(initialData)
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -73,71 +74,88 @@ interface Props {
     // const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     //   setFormData({ ...agreedForResearch, [e.target.name]: e.target.checked })
     // }
+  const [isCurrentPasswordShown, setIsCurrentPasswordShown] = useState(false)
+  const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
+  const [isNewPasswordShown, setIsNewPasswordShown] = useState(false)
 
-    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
-      }
+  const handleClickShowCurrentPassword = () => {
+    setIsCurrentPasswordShown(!isCurrentPasswordShown)
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
+    }
   
-    const handleSave = async () => {
-        await saveUserProfile(formData);
-    };
-
-    const handleReset = async () => {
-        const resetData = await resetUserProfile(formData.id);
-        if (resetData) setFormData(resetData);
-    };
-
-    const handleChangePassword = async () => {
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-          setPasswordError('Passwords do not match.') //make that red
-          return
-        }
-        setPasswordError(null)
-        const success = await changeUserPassword(formData.id, passwordData)
-        if (success) {
-          alert('Password changed successfully!')
-          setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-        } else {
-          alert('Error changing password.') 
-        }
+  const handleSave = async () => {
+    try {
+      const response = await saveUserProfile(formData);
+      if (!response.success) {
+        throw new Error('Failed to update profile');
       }
+      alert('Profile changed saved successfully!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert('Error saving profile changes.');
+    }
+
+  };
+
+  const handleReset = async () => {
+      const resetData = await resetUserProfile(formData.id);
+      if (resetData) setFormData(resetData);
+  };
+
+  const handleChangePassword = async () => {
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        setPasswordError('Passwords do not match.') //make that red
+        return
+      }
+      setPasswordError(null)
+      const success = await changeUserPassword(formData.id, passwordData)
+      if (success) {
+        alert('Password changed successfully!')
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      } else {
+        alert('Error changing password.') 
+      }
+    }
 
 
-    const handlePasswordChangeReset = async () => {
-        // Reset the password fields when the function is called
-        setPasswordData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        });
+  const handlePasswordChangeReset = async () => {
+      // Reset the password fields when the function is called
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+  };
+
+    
+  const getStatusColor = (status: string) => {
+      switch (status) {
+        case "Connected": return 'success';
+        case "Pending": return 'warning';
+        case "Invited": return 'primary' ;
+        default: return 'primary';
+      }
     };
-
     
-    const getStatusColor = (status: string) => {
-        switch (status) {
-          case "Connected": return 'success';
-          case "Pending": return 'warning';
-          case "Invited": return 'primary' ;
-          default: return 'primary';
+    const handleSaveResearch = async () => {
+      try {
+        const response = await saveResearch(
+          { agreedForResearch }, // data to be saved
+          { id: formData.id } // user ID
+        );
+    
+        if (!response.success) {
+          throw new Error('Failed to update research consent');
         }
-      };
     
-      const handleResearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.checked;
-        setAgreedForResearch(newValue); 
-    
-        try {
-            const response = await saveResearch({ agreedForResearch: newValue }, { id: formData.id });
-    
-            if (!response.success) {
-                throw new Error('Failed to update research consent');
-            }
-    
-            setAgreedForResearch(!!response.value?.agreedForResearch);
-        } catch (error) {
-            console.error("Failed to update research consent:", error);
-            setAgreedForResearch(!newValue); // Revert state if API call fails
-        }
+        alert('Research consent saved successfully!');
+      } catch (error) {
+        console.error('Failed to update research consent:', error);
+        alert('Error saving research consent.');
+      }
     };
 
     return (
@@ -149,25 +167,25 @@ interface Props {
             </Typography>
             <CardContent>
                 <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Email" name="email" value={formData.email} onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Phone Number" name="phoneNumber" value={formData.phoneNumber || ""} onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Address" name="address" value={formData.address || ""} onChange={handleChange} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth || ""} onChange={handleChange} InputLabelProps={{ shrink: true }} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Hospital Number" name="hospitalNumber" value={formData.hospitalNumber || ""} onChange={handleChange} />
                 </Grid>
                 </Grid>
@@ -191,60 +209,106 @@ interface Props {
           <CardContent>
             {/* Current Password */}
             <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <TextField
-                  fullWidth
-                  label="Current Password"
-                  name="currentPassword"
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                />
+              <Grid size={{ xs: 6 }}>
+              <TextField
+                fullWidth
+                label='Current Password'
+                type={isCurrentPasswordShown ? 'text' : 'password'}
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          size='small'
+                          edge='end'
+                          onClick={handleClickShowCurrentPassword}
+                          onMouseDown={e => e.preventDefault()}
+                        >
+                          <i className={isCurrentPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
+                }}
+              />
               </Grid>
             </Grid>
 
             {/* New Password and Confirm Password */}
             <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={6}>
-                <TextField
-                  fullWidth
-                  label="New Password"
-                  name="newPassword"
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                />
+              <Grid size={{ xs: 6 }}>
+              <TextField
+                fullWidth
+                label='New Password'
+                type={isNewPasswordShown ? 'text' : 'password'}
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          size='small'
+                          edge='end'
+                          onClick={() => setIsNewPasswordShown(!isNewPasswordShown)}
+                          onMouseDown={e => e.preventDefault()}
+                        >
+                          <i className={isNewPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
+                }}
+              />
               </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  fullWidth
-                  label="Confirm New Password"
-                  name="confirmPassword"
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                />
+              <Grid size={{ xs: 6 }}>
+              <TextField
+                fullWidth
+                label='Confirm New Password'
+                type={isConfirmPasswordShown ? 'text' : 'password'}
+                onChange={handlePasswordChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          size='small'
+                          edge='end'
+                          onClick={() => setIsConfirmPasswordShown(!isConfirmPasswordShown)}
+                          onMouseDown={e => e.preventDefault()}
+                        >
+                          <i className={isConfirmPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
+                }}
+              />
               </Grid>
             </Grid>
 
             {/* Password Requirements */}
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 2 }}>
+            <Grid size={{ xs: 12 }} className='flex flex-col gap-4'>
+              <Typography variant='h6' color='text.secondary'>
                 Password Requirements:
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-                <List>
-                    <ListItem>
-                        <ListItemText primary="- Minimum 8 characters long." />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemText primary="- At least one lower-case character." />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemText primary="- At least one number, symbol, or whitespace character." />
-                    </ListItem>
-                </List>
-            </Box>
-
+              </Typography>
+              <div className='flex flex-col gap-4'>
+                <div className='flex items-center gap-2.5 text-textSecondary'>
+                  <i className='ri-checkbox-blank-circle-fill text-[8px]' />
+                  Minimum 8 characters long - the more, the better
+                </div>
+                <div className='flex items-center gap-2.5 text-textSecondary'>
+                  <i className='ri-checkbox-blank-circle-fill text-[8px]' />
+                  At least one lowercase & one uppercase character
+                </div>
+                <div className='flex items-center gap-2.5 text-textSecondary'>
+                  <i className='ri-checkbox-blank-circle-fill text-[8px]' />
+                  At least one number, symbol, or whitespace character
+                </div>
+              </div>
+            </Grid>
             {/* Password Error */}
             {passwordError && <Typography color="error" sx={{ mt: 1 }}>{passwordError}</Typography>}
 
@@ -270,43 +334,51 @@ interface Props {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#f6f7fb" }}>
+                <TableRow>
                   <TableCell>USER</TableCell>
                   <TableCell>EMAIL</TableCell>
                   <TableCell>PROFESSION</TableCell>
                   <TableCell>STATUS</TableCell>
-                  <TableCell>ACTION</TableCell>
-                  <TableCell>SHARE DATA</TableCell>
+                  <TableCell>DATA ACCESS</TableCell>
+                  <TableCell></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {clinicians.map((clinician, index) => (
-                  <TableRow key={index}>
-                    <TableCell>
-                        <div>
-                            <i className='ri-hospital-line' style={{ color: 'orange' }}></i> 
-                            <Typography variant="body1">{clinician.name}</Typography>
-                        </div>
-                        <Typography variant="body2" color="textSecondary">
-                            {clinician.organisation}
-                        </Typography>
-                    </TableCell>
-                    <TableCell>{clinician.email}</TableCell>
-                    <TableCell>{clinician.profession}</TableCell>
-                    <TableCell>
-                    <Chip 
-                        label={clinician.status} variant='tonal' color={getStatusColor(clinician.status)}
-                    />
-                    </TableCell>
-                    <TableCell>
-                        <Button color='secondary' startIcon={<i className='ri-delete-bin-7-line' />}>
-                        </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Switch color = 'success' checked={clinician.shareData} />
+                {clinicians.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>
+                      You don't have clinicians linked yet. Please add a clinician below.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  clinicians.map((clinician, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <div>
+                          <i className='ri-hospital-line' style={{ color: 'orange' }}></i> 
+                          <Typography variant="body1">{clinician.firstName}</Typography>
+                        </div>
+                        <Typography variant="body2" color="textSecondary">
+                          {clinician.institution}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{clinician.email}</TableCell>
+                      <TableCell>{clinician.profession}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={clinician.status} variant='tonal' color={getStatusColor(clinician.status)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Switch color='success' checked={clinician.agreedToShareData} />
+                      </TableCell>
+                      <TableCell>
+                        <Button color='secondary' startIcon={<i className='ri-delete-bin-7-line' />}>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
 
             </Table>
@@ -327,14 +399,28 @@ interface Props {
             Data Privacy
           </Typography>
           <FormGroup>
-            <FormControlLabel control={<Switch checked={!!agreedForResearch} color = 'success' onChange={handleResearch} />} label="I consent to be contacted about my data being used for research" />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!agreedForResearch}
+                  color="success"
+                  onChange={(e) => setAgreedForResearch(e.target.checked)} 
+                />
+              }
+              label="I consent to be contacted about my data being used for research"
+            />
           </FormGroup>
-            {/* Save Data Privacy Settings Button
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                    <Button variant="contained" color="primary" onClick={{handleSaveResearch}}> 
-                        Save Changes
-                    </Button> */}
-            {/* </Box> */}
+
+          {/* Save Data Privacy Settings Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSaveResearch} 
+            >
+              Save Changes
+            </Button>
+          </Box>
         </Card>
       </Box>
     </>

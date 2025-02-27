@@ -67,31 +67,32 @@ export async function resetUserProfile(userId: string) {
 
 // Change password
 export const changeUserPassword = async (userId: string, { currentPassword, newPassword }: { currentPassword: string, newPassword: string }) => {
+    try {
     // Get the current user from the database (replace `userId` with the actual user ID)
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-  
-    if (!user) {
-      return false // User not found
-    }
-  
-    // Verify the current password with bcrypt
-    const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword)
+        const user = await prisma.user.findUnique({ where: { id: userId } })
     
-    if (!isMatch) {
-      return false // Current password doesn't match
+        if (!user) throw new Error('User not found');
+    
+        // Verify the current password with bcrypt
+        const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword)
+        
+        if (!isMatch) throw new Error('Current password is incorrect');
+    
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+    
+        // Update the password in the database
+        await prisma.user.update({
+        where: { id: 'userId' },
+        data: { hashedPassword: hashedPassword }
+        })
+    
+        return { success: true }
+    } catch (error) {
+        console.error('Error changing password:', error)
+        return {success: false, message: 'Failed to change password'}
     }
-  
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-  
-    // Update the password in the database
-    await prisma.user.update({
-      where: { id: 'userId' },
-      data: { hashedPassword: hashedPassword }
-    })
-  
-    return true // Password updated successfully
-  }
+    }
 
 
 // Save User Profile Settings

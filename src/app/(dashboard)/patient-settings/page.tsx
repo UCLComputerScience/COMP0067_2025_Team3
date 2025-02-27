@@ -1,5 +1,6 @@
 import { prisma } from '@/prisma/client'
 import { Role } from '@prisma/client'
+import { RelationshipStatus } from '@prisma/client';
 import UserProfile from '@/views/Settings'
 
 export interface UserData {
@@ -59,6 +60,51 @@ const getUserProfile = async (userId: string) => {
     }
 }
 
+export interface ClinicianData {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  institution?: string | null
+  profession?: string | null
+  agreedToShareData: boolean
+  status: RelationshipStatus
+} 
+
+const getClinicians = async (userId: string) => {
+  const clinicians = await prisma.clinicianPatient.findMany({
+      where: {
+          patientId: userId,
+      },
+      select: {
+          clinician: {
+              select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  institution: true,
+                  profession: true
+              }
+          },
+          agreedToShareData: true,
+          status: true
+      }
+  });
+  // Log the fetched user data to the console
+  console.log("Clinician data fetched from DB:", clinicians)
+
+  return clinicians.map(({ clinician, agreedToShareData, status }) => ({
+      id: clinician.id,
+      firstName: clinician.firstName,
+      lastName: clinician.lastName,
+      email: clinician.email,
+      institution: clinician.institution ?? null,
+      profession: clinician.profession ?? null,
+      agreedToShareData: agreedToShareData,
+      status: status
+  }));
+};
 // const ProfilePage = async () => {
 //     const userId = await getCurrentUserFake()
 //     const userData = await getUserProfile(userId)
@@ -85,10 +131,11 @@ const getUserProfile = async (userId: string) => {
 const ProfilePage = async () => {
     const userId = await getCurrentUserFake()
     const userData = await getUserProfile(userId)
+    const clinicianData = await getClinicians(userId)
   
     return (
       // Pass user data to the client component
-      <UserProfile initialData={userData} />
+      <UserProfile initialData={userData} clinicians={clinicianData}/>
     )
   }
   
