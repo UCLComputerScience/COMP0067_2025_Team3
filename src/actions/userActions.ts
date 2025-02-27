@@ -23,7 +23,7 @@ export async function saveUserProfile(formData: {
                 email: formData.email,
                 phoneNumber: formData.phoneNumber === "" ? null : formData.phoneNumber,
                 address: formData.address === "" ? null : formData.address,
-                hostipalNumber: formData.hostipallNumber === "" ? null : formData.hostipallNumber,
+                hospitalNumber: formData.hostipallNumber === "" ? null : formData.hostipallNumber,
                 dateOfBirth: formData.dateOfBirth ? null : formData.dateOfBirth,
             },
         });
@@ -47,7 +47,7 @@ export async function resetUserProfile(userId: string) {
                 email: true,
                 phoneNumber: true, 
                 address: true,
-                hostipalNumber: true,
+                hospitalNumber: true,
                 agreedForResearch: false,
                 dateOfBirth: true,
             },

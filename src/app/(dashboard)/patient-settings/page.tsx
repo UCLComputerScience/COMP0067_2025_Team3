@@ -38,7 +38,7 @@ const getUserProfile = async (userId: string) => {
         email: true,
         phoneNumber: true,
         address: true,
-        hostipalNumber: true,
+        hospitalNumber: true,
         agreedForResearch: true,
         dateOfBirth: true
       }
@@ -55,7 +55,7 @@ const getUserProfile = async (userId: string) => {
         dateOfBirth: userProfile?.dateOfBirth ?? null,  
         phoneNumber: userProfile?.phoneNumber ?? null,
         address: userProfile?.address ?? null,
-        hostipalNumber: userProfile?.hostipalNumber ?? null,
+        hospitalNumber: userProfile?.hospitalNumber ?? null,
     }
 }
 
