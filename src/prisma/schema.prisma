@@ -35,7 +35,7 @@ model User {
   // patient
   agreedForResearch Boolean?
   dateOfBirth       DateTime?
-  hostipalNumber    String?
+  hospitalNumber    String?
   patientInfo       PatientInfo[]
   responses         Response[]
 
@@ -78,6 +78,9 @@ model ClinicianPatient {
   clinicianId String @db.Uuid
   patient     User   @relation(fields: [patientId], references: [id], name: "PatientToClinician")
   clinician   User   @relation(fields: [clinicianId], references: [id], name: "ClinicianToPatient")
+  agreedToShareData Boolean @default(false)
+  status RelationshipStatus @default(PENDING)
+
 
   @@id([patientId, clinicianId])
 }
@@ -176,4 +179,9 @@ enum DataField {
   EMPLOYMENT
   EXERCISELEVEL
   LONGITUDINAL
+}
+
+enum RelationshipStatus {
+  PENDING
+  CONNECTED
 }
