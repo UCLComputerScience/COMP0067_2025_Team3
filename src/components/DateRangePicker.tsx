@@ -1,14 +1,7 @@
-// React Imports
-import { forwardRef, SetStateAction, Dispatch, useEffect } from 'react'
-
-// MUI Imports
+import { forwardRef, useEffect } from 'react'
 import TextField from '@mui/material/TextField'
 import type { TextFieldProps } from '@mui/material/TextField'
-
-// Third-party Imports
 import { format } from 'date-fns'
-
-// Component Imports
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 
 type CustomInputProps = TextFieldProps & {
@@ -19,19 +12,15 @@ type CustomInputProps = TextFieldProps & {
 
 interface Props {
   label?: string
-  startDateRange?: Date | null | undefined
-  setStartDateRange?: Dispatch<SetStateAction<Date | null | undefined>>
-  endDateRange?: Date | null | undefined
-  setEndDateRange?: Dispatch<SetStateAction<Date | null | undefined>>
+  value: { expectedStartDate: Date | null; expectedEndDate: Date | null }
+  onChange: (dates: { expectedStartDate: Date | null; expectedEndDate: Date | null }) => void
 }
 
-const DateRangePicker = ({ label = '', startDateRange, setStartDateRange, endDateRange, setEndDateRange }: Props) => {
-  const handleOnChangeRange = (dates: [Date | null, Date | null]) => {
-    const [start, end] = dates
+const DateRangePicker = ({ label = '', value, onChange }: Props) => {
+  const { expectedStartDate, expectedEndDate } = value
 
-    // Update formData state in the parent component
-    if (setStartDateRange) setStartDateRange(start)
-    if (setEndDateRange) setEndDateRange(end)
+  const handleOnChangeRange = (dates: [Date | null, Date | null]) => {
+    onChange({ expectedStartDate: dates[0], expectedEndDate: dates[1] })
   }
 
   const CustomInput = forwardRef((props: CustomInputProps, ref) => {
@@ -44,21 +33,21 @@ const DateRangePicker = ({ label = '', startDateRange, setStartDateRange, endDat
   })
 
   useEffect(() => {
-    console.log(startDateRange, endDateRange)
-  }, [startDateRange, endDateRange])
+    console.log(expectedStartDate, expectedEndDate)
+  }, [expectedStartDate, expectedEndDate])
 
   return (
     <AppReactDatepicker
       selectsRange
       monthsShown={2}
-      endDate={endDateRange as Date}
-      selected={startDateRange}
-      startDate={startDateRange as Date}
+      endDate={expectedEndDate as Date}
+      selected={expectedStartDate}
+      startDate={expectedStartDate as Date}
       shouldCloseOnSelect={false}
       id='date-range-picker-months'
       onChange={handleOnChangeRange}
       customInput={
-        <CustomInput label={label} end={endDateRange as Date | number} start={startDateRange as Date | number} />
+        <CustomInput label={label} end={expectedEndDate as Date | number} start={expectedStartDate as Date | number} />
       }
     />
   )
