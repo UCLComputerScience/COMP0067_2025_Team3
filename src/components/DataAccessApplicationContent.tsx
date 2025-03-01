@@ -1,9 +1,6 @@
-'use client'
+// 'use client'
 
 // React Imports
-import { Dispatch, SetStateAction } from 'react'
-
-// MUI Imports
 import Grid from '@mui/material/Grid2'
 import Select from '@mui/material/Select'
 import Divider from '@mui/material/Divider'
@@ -19,12 +16,13 @@ import InputLabel from '@mui/material/InputLabel'
 import DateRangePicker from './DateRangePicker'
 import LabeledCheckbox from './LabeledCheckbox'
 import FileUpload from './FileUpload'
+import { Control, Controller, FieldErrors } from 'react-hook-form'
+import { FormValues } from './DataAccessApplicationForm'
+import FormHelperText from '@mui/material/FormHelperText'
 
 interface Props {
-  formData: any
-  setFormData: Dispatch<SetStateAction<any>>
-  handleCheckboxChange: (type: 'demographic' | 'questionnaire', value: string) => void
-  handleFilesChanges: (files: File[]) => void
+  control: Control<FormValues, any>
+  errors: FieldErrors<FormValues>
 }
 
 const dataAccessAttributes = {
@@ -44,79 +42,115 @@ const dataAccessAttributes = {
   questionnaire: ['Single episode questionnaire', 'Longitudinal data (multiple questionnaires over time)']
 }
 
-const DataAccessApplicationContent = ({ formData, setFormData, handleCheckboxChange, handleFilesChanges }: Props) => {
+const DataAccessApplicationContent = ({ control, errors }: Props) => {
   return (
     <>
       <CardHeader
         title='Data Access Application'
-        subheader='Add you study here to apply for using our research data.'
+        subheader='Add your study here to apply for using our research data.'
       />
 
       <CardContent>
         <Grid container spacing={5}>
-          <Grid size={{ xs: 12 }}>
+          <Grid size={12}>
             <Typography variant='body1' className='font-medium'>
               Study Information
             </Typography>
           </Grid>
+
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label='Research Title'
-              value={formData.researchTitle}
-              onChange={e => setFormData({ ...formData, researchTitle: e.target.value })}
+            <Controller
+              name='researchTitle'
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label='Research Title'
+                  name='researchTitle'
+                  {...(errors.researchTitle && { error: true, helperText: errors.researchTitle.message })}
+                />
+              )}
             />
           </Grid>
+
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label='Research Question'
-              value={formData.researchQuestion}
-              onChange={e => setFormData({ ...formData, researchQuestion: e.target.value })}
+            <Controller
+              name='researchQuestion'
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label='Research Question'
+                  name='researchQuestion'
+                  {...(errors.researchQuestion && { error: true, helperText: errors.researchQuestion.message })}
+                />
+              )}
             />
           </Grid>
+
           <Grid size={{ xs: 12, sm: 6 }}>
-            <FormControl fullWidth>
+            <FormControl fullWidth error={Boolean(errors.institution)}>
               <InputLabel>Institution</InputLabel>
-              <Select
-                label='Country'
-                value={formData.instituion}
-                onChange={e => setFormData({ ...formData, instituion: e.target.value })}
-              >
-                <MenuItem value='UCL'>University College London (UCL)</MenuItem>
-              </Select>
+              <Controller
+                name='institution'
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Select {...field} label='Institution' defaultValue=''>
+                    <MenuItem value='University College London (UCL)'>University College London (UCL)</MenuItem>
+                  </Select>
+                )}
+              />
+              {errors.institution && <FormHelperText>{errors.institution.message}</FormHelperText>}
             </FormControl>
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <DateRangePicker
-              label='Expected start date to end date'
-              startDateRange={formData.expectedStartDate}
-              setStartDateRange={start =>
-                setFormData((prev: { expectedStartDate: Date | null | undefined }) => ({
-                  ...prev,
-                  expectedStartDate: typeof start === 'function' ? start(prev.expectedStartDate) : start
-                }))
-              }
-              endDateRange={formData.expectedEndDate}
-              setEndDateRange={end =>
-                setFormData((prev: { expectedEndDate: Date | null | undefined }) => ({
-                  ...prev,
-                  expectedEndDate: typeof end === 'function' ? end(prev.expectedEndDate) : end
-                }))
-              }
-            />
+            <FormControl fullWidth error={Boolean(errors.dateRange?.expectedEndDate)}>
+              <Controller
+                name='dateRange'
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <DateRangePicker
+                    value={{
+                      expectedStartDate: field.value?.expectedStartDate,
+                      expectedEndDate: field.value?.expectedEndDate
+                    }}
+                    onChange={dates => {
+                      field.onChange({
+                        expectedStartDate: dates.expectedStartDate,
+                        expectedEndDate: dates.expectedEndDate
+                      })
+                    }}
+                    label='Expected start date to end date'
+                  />
+                )}
+              />
+            </FormControl>
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
-              rows={4}
-              multiline
-              fullWidth
-              label='Summary'
-              helperText='Includes aims, objectives and proposed methods.'
-              value={formData.summary}
-              onChange={e => setFormData({ ...formData, summary: e.target.value })}
+            <Controller
+              name='summary'
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  rows={4}
+                  multiline
+                  fullWidth
+                  label='Summary'
+                  name='summary'
+                  helperText='Includes aims, objectives, and proposed methods.'
+                  {...(errors.summary && { error: true, helperText: errors.summary.message })}
+                />
+              )}
             />
           </Grid>
 
@@ -133,40 +167,73 @@ const DataAccessApplicationContent = ({ formData, setFormData, handleCheckboxCha
             </Typography>
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <FileUpload files={formData.documents} onChange={handleFilesChanges} />
+            <Controller
+              name='documents'
+              control={control}
+              render={({ field }) => <FileUpload files={field.value} onChange={field.onChange} />}
+            />
           </Grid>
 
           <Grid size={{ xs: 12 }}>
             <Divider variant='middle' sx={{ mt: 2, mb: 2 }} />
           </Grid>
+
           <Grid size={{ xs: 12 }}>
             <Typography variant='body1' className='font-medium'>
               What data would you like access to?
             </Typography>
           </Grid>
+
           <Grid size={{ xs: 12 }}>
             <Typography variant='body2' className='font-small'>
               Demographic Data
             </Typography>
             {dataAccessAttributes['demographic'].map(label => (
-              <LabeledCheckbox
+              <Controller
                 key={label}
-                label={label}
-                checked={formData.demographicDataAccess.includes(label)}
-                onChange={() => handleCheckboxChange('demographic', label)}
+                name='demographicDataAccess'
+                control={control}
+                render={({ field }) => (
+                  <LabeledCheckbox
+                    {...field}
+                    label={label}
+                    value={label}
+                    checked={field.value?.includes(label) as boolean}
+                    onChange={e => {
+                      const newValue = e.target.checked
+                        ? [...(field.value || []), label]
+                        : (field.value || []).filter(item => item !== label)
+                      field.onChange(newValue)
+                    }}
+                  />
+                )}
               />
             ))}
           </Grid>
+
           <Grid size={{ xs: 12 }}>
             <Typography variant='body2' className='font-small'>
               Spider Questionnaire
             </Typography>
             {dataAccessAttributes['questionnaire'].map(label => (
-              <LabeledCheckbox
+              <Controller
                 key={label}
-                label={label}
-                checked={formData.questionnaireAccess.includes(label)}
-                onChange={() => handleCheckboxChange('questionnaire', label)}
+                name='questionnaireAccess'
+                control={control}
+                render={({ field }) => (
+                  <LabeledCheckbox
+                    {...field}
+                    label={label}
+                    value={label}
+                    checked={field.value?.includes(label) as boolean}
+                    onChange={e => {
+                      const newValue = e.target.checked
+                        ? [...(field.value || []), label]
+                        : (field.value || []).filter(item => item !== label)
+                      field.onChange(newValue)
+                    }}
+                  />
+                )}
               />
             ))}
           </Grid>
