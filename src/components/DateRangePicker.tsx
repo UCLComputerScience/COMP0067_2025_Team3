@@ -14,9 +14,10 @@ interface Props {
   label?: string
   value: { expectedStartDate: Date | null; expectedEndDate: Date | null }
   onChange: (dates: { expectedStartDate: Date | null; expectedEndDate: Date | null }) => void
+  error?: boolean
 }
 
-const DateRangePicker = ({ label = '', value, onChange }: Props) => {
+const DateRangePicker = ({ label = '', value, onChange, error }: Props) => {
   const { expectedStartDate, expectedEndDate } = value
 
   const handleOnChangeRange = (dates: [Date | null, Date | null]) => {
@@ -29,7 +30,7 @@ const DateRangePicker = ({ label = '', value, onChange }: Props) => {
     const startDate = start ? format(start, 'MM/dd/yyyy') : ''
     const endDate = end ? ` - ${format(end, 'MM/dd/yyyy')}` : ''
 
-    return <TextField fullWidth inputRef={ref} {...rest} label={label} value={`${startDate}${endDate}`} />
+    return <TextField fullWidth inputRef={ref} {...rest} label={label} value={`${startDate}${endDate}`} error={error} />
   })
 
   useEffect(() => {

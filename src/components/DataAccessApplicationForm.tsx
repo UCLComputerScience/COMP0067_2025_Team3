@@ -5,7 +5,7 @@ import Button from '@mui/material/Button'
 import CardActions from '@mui/material/CardActions'
 import DataAccessApplicationContent from './DataAccessApplicationContent'
 import DialogsAlert from './DialogsAlert'
-import { object, minLength, string, pipe, nonEmpty, array, file, InferInput, date } from 'valibot'
+import { object, minLength, string, pipe, nonEmpty, array, file, InferInput, date, custom } from 'valibot'
 
 import { useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
@@ -35,8 +35,8 @@ const schema = object({
   demographicDataAccess: pipe(array(string())),
   questionnaireAccess: pipe(array(string())),
   dateRange: object({
-    expectedStartDate: pipe(date()),
-    expectedEndDate: pipe(date())
+    expectedStartDate: pipe(date('This field is required')),
+    expectedEndDate: pipe(date('This field is required'))
   })
 })
 
