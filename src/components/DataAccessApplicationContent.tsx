@@ -110,7 +110,10 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <FormControl fullWidth error={Boolean(errors.dateRange?.expectedEndDate)}>
+            <FormControl
+              fullWidth
+              error={Boolean(errors.dateRange?.expectedStartDate || errors.dateRange?.expectedEndDate)}
+            >
               <Controller
                 name='dateRange'
                 control={control}
@@ -128,9 +131,15 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
                       })
                     }}
                     label='Expected start date to end date'
+                    error={Boolean(errors.dateRange?.expectedStartDate || errors.dateRange?.expectedEndDate)}
                   />
                 )}
               />
+              {(errors.dateRange?.expectedStartDate || errors.dateRange?.expectedEndDate) && (
+                <FormHelperText>
+                  {errors.dateRange?.expectedStartDate?.message || errors.dateRange?.expectedEndDate?.message}
+                </FormHelperText>
+              )}
             </FormControl>
           </Grid>
 
@@ -167,11 +176,14 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
             </Typography>
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <Controller
-              name='documents'
-              control={control}
-              render={({ field }) => <FileUpload files={field.value} onChange={field.onChange} />}
-            />
+            <FormControl fullWidth error={Boolean(errors.documents)}>
+              <Controller
+                name='documents'
+                control={control}
+                render={({ field }) => <FileUpload files={field.value} onChange={field.onChange} />}
+              />
+              {errors.documents && <FormHelperText sx={{ mt: 2 }}>{errors.documents.message}</FormHelperText>}
+            </FormControl>
           </Grid>
 
           <Grid size={{ xs: 12 }}>
