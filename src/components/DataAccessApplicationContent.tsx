@@ -19,27 +19,11 @@ import FileUpload from './FileUpload'
 import { Control, Controller, FieldErrors } from 'react-hook-form'
 import { FormValues } from './DataAccessApplicationForm'
 import FormHelperText from '@mui/material/FormHelperText'
+import { DATA_ACCESS_ATTRIBUTES } from '@/constants'
 
 interface Props {
   control: Control<FormValues, any>
   errors: FieldErrors<FormValues>
-}
-
-const dataAccessAttributes = {
-  demographic: [
-    'Age',
-    'Gender',
-    'Sex',
-    'Gender Same as Sex',
-    'Ethnicity',
-    'Geographical Location',
-    'Diagnosis',
-    'Person who Give Diagnosis',
-    'Activity Levels/Excercises',
-    'Education Levels',
-    'Employment Status'
-  ],
-  questionnaire: ['Single episode questionnaire', 'Longitudinal data (multiple questionnaires over time)']
 }
 
 const DataAccessApplicationContent = ({ control, errors }: Props) => {
@@ -200,7 +184,7 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
             <Typography variant='body2' className='font-small'>
               Demographic Data
             </Typography>
-            {dataAccessAttributes['demographic'].map(label => (
+            {DATA_ACCESS_ATTRIBUTES['demographic'].map(label => (
               <Controller
                 key={label}
                 name='demographicDataAccess'
@@ -227,7 +211,7 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
             <Typography variant='body2' className='font-small'>
               Spider Questionnaire
             </Typography>
-            {dataAccessAttributes['questionnaire'].map(label => (
+            {DATA_ACCESS_ATTRIBUTES['questionnaire'].map(label => (
               <Controller
                 key={label}
                 name='questionnaireAccess'

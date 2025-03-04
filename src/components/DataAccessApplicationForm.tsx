@@ -1,16 +1,22 @@
 'use client'
 
+// MUI
 import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import CardActions from '@mui/material/CardActions'
 import DataAccessApplicationContent from './DataAccessApplicationContent'
 import DialogsAlert from './DialogsAlert'
-import { object, minLength, string, pipe, nonEmpty, array, file, InferInput, date, custom } from 'valibot'
+import { useRouter } from 'next/navigation'
 
-import { useForm } from 'react-hook-form'
-import { valibotResolver } from '@hookform/resolvers/valibot'
-
+// Components
 import { createApplication } from '@/actions/researcher/applicationAction'
+import { toast } from 'react-toastify'
+
+// Form validation
+import { useForm } from 'react-hook-form'
+import { object, minLength, string, pipe, nonEmpty, array, file, InferInput, date, custom } from 'valibot'
+import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useSession } from 'next-auth/react'
 
 export type FormValues = InferInput<typeof schema>
 
@@ -60,6 +66,9 @@ const DataAccessApplicationForm = () => {
     }
   })
 
+  const { data: session } = useSession()
+  const router = useRouter()
+
   const onSubmit = async (data: FormValues) => {
     console.log('submitting?')
     const formData = new FormData()
@@ -84,7 +93,19 @@ const DataAccessApplicationForm = () => {
       }
     })
 
-    await createApplication(formData)
+    try {
+      const success = await createApplication(formData, session?.user?.id as string)
+
+      if (success) {
+        router.push('/my-profile')
+      } else {
+        toast.error('Application creation failed')
+        console.error('Application creation failed')
+      }
+    } catch (error) {
+      console.error('An error occurred while submitting the form:', error)
+      toast.error('An error occurred while submitting your application. Please try again later.')
+    }
   }
 
   return (
