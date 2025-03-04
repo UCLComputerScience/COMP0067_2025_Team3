@@ -94,11 +94,6 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
 
   return (
     <Card>
-      {/* <CardContent className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
-        <Button variant='outlined' color='secondary' startIcon={<i className='ri-upload-2-line' />}>
-          Export
-        </Button>
-      </CardContent> */}
       <EnhancedTableToolbar numSelected={selected.length} handleDisplayDataOnClick={handleDisplayDataOnClick} />
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby='tableTitle' size='medium'>

@@ -1,5 +1,4 @@
 import { Toolbar, alpha, Typography, Button } from '@mui/material'
-import { toast } from 'react-toastify'
 
 interface EnhancedTableToolbarProps {
   numSelected: number
