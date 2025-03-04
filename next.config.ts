@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         locale: false
       }
     ]
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb'
+    }
   }
 }
 
