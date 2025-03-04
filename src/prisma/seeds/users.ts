@@ -1,6 +1,12 @@
 import { prisma } from '../client'
 import { Role } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
+import {
+  generateRandomClincianInformation,
+  generateRandomPatientInformation,
+  generateRandomResearcherInformation
+} from './seedHelpers'
+import bcrypt from 'bcryptjs'
 
 const patient1SubmissionUuid1 = uuidv4()
 const responseValues = [0, 25, 50, 75, 100]
@@ -45,10 +51,12 @@ async function createQuestionResponses(
 }
 
 export async function initialiseUsersAndResponses() {
+  const hashedPassword = await bcrypt.hash('1234567', 10)
+
   const patient1 = await prisma.user.create({
     data: {
       email: 'patient1@mail.com',
-      hashedPassword: '',
+      hashedPassword: hashedPassword,
       firstName: 'patient1',
       lastName: 'patient1',
       agreedForResearch: true,
@@ -60,7 +68,7 @@ export async function initialiseUsersAndResponses() {
   const clinician1 = await prisma.user.create({
     data: {
       email: 'clinician1@mail.com',
-      hashedPassword: '',
+      hashedPassword: hashedPassword,
       firstName: 'clinician1',
       lastName: 'clinician1',
       profession: 'General Practitioner',
@@ -73,7 +81,7 @@ export async function initialiseUsersAndResponses() {
   const researcher1 = await prisma.user.create({
     data: {
       email: 'researcher1@mail.com',
-      hashedPassword: '',
+      hashedPassword: hashedPassword,
       firstName: 'researcher1',
       lastName: 'researcher1',
       institution: 'UCL',
@@ -98,6 +106,10 @@ export async function initialiseUsersAndResponses() {
       diagnosedBy: 'General Practitioner'
     }
   })
+
+  // const patientAccountData = generateRandomPatientInformation(10)
+  // const clinicianAccountData = generateRandomClincianInformation(5)
+  // const researcherAccountData = generateRandomResearcherInformation(5)
 
   console.log(patient1, clinician1, researcher1, patientInfo1)
   await createQuestionResponses(patient1.id, patient1SubmissionUuid1)
