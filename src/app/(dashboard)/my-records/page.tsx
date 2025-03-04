@@ -1,7 +1,12 @@
 import { prisma } from '@/prisma/client'
 import { groupBy } from 'lodash'
-import { Role } from '@prisma/client'
+
+// Component
 import Records from '@/views/Records'
+
+// Auth
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/libs/auth'
 
 export interface Data {
   submissionId: string
@@ -14,19 +19,6 @@ export interface Data {
   urogenital: number
   anxiety: number
   depression: number
-}
-
-const getCurrentUserFake = async () => {
-  const userId = await prisma.user.findFirst({
-    where: {
-      role: Role.PATIENT
-    },
-    select: {
-      id: true
-    }
-  })
-
-  return userId?.id ?? ''
 }
 
 const flattenSubmissionData = (
@@ -97,9 +89,14 @@ const getResponseDataByUser = async (userId: string) => {
 }
 
 const Page = async () => {
-  const userId = await getCurrentUserFake()
-  const data = await getResponseDataByUser(userId)
-  console.log(data)
+  const session = await getServerSession(authOptions)
+
+  // debug, and secure the end point and remove this later.
+  console.log(session)
+  if (!session?.user?.id) {
+    return <p>Unauthorized</p>
+  }
+  const data = await getResponseDataByUser(session.user.id)
 
   return <Records data={data} />
 }

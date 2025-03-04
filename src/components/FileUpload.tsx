@@ -120,6 +120,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
             <i className='ri-upload-2-line' />
           </CustomAvatar>
           <Typography variant='h5'>Drag and Drop Your File Here.</Typography>
+          <Typography color='text.secondary'>Max size of 10 MB overall</Typography>
           <Typography color='text.secondary'>Allowed *.jpeg, *.jpg, *.png, *.doc, *.docx, *.pdf</Typography>
           <Typography color='text.disabled'>or</Typography>
           <Button variant='outlined' size='small'>
@@ -134,7 +135,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
             <Button color='error' variant='outlined' onClick={handleRemoveAllFiles}>
               Remove All
             </Button>
-            <Button variant='contained'>Upload Files</Button>
+            {/* <Button variant='contained'>Upload Files</Button> */}
           </div>
         </>
       ) : null}
