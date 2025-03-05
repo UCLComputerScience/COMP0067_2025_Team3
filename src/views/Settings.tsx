@@ -1,18 +1,21 @@
 //The date of birth shows current date and not actual date from the database 
 // save doesnt work for date of birth as well because of that
 
-// have not checked edge cases (no information on profile etc) and validation
+// Form validation
+
+// test changing passwords and new password + add validation???
+
+// Add clinician - backend =>  search, select, save + display clinicians in the db
+// test&backend clinician table when data added to db
 
 // *Could have* --> requirements changing to green as they are satisfied 
+// *Could have* --> invited clinicians saved in the database
 
-// fix backend and test changing passwords and new password meeting the requirements 
-
-// Add clinician button and backend 
 
 
 'use client'
 
-import { Box, Button, Card, CardContent, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
+import { Box, Button, Card, CardContent, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel} from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import React, { useState, useEffect} from 'react'
 import { ClinicianData, UserData } from '@/app/(dashboard)/patient-settings/page'
@@ -22,22 +25,19 @@ import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch} fro
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 
-// // HARDCODED CLINICIAN DATA 
-// interface Clinician {
-//     name: string;
-//     organisation: string;
-//     email: string;
-//     profession: string;
-//     status: "Connected" | "Pending" | "Invited"; // Restrict possible values
-//     shareData: boolean;
-//   }
-//   const clinicians: Clinician[] = [
-//     { name: "Jordan Stevenson", organisation:"UCL", email: "Jacinthe_Blick@hotmail.com", profession: "Doctor", status: "Connected", shareData: true },
-//     { name: "Dorothy Lockman", organisation:"UCL", email: "dorothy_lockman@hotmail.com", profession: "Physician", status: "Connected", shareData: true },
-//     { name: "Wiki Hannah", organisation:"UCL", email: "wiki@hotmail.com", profession: "Physician", status: "Pending", shareData: false },
-//     { name: "Hannah Wiki", organisation:"UCL", email: "hannah@hotmail.com", profession: "Doctor", status: "Invited", shareData: false }
-//   ];
-
+const results = [
+  {
+    id: 1,
+    name: "Lester Palmer",
+    organization: "St. Mary's General Hospital",
+    email: "Jerrod98@gmail.com",
+  },
+  // Duplicate data for UI demo
+  { id: 2, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
+  { id: 3, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
+  { id: 4, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
+  { id: 5, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
+];
 
 interface Props {
     initialData: UserData;
@@ -54,6 +54,8 @@ interface Props {
 
     const [passwordError, setPasswordError] = useState<string | null>(null)
     const [agreedForResearch, setAgreedForResearch] = useState(!!formData?.agreedForResearch);
+    const [openModal, setOpenModal] = useState(false);
+    // const [selectedClinician, setSelectedClinician] = useState(null);
 
     useEffect(() => {
         setFormData(initialData);
@@ -157,6 +159,19 @@ interface Props {
         alert('Error saving research consent.');
       }
     };
+
+      // Open the modal
+    const handleOpenModal = () => {
+      setOpenModal(true);
+    };
+
+    // Close the modal
+    const handleCloseModal = () => {
+      setOpenModal(false);
+    };
+    // const handleClinicianSelect = (clinician) => {
+    //   setSelectedClinician(clinician.id);
+    // };
 
     return (
         <>
@@ -385,9 +400,103 @@ interface Props {
            </TableContainer>
             {/* Add Clinician Button */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                    <Button variant="contained" color="primary"> 
+                    <Button variant="contained" color="primary" onClick={handleOpenModal}> 
                         Add Clinician
                     </Button>
+                    {/* Add Clinician Popup Modal */}
+                    <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
+                      <DialogTitle>
+                        Link Clinician
+                        <IconButton 
+                          color="secondary"
+                          onClick={handleCloseModal}
+                          sx={{ position: 'absolute', right: 8, top: 8 }}
+                        >
+                          <i className="ri-close-line" />
+                        </IconButton>
+                        <Typography color = 'secondary' variant="body2" sx={{alignItems: "center"}}>
+                          Link your clinician to share data with
+                      </Typography>
+                      </DialogTitle>
+                      <DialogContent>
+                        {/* Search Fields */}
+                      <Box display="grid" gridTemplateColumns="repeat(1, 1fr)" gap={2} sx={{ mt: 3 }}>
+                        <TextField label="First Name" name="firstName" fullWidth value=''/>
+                        <TextField label="Last Name" name="lastName" fullWidth value='' />
+                        <FormControl fullWidth>
+                        <InputLabel id='demo-basic-select-outlined-label'>Organization</InputLabel>
+                        <Select label = "Organization" name="organization" defaultValue='' id='demo-basic-select-outlined' labelId='demo-basic-select-outlined-label'>
+                          <MenuItem value="">Select Organization</MenuItem>
+                          <MenuItem value="St. Mary's General Hospital">St. Mary's General Hospital</MenuItem>
+                        </Select>
+                        </FormControl>
+                        <TextField label="Email" name="email" fullWidth value='' />
+                      </Box>
+                       {/* Search Button */}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 3}}>
+                        <Button variant="contained" startIcon={<i className='ri-search-line' />}>
+                          Search
+                        </Button>
+
+                        {/* Invite Text with Button */}
+                        <Typography >
+                          Cannot find your clinician?{" "}
+                          <Button
+                            variant="text"
+                            color="primary"
+                            sx={{ textTransform: "none", fontWeight: 600, p: 0, minWidth: "auto" }}
+                            // onClick={handleInviteClick}
+                          >
+                            Invite them to create an account
+                          </Button>
+                        </Typography>
+
+                      </Box>
+                      {/* Results Clinician List */}
+                        <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
+                          {results.length} Results
+                        </Typography>
+                        <List sx={{ maxHeight: 300, overflowY: "auto", borderRadius: 1 }}>
+                          {results.map((clinician) => (
+                            <ListItem
+                              key={clinician.id}
+                              // onClick={() => handleClinicianSelect(clinician)}
+                              // sx={{
+                              //   cursor: "pointer",
+                              //   backgroundColor: selectedClinician === clinician.id ? "#F5F5F5" : "transparent",
+                              //   borderRadius: 1,
+                              //   "&:hover": { backgroundColor: "#F5F5F5" },
+                              // }}
+                            >
+                              <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
+                              <ListItemText
+                                primary={
+                                  <Typography>
+                                    {clinician.name}
+                                  </Typography>
+                                }
+                                secondary={
+                                  <>
+                                    <Typography variant="body2" color='secondary'>
+                                      {clinician.organization}
+                                    </Typography>
+                                    <Typography variant="body2" color='secondary'>
+                                      {clinician.email}
+                                    </Typography>
+                                  </>
+                                }
+                              />
+                            </ListItem>
+                          ))}
+                        </List>
+                      </DialogContent>
+                     {/* Save Button */}
+                        <DialogActions sx={{ justifyContent: "flex-start", px: 3, pb: 3, mt: 3 }}>
+                          <Button variant="contained" color="primary" >
+                            Save
+                          </Button>
+                        </DialogActions>
+                    </Dialog>
             </Box>
           </CardContent>
         </Card>
@@ -407,7 +516,7 @@ interface Props {
                   onChange={(e) => setAgreedForResearch(e.target.checked)} 
                 />
               }
-              label="I consent to be contacted about my data being used for research"
+              label="I consent to being contacted about researchers accessing my data for medical research"
             />
           </FormGroup>
 
