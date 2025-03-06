@@ -3,10 +3,16 @@
 
 // Form validation
 
+// whats wrong with passworddddd typing
 // test changing passwords and new password + add validation???
 
-// Add clinician - backend =>  search, select, save + display clinicians in the db
-// test&backend clinician table when data added to db
+
+// share data and delete clinician functionalities
+// select clinician - theme colors not working 
+// invite clinician functionality
+// avoid saving clinician if the relationship already exists
+// refresh the clinicians table better when new clinician added
+// move functions to components
 
 // *Could have* --> requirements changing to green as they are satisfied 
 // *Could have* --> invited clinicians saved in the database
@@ -18,33 +24,22 @@
 import { Box, Button, Card, CardContent, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel} from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import React, { useState, useEffect} from 'react'
-import { ClinicianData, UserData } from '@/app/(dashboard)/patient-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch} from '@/actions/userActions'
-
-
+import { ClinicianData, UserData, AllClinicians } from '@/app/(dashboard)/patient-settings/page'
+import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveNewClinician} from '@/actions/userActions'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
+// import { useSession } from 'next-auth/react'
+// const { data: session } = useSession()
 
-const results = [
-  {
-    id: 1,
-    name: "Lester Palmer",
-    organization: "St. Mary's General Hospital",
-    email: "Jerrod98@gmail.com",
-  },
-  // Duplicate data for UI demo
-  { id: 2, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
-  { id: 3, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
-  { id: 4, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
-  { id: 5, name: "Lester Palmer", organization: "St. Mary's General Hospital", email: "Jerrod98@gmail.com" },
-];
+
 
 interface Props {
     initialData: UserData;
     clinicians: ClinicianData [];
-  }
+    cliniciansList: AllClinicians [];
+}
 
-  const UserProfile = ({ initialData, clinicians =[]}: Props) => {
+const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props) => {
     const [formData, setFormData] = useState <UserData | null>(initialData)
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -55,7 +50,8 @@ interface Props {
     const [passwordError, setPasswordError] = useState<string | null>(null)
     const [agreedForResearch, setAgreedForResearch] = useState(!!formData?.agreedForResearch);
     const [openModal, setOpenModal] = useState(false);
-    // const [selectedClinician, setSelectedClinician] = useState(null);
+    const [selectedClinician, setSelectedClinician] = useState<string | null>(null);
+
 
     useEffect(() => {
         setFormData(initialData);
@@ -70,23 +66,30 @@ interface Props {
     }, [formData])
   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log(e.target.name, e.target.value);
       setFormData({ ...formData, [e.target.name]: e.target.value })
     }
+
+    const [isCurrentPasswordShown, setIsCurrentPasswordShown] = useState(false)
+    const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
+    const [isNewPasswordShown, setIsNewPasswordShown] = useState(false)
+
+    const handleClickShowCurrentPassword = () => {
+      setIsCurrentPasswordShown(!isCurrentPasswordShown)
+    }
+    const handlePasswordFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setPasswordData(prevState => ({
+          ...prevState,
+          [name]: value,
+      }));
+  };
   
     // const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     //   setFormData({ ...agreedForResearch, [e.target.name]: e.target.checked })
     // }
-  const [isCurrentPasswordShown, setIsCurrentPasswordShown] = useState(false)
-  const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
-  const [isNewPasswordShown, setIsNewPasswordShown] = useState(false)
+  
 
-  const handleClickShowCurrentPassword = () => {
-    setIsCurrentPasswordShown(!isCurrentPasswordShown)
-  }
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
-    }
   
   const handleSave = async () => {
     try {
@@ -106,6 +109,7 @@ interface Props {
       const resetData = await resetUserProfile(formData.id);
       if (resetData) setFormData(resetData);
   };
+
 
   const handleChangePassword = async () => {
       if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -168,10 +172,83 @@ interface Props {
     // Close the modal
     const handleCloseModal = () => {
       setOpenModal(false);
+      setSelectedClinician(null);
     };
-    // const handleClinicianSelect = (clinician) => {
-    //   setSelectedClinician(clinician.id);
-    // };
+
+
+    const handleClinicianSelect = (clinician: AllClinicians) => {
+      setSelectedClinician(clinician.id);
+      console.log ('Selected clinicians id:', clinician.id)
+    };
+
+    const handleClinicianSave = async () => {
+      if (selectedClinician) {
+        try{
+          const save = await saveNewClinician(selectedClinician, initialData.id);
+          if (!save.success) {
+            throw new Error ('Failed to save changes');
+          }
+          alert ('Clinician added successfully')
+          window.location.reload();
+          console.log("Selected Clinician:", selectedClinician);
+        } catch (error) {
+          console.error('Failed to save changes:', error);
+          alert('Error saving changes.');
+        }
+      } else {
+        console.log("No clinician selected");
+      }
+    };
+
+    // New state for search
+    const [searchCriteria, setSearchCriteria] = useState({
+      firstName: '',
+      lastName: '',
+      organization: '',
+      email: ''
+  });
+
+  // Filtered clinicians based on search
+  const [filteredClinicians, setFilteredClinicians] = useState(cliniciansList);
+
+    useEffect(() => {
+      // Filter clinicians based on search criteria
+      const filtered = cliniciansList.filter(clinician => {
+          return (
+              clinician.firstName.toLowerCase().includes(searchCriteria.firstName.toLowerCase()) &&
+              clinician.lastName.toLowerCase().includes(searchCriteria.lastName.toLowerCase()) &&
+              clinician.institution?.toLowerCase().includes(searchCriteria.organization.toLowerCase()) &&
+              clinician.email.toLowerCase().includes(searchCriteria.email.toLowerCase())
+          );
+      });
+      setFilteredClinicians(filtered);
+  }, [searchCriteria, cliniciansList]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setSearchCriteria(prevState => ({
+          ...prevState,
+          [name]: value
+      }));
+  };
+
+  const handleSearch = () => {
+      // Trigger the search/filter logic manually
+      setFilteredClinicians(
+          cliniciansList.filter(clinician => {
+              return (
+                  clinician.firstName.toLowerCase().includes(searchCriteria.firstName.toLowerCase()) &&
+                  clinician.lastName.toLowerCase().includes(searchCriteria.lastName.toLowerCase()) &&
+                  clinician.institution?.toLowerCase().includes(searchCriteria.organization.toLowerCase()) &&
+                  clinician.email.toLowerCase().includes(searchCriteria.email.toLowerCase())
+              );
+          })
+      );
+  };
+
+  const organizationsList = Array.from(
+    new Set(cliniciansList.map(clinician => clinician.institution).filter(Boolean)))
+  
 
     return (
         <>
@@ -230,7 +307,7 @@ interface Props {
                 label='Current Password'
                 type={isCurrentPasswordShown ? 'text' : 'password'}
                 value={passwordData.currentPassword}
-                onChange={handlePasswordChange}
+                onChange={handlePasswordFieldChange}
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -259,7 +336,7 @@ interface Props {
                 label='New Password'
                 type={isNewPasswordShown ? 'text' : 'password'}
                 value={passwordData.newPassword}
-                onChange={handlePasswordChange}
+                onChange={handlePasswordFieldChange}
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -283,7 +360,8 @@ interface Props {
                 fullWidth
                 label='Confirm New Password'
                 type={isConfirmPasswordShown ? 'text' : 'password'}
-                onChange={handlePasswordChange}
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordFieldChange}
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -373,7 +451,7 @@ interface Props {
                           <i className='ri-hospital-line' style={{ color: 'orange' }}></i> 
                           <Typography variant="body1">{clinician.firstName}</Typography>
                         </div>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography variant="body2" color="secondary">
                           {clinician.institution}
                         </Typography>
                       </TableCell>
@@ -385,7 +463,7 @@ interface Props {
                         />
                       </TableCell>
                       <TableCell>
-                        <Switch color='success' checked={clinician.agreedToShareData} />
+                        <Switch color='success' checked={!!clinician.agreedToShareData} />
                       </TableCell>
                       <TableCell>
                         <Button color='secondary' startIcon={<i className='ri-delete-bin-7-line' />}>
@@ -421,20 +499,23 @@ interface Props {
                       <DialogContent>
                         {/* Search Fields */}
                       <Box display="grid" gridTemplateColumns="repeat(1, 1fr)" gap={2} sx={{ mt: 3 }}>
-                        <TextField label="First Name" name="firstName" fullWidth value=''/>
-                        <TextField label="Last Name" name="lastName" fullWidth value='' />
+                        <TextField label="First Name" name="firstName" fullWidth value={searchCriteria.firstName} onChange={handleSearchChange}/>
+                        <TextField label="Last Name" name="lastName" fullWidth value={searchCriteria.lastName} onChange={handleSearchChange} />
                         <FormControl fullWidth>
                         <InputLabel id='demo-basic-select-outlined-label'>Organization</InputLabel>
-                        <Select label = "Organization" name="organization" defaultValue='' id='demo-basic-select-outlined' labelId='demo-basic-select-outlined-label'>
-                          <MenuItem value="">Select Organization</MenuItem>
-                          <MenuItem value="St. Mary's General Hospital">St. Mary's General Hospital</MenuItem>
+                        <Select label = "Organization" name="organization" defaultValue='' id='demo-basic-select-outlined' value={searchCriteria.organization} >
+                        <MenuItem value="">Select Organization</MenuItem>
+                        {organizationsList.map((organization, index) => (
+                          <MenuItem key={index} value={String(organization)}>
+                              {organization}
+                          </MenuItem> ))}
                         </Select>
                         </FormControl>
-                        <TextField label="Email" name="email" fullWidth value='' />
+                        <TextField label="Email" name="email" fullWidth value={searchCriteria.email} onChange={handleSearchChange} />
                       </Box>
                        {/* Search Button */}
                       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 3}}>
-                        <Button variant="contained" startIcon={<i className='ri-search-line' />}>
+                        <Button variant="contained" onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
                           Search
                         </Button>
 
@@ -454,31 +535,31 @@ interface Props {
                       </Box>
                       {/* Results Clinician List */}
                         <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-                          {results.length} Results
+                          {filteredClinicians.length} Results
                         </Typography>
                         <List sx={{ maxHeight: 300, overflowY: "auto", borderRadius: 1 }}>
-                          {results.map((clinician) => (
+                          {filteredClinicians.map((clinician) => (
                             <ListItem
                               key={clinician.id}
-                              // onClick={() => handleClinicianSelect(clinician)}
-                              // sx={{
-                              //   cursor: "pointer",
-                              //   backgroundColor: selectedClinician === clinician.id ? "#F5F5F5" : "transparent",
-                              //   borderRadius: 1,
-                              //   "&:hover": { backgroundColor: "#F5F5F5" },
-                              // }}
+                              onClick={() => handleClinicianSelect(clinician)}
+                              sx={{
+                                 cursor: "pointer",
+                                 backgroundColor: selectedClinician === clinician.id ? "#A379FF" : "primary",
+                                 borderRadius: 1,
+                                 "&:hover": { backgroundColor: "#A379FF" },
+                              }}
                             >
                               <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
                               <ListItemText
                                 primary={
                                   <Typography>
-                                    {clinician.name}
+                                    {clinician.firstName} {clinician.lastName}
                                   </Typography>
                                 }
                                 secondary={
                                   <>
                                     <Typography variant="body2" color='secondary'>
-                                      {clinician.organization}
+                                      {clinician.institution}
                                     </Typography>
                                     <Typography variant="body2" color='secondary'>
                                       {clinician.email}
@@ -492,7 +573,7 @@ interface Props {
                       </DialogContent>
                      {/* Save Button */}
                         <DialogActions sx={{ justifyContent: "flex-start", px: 3, pb: 3, mt: 3 }}>
-                          <Button variant="contained" color="primary" >
+                          <Button variant="contained" color="primary" onClick={handleClinicianSave} >
                             Save
                           </Button>
                         </DialogActions>

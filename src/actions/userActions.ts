@@ -2,6 +2,7 @@
 
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/prisma/client'
+import select from '@/@core/theme/overrides/select';
 
 // Save User Profile Settings
 export async function saveUserProfile(formData: {
@@ -108,5 +109,40 @@ export async function saveResearch(agreedForResearch: {agreedForResearch: boolea
     } catch (error) {
         console.error('Error saving user profile:', error);
         return { success: false, message: 'Failed to update profile' };
+    }
+}
+
+// Save change to sharing data with clinician
+export async function saveShareData(agreedToShareData: boolean, formData: {id: string}, clinicianId: string) {
+    try {
+        await prisma.clinicianPatient.update({
+            where: {patientId_clinicianId: { patientId: formData.id, clinicianId: clinicianId } 
+        },
+            data: {
+                agreedToShareData: agreedToShareData
+            },
+        });
+        return { success: true, value : agreedToShareData };
+    } catch (error) {
+        console.error('Error saving user profile:', error);
+        return { success: false, message: 'Failed to update profile' };
+    }
+}
+
+
+//Save selected clinician 
+export async function saveNewClinician (selectedClinician:string, patientId:string) {
+    try{
+        const newRelationship = await prisma.clinicianPatient.create({
+            data: {
+                clinicianId: selectedClinician,
+                patientId: patientId
+            }
+        })
+        console.log('New relationship created:', newRelationship);
+        return {success : true, newRelationship} ;
+    } catch (error) {
+        console.error ('Error adding new clinician:', error);
+        return {success : false};
     }
 }

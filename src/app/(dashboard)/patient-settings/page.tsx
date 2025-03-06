@@ -1,7 +1,11 @@
 import { prisma } from '@/prisma/client'
-import { Role } from '@prisma/client'
+// import { Role } from '@prisma/client'
 import { RelationshipStatus } from '@prisma/client';
 import UserProfile from '@/views/Settings'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/libs/auth'
+
+// const session = await getServerSession(authOptions)
 
 export interface UserData {
     id: string
@@ -15,19 +19,9 @@ export interface UserData {
     dateOfBirth?: Date | null
 }
 
-const getCurrentUserFake = async () => {
-    const userId = await prisma.user.findFirst({
-      where: {
-        role: Role.PATIENT
-      },
-      select: {
-        id: true
-      }
-    })
-  
-    return userId?.id ?? ''
-  }
-
+// const getCurrentUser = async (): Promise<string | null> => {
+//   return session?.user.id ?? null;
+// }
 
 const getUserProfile = async (userId: string) => {   
     const userProfile = await prisma.user.findUnique({
@@ -128,14 +122,45 @@ const getClinicians = async (userId: string) => {
 
 // export default ProfilePage
 
+export interface AllClinicians {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  profession?: string | null
+  institution?: string | null
+} 
+
+const getAllClinicians = async (): Promise<AllClinicians[]> => {
+  const allClinicians = await prisma.user.findMany({
+    where: { role: 'CLINICIAN' },
+    select: { id: true, email: true, firstName: true, lastName: true, profession: true, institution: true }
+  })
+
+  return allClinicians.map(clinician => ({
+    id: clinician.id,
+    firstName: clinician.firstName,
+    lastName: clinician.lastName,
+    email: clinician.email,
+    institution: clinician.institution ?? null,
+    profession: clinician.profession ?? null
+  }))
+}
+
 const ProfilePage = async () => {
-    const userId = await getCurrentUserFake()
-    const userData = await getUserProfile(userId)
-    const clinicianData = await getClinicians(userId)
-  
+    const session = await getServerSession(authOptions)
+    console.log(session)
+    if (!session?.user?.id) {
+      return <p>Unauthorized</p>
+  }
+    const userData = await getUserProfile(session.user.id)
+    const clinicianData = await getClinicians(session.user.id)
+    const allClinicians = await getAllClinicians()
+    
+ 
     return (
       // Pass user data to the client component
-      <UserProfile initialData={userData} clinicians={clinicianData}/>
+      <UserProfile initialData={userData} clinicians={clinicianData} cliniciansList = {allClinicians}/>
     )
   }
   
