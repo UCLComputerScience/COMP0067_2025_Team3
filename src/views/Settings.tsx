@@ -1,18 +1,14 @@
 //The date of birth shows current date and not actual date from the database 
 // save doesnt work for date of birth as well because of that
 
-// Form validation
-
 // whats wrong with passworddddd typing
 // test changing passwords and new password + add validation???
 
+// Form validation
 
-// share data and delete clinician functionalities
-// select clinician - theme colors not working 
-// invite clinician functionality
-// avoid saving clinician if the relationship already exists
-// refresh the clinicians table better when new clinician added
-// move functions to components
+// move functions to components (then make the clinicians setting page)
+
+//hydration error
 
 // *Could have* --> requirements changing to green as they are satisfied 
 // *Could have* --> invited clinicians saved in the database
@@ -21,25 +17,24 @@
 
 'use client'
 
-import { Box, Button, Card, CardContent, TextField, Typography, List, ListItem, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel} from '@mui/material'
+import { Box, Button, Card, CardContent, TextField, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import React, { useState, useEffect} from 'react'
-import { ClinicianData, UserData, AllClinicians } from '@/app/(dashboard)/patient-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveNewClinician} from '@/actions/userActions'
+import { ClinicianData, UserData, AllClinicians } from '@/app/(dashboard)/my-profile/patient-settings/page'
+import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveNewClinician, saveShareData, deleteClinician} from '@/actions/userActions'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
-// import { useSession } from 'next-auth/react'
-// const { data: session } = useSession()
+import { useRouter } from 'next/navigation';
 
 
 
 interface Props {
     initialData: UserData;
     clinicians: ClinicianData [];
-    cliniciansList: AllClinicians [];
 }
 
-const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props) => {
+const UserProfile = ({ initialData, clinicians =[]}: Props) => {
+    const router = useRouter();
     const [formData, setFormData] = useState <UserData | null>(initialData)
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -49,8 +44,7 @@ const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props)
 
     const [passwordError, setPasswordError] = useState<string | null>(null)
     const [agreedForResearch, setAgreedForResearch] = useState(!!formData?.agreedForResearch);
-    const [openModal, setOpenModal] = useState(false);
-    const [selectedClinician, setSelectedClinician] = useState<string | null>(null);
+    const [cliniciansData, setCliniciansData] = useState(clinicians);
 
 
     useEffect(() => {
@@ -85,12 +79,7 @@ const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props)
       }));
   };
   
-    // const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //   setFormData({ ...agreedForResearch, [e.target.name]: e.target.checked })
-    // }
-  
 
-  
   const handleSave = async () => {
     try {
       const response = await saveUserProfile(formData);
@@ -164,91 +153,52 @@ const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props)
       }
     };
 
-      // Open the modal
-    const handleOpenModal = () => {
-      setOpenModal(true);
-    };
-
-    // Close the modal
-    const handleCloseModal = () => {
-      setOpenModal(false);
-      setSelectedClinician(null);
-    };
-
-
-    const handleClinicianSelect = (clinician: AllClinicians) => {
-      setSelectedClinician(clinician.id);
-      console.log ('Selected clinicians id:', clinician.id)
-    };
-
-    const handleClinicianSave = async () => {
-      if (selectedClinician) {
-        try{
-          const save = await saveNewClinician(selectedClinician, initialData.id);
-          if (!save.success) {
-            throw new Error ('Failed to save changes');
+    const handleClinicianSwitch = async (clinicianId: string, newValue: boolean, patientId: string) => {
+      setCliniciansData(prevClinicians =>
+        prevClinicians.map(clinician =>
+            clinician.id === clinicianId
+                ? { ...clinician, agreedToShareData: newValue } 
+                : clinician
+        )
+    );
+      try {
+        formData.id === patientId
+          const result = await saveShareData(clinicianId, newValue, patientId);
+          if (!result.success) {
+              throw new Error('Failed to save clinician data share consent');
           }
-          alert ('Clinician added successfully')
-          window.location.reload();
-          console.log("Selected Clinician:", selectedClinician);
-        } catch (error) {
-          console.error('Failed to save changes:', error);
-          alert('Error saving changes.');
-        }
-      } else {
-        console.log("No clinician selected");
+      } catch (error) {
+          console.error('Error saving clinician data consent:', error);
+          setCliniciansData(prevClinicians =>
+            prevClinicians.map(clinician =>
+                clinician.id === clinicianId
+                    ? { ...clinician, agreedToShareData: !newValue } // Revert state if API fails
+                    : clinician
+            )
+        );
+    }
+};
+
+const handleDelete = async (clinicianId: string, patientId: string) => {
+  const prevClinicians = [...cliniciansData]; 
+  setCliniciansData(prevClinicians.filter(clinician => clinician.id !== clinicianId));
+
+  try {
+      const result = await deleteClinician(clinicianId, patientId); 
+      if (!result.success) {
+          throw new Error('Failed to delete clinician');
       }
-    };
+  } catch (error) {
+      console.error('Error deleting clinician:', error);
+      setCliniciansData(prevClinicians);
+  }
+};
 
-    // New state for search
-    const [searchCriteria, setSearchCriteria] = useState({
-      firstName: '',
-      lastName: '',
-      organization: '',
-      email: ''
-  });
-
-  // Filtered clinicians based on search
-  const [filteredClinicians, setFilteredClinicians] = useState(cliniciansList);
-
-    useEffect(() => {
-      // Filter clinicians based on search criteria
-      const filtered = cliniciansList.filter(clinician => {
-          return (
-              clinician.firstName.toLowerCase().includes(searchCriteria.firstName.toLowerCase()) &&
-              clinician.lastName.toLowerCase().includes(searchCriteria.lastName.toLowerCase()) &&
-              clinician.institution?.toLowerCase().includes(searchCriteria.organization.toLowerCase()) &&
-              clinician.email.toLowerCase().includes(searchCriteria.email.toLowerCase())
-          );
-      });
-      setFilteredClinicians(filtered);
-  }, [searchCriteria, cliniciansList]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setSearchCriteria(prevState => ({
-          ...prevState,
-          [name]: value
-      }));
-  };
-
-  const handleSearch = () => {
-      // Trigger the search/filter logic manually
-      setFilteredClinicians(
-          cliniciansList.filter(clinician => {
-              return (
-                  clinician.firstName.toLowerCase().includes(searchCriteria.firstName.toLowerCase()) &&
-                  clinician.lastName.toLowerCase().includes(searchCriteria.lastName.toLowerCase()) &&
-                  clinician.institution?.toLowerCase().includes(searchCriteria.organization.toLowerCase()) &&
-                  clinician.email.toLowerCase().includes(searchCriteria.email.toLowerCase())
-              );
-          })
-      );
-  };
-
-  const organizationsList = Array.from(
-    new Set(cliniciansList.map(clinician => clinician.institution).filter(Boolean)))
-  
+const confirmDelete = (clinicianId: string, patientId:string) => {
+  if (window.confirm("Are you sure you want to delete this clinician?")) {
+      handleDelete(clinicianId, patientId);
+  }
+};
 
     return (
         <>
@@ -444,7 +394,7 @@ const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props)
                     </TableCell>
                   </TableRow>
                 ) : (
-                  clinicians.map((clinician, index) => (
+                  cliniciansData.map((clinician, index) => (
                     <TableRow key={index}>
                       <TableCell>
                         <div>
@@ -463,10 +413,10 @@ const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props)
                         />
                       </TableCell>
                       <TableCell>
-                        <Switch color='success' checked={!!clinician.agreedToShareData} />
+                        <Switch color='success' checked={!!clinician.agreedToShareData} onChange={(e) => handleClinicianSwitch(clinician.id, e.target.checked, formData.id)} />
                       </TableCell>
                       <TableCell>
-                        <Button color='secondary' startIcon={<i className='ri-delete-bin-7-line' />}>
+                        <Button color='secondary' startIcon={<i className='ri-delete-bin-7-line'/>} onClick = {() => confirmDelete(clinician.id, formData.id)}>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -478,106 +428,10 @@ const UserProfile = ({ initialData, clinicians =[], cliniciansList = []}: Props)
            </TableContainer>
             {/* Add Clinician Button */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                    <Button variant="contained" color="primary" onClick={handleOpenModal}> 
+                    <Button variant="contained" color="primary" onClick={() => router.push('/my-profile/patient-settings/add-clinician')}> 
                         Add Clinician
                     </Button>
-                    {/* Add Clinician Popup Modal */}
-                    <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
-                      <DialogTitle>
-                        Link Clinician
-                        <IconButton 
-                          color="secondary"
-                          onClick={handleCloseModal}
-                          sx={{ position: 'absolute', right: 8, top: 8 }}
-                        >
-                          <i className="ri-close-line" />
-                        </IconButton>
-                        <Typography color = 'secondary' variant="body2" sx={{alignItems: "center"}}>
-                          Link your clinician to share data with
-                      </Typography>
-                      </DialogTitle>
-                      <DialogContent>
-                        {/* Search Fields */}
-                      <Box display="grid" gridTemplateColumns="repeat(1, 1fr)" gap={2} sx={{ mt: 3 }}>
-                        <TextField label="First Name" name="firstName" fullWidth value={searchCriteria.firstName} onChange={handleSearchChange}/>
-                        <TextField label="Last Name" name="lastName" fullWidth value={searchCriteria.lastName} onChange={handleSearchChange} />
-                        <FormControl fullWidth>
-                        <InputLabel id='demo-basic-select-outlined-label'>Organization</InputLabel>
-                        <Select label = "Organization" name="organization" defaultValue='' id='demo-basic-select-outlined' value={searchCriteria.organization} >
-                        <MenuItem value="">Select Organization</MenuItem>
-                        {organizationsList.map((organization, index) => (
-                          <MenuItem key={index} value={String(organization)}>
-                              {organization}
-                          </MenuItem> ))}
-                        </Select>
-                        </FormControl>
-                        <TextField label="Email" name="email" fullWidth value={searchCriteria.email} onChange={handleSearchChange} />
-                      </Box>
-                       {/* Search Button */}
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 3}}>
-                        <Button variant="contained" onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
-                          Search
-                        </Button>
-
-                        {/* Invite Text with Button */}
-                        <Typography >
-                          Cannot find your clinician?{" "}
-                          <Button
-                            variant="text"
-                            color="primary"
-                            sx={{ textTransform: "none", fontWeight: 600, p: 0, minWidth: "auto" }}
-                            // onClick={handleInviteClick}
-                          >
-                            Invite them to create an account
-                          </Button>
-                        </Typography>
-
-                      </Box>
-                      {/* Results Clinician List */}
-                        <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-                          {filteredClinicians.length} Results
-                        </Typography>
-                        <List sx={{ maxHeight: 300, overflowY: "auto", borderRadius: 1 }}>
-                          {filteredClinicians.map((clinician) => (
-                            <ListItem
-                              key={clinician.id}
-                              onClick={() => handleClinicianSelect(clinician)}
-                              sx={{
-                                 cursor: "pointer",
-                                 backgroundColor: selectedClinician === clinician.id ? "#A379FF" : "primary",
-                                 borderRadius: 1,
-                                 "&:hover": { backgroundColor: "#A379FF" },
-                              }}
-                            >
-                              <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
-                              <ListItemText
-                                primary={
-                                  <Typography>
-                                    {clinician.firstName} {clinician.lastName}
-                                  </Typography>
-                                }
-                                secondary={
-                                  <>
-                                    <Typography variant="body2" color='secondary'>
-                                      {clinician.institution}
-                                    </Typography>
-                                    <Typography variant="body2" color='secondary'>
-                                      {clinician.email}
-                                    </Typography>
-                                  </>
-                                }
-                              />
-                            </ListItem>
-                          ))}
-                        </List>
-                      </DialogContent>
-                     {/* Save Button */}
-                        <DialogActions sx={{ justifyContent: "flex-start", px: 3, pb: 3, mt: 3 }}>
-                          <Button variant="contained" color="primary" onClick={handleClinicianSave} >
-                            Save
-                          </Button>
-                        </DialogActions>
-                    </Dialog>
+                    
             </Box>
           </CardContent>
         </Card>

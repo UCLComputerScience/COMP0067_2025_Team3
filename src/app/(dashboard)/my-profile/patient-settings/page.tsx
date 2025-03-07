@@ -1,11 +1,9 @@
 import { prisma } from '@/prisma/client'
-// import { Role } from '@prisma/client'
 import { RelationshipStatus } from '@prisma/client';
 import UserProfile from '@/views/Settings'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/libs/auth'
 
-// const session = await getServerSession(authOptions)
 
 export interface UserData {
     id: string
@@ -19,9 +17,6 @@ export interface UserData {
     dateOfBirth?: Date | null
 }
 
-// const getCurrentUser = async (): Promise<string | null> => {
-//   return session?.user.id ?? null;
-// }
 
 const getUserProfile = async (userId: string) => {   
     const userProfile = await prisma.user.findUnique({
@@ -99,28 +94,7 @@ const getClinicians = async (userId: string) => {
       status: status
   }));
 };
-// const ProfilePage = async () => {
-//     const userId = await getCurrentUserFake()
-//     const userData = await getUserProfile(userId)
-  
-//     // State to hold user data (for client-side updates)
-//     const [user, setUser] = useState<UserData | null>(null)
-  
-//     // Use effect to set the user data after fetching
-//     useEffect(() => {
-//       setUser(userData)
-//     }, [userData])
-  
-//     // Wait until user data is loaded before rendering
-//     if (!user) {
-//       return <div>Loading...</div> // Render loading until user data is available
-//     }
-  
-//     return <UserProfile initialData={user} />
-//   }
-  
 
-// export default ProfilePage
 
 export interface AllClinicians {
   id: string
@@ -131,21 +105,6 @@ export interface AllClinicians {
   institution?: string | null
 } 
 
-const getAllClinicians = async (): Promise<AllClinicians[]> => {
-  const allClinicians = await prisma.user.findMany({
-    where: { role: 'CLINICIAN' },
-    select: { id: true, email: true, firstName: true, lastName: true, profession: true, institution: true }
-  })
-
-  return allClinicians.map(clinician => ({
-    id: clinician.id,
-    firstName: clinician.firstName,
-    lastName: clinician.lastName,
-    email: clinician.email,
-    institution: clinician.institution ?? null,
-    profession: clinician.profession ?? null
-  }))
-}
 
 const ProfilePage = async () => {
     const session = await getServerSession(authOptions)
@@ -155,12 +114,11 @@ const ProfilePage = async () => {
   }
     const userData = await getUserProfile(session.user.id)
     const clinicianData = await getClinicians(session.user.id)
-    const allClinicians = await getAllClinicians()
     
  
     return (
       // Pass user data to the client component
-      <UserProfile initialData={userData} clinicians={clinicianData} cliniciansList = {allClinicians}/>
+      <UserProfile initialData={userData} clinicians={clinicianData}/>
     )
   }
   
