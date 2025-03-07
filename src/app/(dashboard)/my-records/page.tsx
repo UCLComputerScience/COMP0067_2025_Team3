@@ -10,7 +10,7 @@ import { authOptions } from '@/libs/auth'
 
 export interface Data {
   submissionId: string
-  date: string
+  date: Date
   neuromusculoskeletal: number
   pain: number
   fatigue: number
@@ -21,10 +21,44 @@ export interface Data {
   depression: number
 }
 
-const flattenSubmissionData = (
-  data: Record<string, { createdAt: string; domains: Record<string, { averageScore: number }> }>
-): Data[] => {
-  return Object.entries(data).map(([submissionId, submissionData]) => {
+interface DomainScore {
+  averageScore: number
+}
+
+interface SubmissionResult {
+  createdAt: Date
+  domains: Record<string, DomainScore>
+}
+
+const getResponseDataByUser = async (userId: string) => {
+  const responses = await prisma.response.groupBy({
+    by: ['domain', 'submissionId'],
+    where: {
+      userId
+    },
+    _avg: {
+      score: true
+    },
+    _min: {
+      createdAt: true
+    }
+  })
+  const groupedResults: Record<string, SubmissionResult> = {}
+
+  responses.forEach(result => {
+    if (!groupedResults[result.submissionId]) {
+      groupedResults[result.submissionId] = {
+        createdAt: result._min.createdAt!,
+        domains: {}
+      }
+    }
+
+    groupedResults[result.submissionId].domains[result.domain] = {
+      averageScore: result._avg.score!
+    }
+  })
+
+  const formattedData: Data[] = Object.entries(groupedResults).map(([submissionId, submissionData]) => {
     const { createdAt, domains } = submissionData
 
     return {
@@ -40,59 +74,15 @@ const flattenSubmissionData = (
       depression: domains['Depression']?.averageScore
     }
   })
-}
 
-const getResponseDataByUser = async (userId: string) => {
-  const responses = await prisma.response.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      createdAt: true,
-      userId: true,
-      score: true,
-      label: true,
-      submissionId: true,
-      question: {
-        select: { domain: true }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
-
-  const groupedBySubmission = groupBy(responses, response => response.submissionId)
-
-  const result: Record<string, { createdAt: string; domains: Record<string, { averageScore: number }> }> = {}
-
-  for (const [submissionId, responsesInSubmission] of Object.entries(groupedBySubmission)) {
-    const createdAt = responsesInSubmission[0]?.createdAt.toISOString()
-
-    const groupedByDomain = groupBy(responsesInSubmission, response => response.question.domain)
-
-    const domainScores: Record<string, { averageScore: number }> = {}
-
-    for (const [domain, responsesInDomain] of Object.entries(groupedByDomain)) {
-      const averageScore =
-        responsesInDomain.reduce((sum, response) => sum + response.score, 0) / responsesInDomain.length
-
-      domainScores[domain] = { averageScore }
-    }
-
-    result[submissionId] = {
-      createdAt,
-      domains: domainScores
-    }
-  }
-
-  return flattenSubmissionData(result)
+  return formattedData.sort((a, b) => b.date.getTime() - a.date.getTime())
 }
 
 const Page = async () => {
   const session = await getServerSession(authOptions)
 
   // debug, and secure the end point and remove this later.
-  console.log(session)
+  console.log('session:', session)
   if (!session?.user?.id) {
     return <p>Unauthorized</p>
   }
