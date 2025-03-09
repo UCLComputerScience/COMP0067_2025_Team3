@@ -24,8 +24,13 @@ interface Props {
   handleDisplayDataOnClick: (numSelected: number) => void
 }
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
+const formatDate = (dateInput: string | Date): string => {
+  const date = dateInput instanceof Date ? dateInput : new Date(dateInput)
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date input')
+  }
+
   return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
