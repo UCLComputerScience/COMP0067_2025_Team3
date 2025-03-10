@@ -107,6 +107,7 @@ model Response {
 
   score Int
   label String
+  domain String
 
   submissionId String
 }
@@ -138,7 +139,7 @@ model Application {
 model Document {
   id            Int         @id @default(autoincrement())
   createdAt     DateTime    @default(now())
-  application   Application @relation(fields: [applicationId], references: [id])
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade) 
   applicationId Int
 
   documentPath String

@@ -29,7 +29,7 @@ async function createQuestionResponses(
   timestamp: Date = getRandomDateWithinDays() // Generate random date
 ) {
   const questions = await prisma.question.findMany({
-    select: { id: true }
+    select: { id: true, domain: true }
   })
 
   const responsesData = questions.map(question => ({
@@ -38,6 +38,7 @@ async function createQuestionResponses(
     submissionId,
     score: getRandomResponseValue(),
     label: '',
+    domain: question.domain,
     createdAt: timestamp // Assigning random timestamp
   }))
 
