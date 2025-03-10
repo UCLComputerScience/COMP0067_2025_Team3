@@ -1,5 +1,3 @@
-// 'use client'
-
 // React Imports
 import Grid from '@mui/material/Grid2'
 import Select from '@mui/material/Select'
@@ -7,7 +5,6 @@ import Divider from '@mui/material/Divider'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
@@ -29,11 +26,6 @@ interface Props {
 const DataAccessApplicationContent = ({ control, errors }: Props) => {
   return (
     <>
-      <CardHeader
-        title='Data Access Application'
-        subheader='Add your study here to apply for using our research data.'
-      />
-
       <CardContent>
         <Grid container spacing={5}>
           <Grid size={12}>
@@ -194,7 +186,7 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
                     {...field}
                     label={label}
                     value={label}
-                    checked={field.value?.includes(label) as boolean}
+                    checked={field.value.includes(label)}
                     onChange={e => {
                       const newValue = e.target.checked
                         ? [...(field.value || []), label]
@@ -221,7 +213,7 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
                     {...field}
                     label={label}
                     value={label}
-                    checked={field.value?.includes(label) as boolean}
+                    checked={Array.isArray(field.value) && field.value.includes(label)}
                     onChange={e => {
                       const newValue = e.target.checked
                         ? [...(field.value || []), label]

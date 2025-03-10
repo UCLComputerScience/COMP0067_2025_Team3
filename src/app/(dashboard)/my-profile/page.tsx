@@ -1,4 +1,4 @@
-import StudyList from '@/components/StudyList'
+import StudyList from '@/components/study-list'
 import { Role } from '@prisma/client'
 
 import { getServerSession } from 'next-auth'
