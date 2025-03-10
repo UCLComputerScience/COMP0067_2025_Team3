@@ -1,13 +1,10 @@
 "use server";
 
-
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/prisma/client'
 import { Role } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { hash } from "bcrypt";
 import nodemailer from 'nodemailer';
 
 // Save User Profile Settings
@@ -177,63 +174,6 @@ export async function registerClinician(formData: {
     }
   }
 
-export async function loginUser(formData: {email: string; password: string; rememberMe: boolean; }): Promise<{ success: boolean; error?: string; user?: {   id: string; email: string;  firstName?: string;lastName?: string;role: Role; }}> {
-    try {
-      if (!formData.email || !formData.password) {
-        return {
-          success: false,
-          error: 'Email and password cannot be empty'
-        };
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { email: formData.email },
-        select: {  id: true,  email: true,  hashedPassword: true,  firstName: true,  lastName: true,  role: true }});
-      if (!user || !(await bcrypt.compare(formData.password, user.hashedPassword))) {
-        console.log('Login failed: Invalid email or password');
-        return {
-          success: false,
-          error: 'Incorrect email or password'
-        };
-      }
-  
-      const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        process.env.JWT_SECRET || 'fallback-secret-key',
-        { expiresIn: formData.rememberMe ? '7d' : '24h' }
-      );
-  
-      const cookieStore = await cookies(); 
-      cookieStore.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: formData.rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60,
-      path: '/'
-    });
-  
-      console.log('Login Successful:', user.id);
-  
-      return {
-        success: true,
-        user: { id: user.id, email: user.email, firstName: user.firstName || undefined, lastName: user.lastName || undefined, role: user.role}};
-    } catch (error) {
-      console.error('Login Error:', error);
-      return {
-        success: false,
-        error: 'An error occurred during login: ' + (error instanceof Error ? error.message : String(error))
-      };
-    }
-  }
-  
-  export async function logoutUser() {
-    const cookieStore = await cookies(); 
-    cookieStore.set("auth-token", "", { expires: new Date(0), path: "/" })
-    console.log("User logged out, auth-token cleared.");
-  
-
-    return { success: true };
-}
-  
   export async function getCurrentUser() {
     const cookieStore = await cookies(); 
     const token = cookieStore.get('auth-token')?.value;
@@ -326,4 +266,3 @@ export async function loginUser(formData: {email: string; password: string; reme
     await prisma.user.update({ where: { email }, data: { hashedPassword } });
     return { success: true, message: 'Password reset successful. Redirecting to login...' };
   }
-  

@@ -1,251 +1,163 @@
-"use client";
+'use client'
+// Hook Imports
+// import { useImageVariant } from '@core/hooks/useImageVariant'
+import { useSettings } from '@core/hooks/useSettings'
 
-import React, { useState, useEffect } from "react";
-import { useTheme } from "@mui/material/styles";
-import { useRouter } from "next/navigation";
-import { loginUser, getCurrentUser } from "@/actions/userActions";
-import { Box,Button,TextField,Checkbox,FormControlLabel,Typography,Container,Paper,Link,CircularProgress} from "@mui/material";
-import Footer from "@/components/layout/horizontal/Footer";
-import { Role } from "@prisma/client";
+// React Imports
+import { useState, useEffect } from 'react'
 
-const LoginPageClient: React.FC = () => {
-  const theme = useTheme();
-  const router = useRouter();
-  const mode = theme.palette.mode;
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [isClient, setIsClient] = useState(false);
+// Next Imports
+import { useRouter } from 'next/navigation'
 
-  // 用于解决hydration错误，确保只在客户端渲染后执行localStorage相关操作
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+// NextAuth Imports
+import { signIn, getSession } from 'next-auth/react'
 
-  // Check login Information
-  useEffect(() => {
-    async function checkAuth() {
-      const user = await getCurrentUser();
-      if (user) {
-        let role = user.role as string;  
-        let redirectPath = "/dashboard"; // 默认路径
-        
-        if (role.toLowerCase() === "clinician") {
-          redirectPath = "/clinician-allpatients";
-        } else if (role.toLowerCase() === "admin") {
-          redirectPath = "/admin-allusers";
-        } else if (role.toLowerCase() === "researcher") {
-          redirectPath = "/researcher-download";
-        } else if (role.toLowerCase() === "patient") {
-          redirectPath = "/my-records";
-        }
-        
-        console.log("[CheckAuth] User role:", role);
-        console.log("[CheckAuth] Redirecting to:", redirectPath);
-        router.push(redirectPath);
-      }
-    }
-    
-    if (isClient) {
-      checkAuth();
-    }
-  }, [isClient]);
-  
-  // obtain email and password - only after client-side hydration
-  useEffect(() => {
-    if (!isClient) return;
-    
-    const savedEmail = localStorage.getItem("rememberedEmail");
-    const savedPassword = localStorage.getItem("rememberedPassword");
-    const savedRememberMe = localStorage.getItem("rememberMe") === "true";
-    
-    if (savedEmail) setEmail(savedEmail);
-    if (savedRememberMe) {
-      setRememberMe(true);
-      if (savedPassword) setPassword(savedPassword);
-    }
-  }, [isClient]);
+// MUI Imports
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import Checkbox from '@mui/material/Checkbox'
+import Button from '@mui/material/Button'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
-  // Validate email format
+// Third-party Imports
+import classnames from 'classnames'
+
+// Component Imports
+import Link from '@components/Link'
+import Logo from '@components/layout/shared/Logo'
+import Illustrations from '@components/Illustrations'
+
+// Config Imports
+import themeConfig from '@configs/themeConfig'
+
+
+const LoginV2 = ({ mode }: { mode: string }) => {
+  // States
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [rememberMe, setRememberMe] = useState(false)
+
+  // Hooks
+  const router = useRouter()
+  // const { settings } = useSettings()
+
+  // Email validation function
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email) && email.trim() !== "") {
-      setEmailError("Please enter a valid email address");
-      return false;
-    } else {
-      setEmailError("");
-      return true;
-    }
-  };
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return regex.test(email)
+  }
 
-  // Handle email change with validation
+  // Load saved credentials on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('userEmail')
+    if (savedEmail) {
+      setEmail(savedEmail)
+    }
+    
+    const savedPassword = localStorage.getItem('userPassword')
+    if (savedPassword) {
+      setPassword(savedPassword)
+      setRememberMe(true)
+    }
+  }, [])
+
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-    if (newEmail.trim() !== "") {
-      validateEmail(newEmail);
+    const newEmail = e.target.value
+    setEmail(newEmail)
+    
+    // Clear error when user starts typing
+    if (emailError) setEmailError(null)
+  }
+
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    
+    // Validate email before submission
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address')
+      return
+    }
+    
+    const result = await signIn('credentials', { redirect: false, email, password})
+
+    if (result?.error) {
+      setError('Invalid email or password')
     } else {
-      setEmailError("");
-    }
-  };
-
-  // login verification
-  const validateForm = () => {
-    setFormError("");
-    if (!email.trim()) {
-      setFormError("Enter your Email and Password");
-      return false;
-    }
-    if (!password.trim()) {
-      setFormError("Enter your password");
-      return false;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError("Please enter a valid email address");
-      return false;
-    }
-    return true;
-  };
-
-  const handleLogin = async () => {
-    setFormError("");
-    if (!validateForm()) {
-      return;
-    }
-    setLoading(true);
-
-    try {
-      const result = await loginUser({ email, password, rememberMe });
-      console.log("Login Response:", result); 
-
-      if (!result.success) {
-        setFormError(result.error || "Incorrect email or password");
-        return;
-      }
-
-      // Remember email and password
-      if (rememberMe) {
-        localStorage.setItem("rememberedEmail", email);
-        localStorage.setItem("rememberedPassword", password);
-        localStorage.setItem("rememberMe", "true");
-      } else {
-        localStorage.removeItem("rememberedEmail");
-        localStorage.removeItem("rememberedPassword");
-        localStorage.removeItem("rememberMe");
-      }
-
-      // Dynamic jumps to different pages
-      let redirectPath = "/dashboard"; 
-      if (result.user?.role === Role.CLINICIAN) {
-        redirectPath = "/clinician-allpatients";
-      } else if (result.user?.role === Role.ADMIN) {
-        redirectPath = "/admin-allusers";
-      } else if (result.user?.role === Role.RESEARCHER) {
-        redirectPath = "/researcher-download";
-      }else if (result.user?.role === Role.PATIENT) {
-        redirectPath = "/my-records";
-      }
-
-      console.log("Redirecting to:", redirectPath); 
-      router.push(redirectPath);
-      router.refresh();
+      // Save email for future use
+      localStorage.setItem('userEmail', email)
       
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : "An unexpected error has occurred");
-    } finally {
-      setLoading(false);
+      // Save password only if remember me is checked
+      if (rememberMe) { localStorage.setItem('userPassword', password)} 
+      else {localStorage.removeItem('userPassword')}
+      
+      // Get user session which contains user information including role
+      const session = await getSession()
+      const userRole = session?.user?.role || 'default'
+      
+      // Redirect based on user role
+      switch(userRole) {
+        case 'patient':
+          router.push('/my-records')
+          break
+        case 'clinician':
+          router.push('/clinician-allpatients')
+          break
+        case 'researcher':
+          router.push('/researcher-download')
+          break
+        case 'admin':
+          router.push('/admin-allusers')
+          break
+        default:
+          // Default redirect path
+          router.push('/home')
+      }
     }
-  };
+  }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: theme.palette.background.default }}>
-      <Container component="main" sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Paper elevation={6} sx={{ padding: 4, maxWidth: 500, width: "100%", textAlign: "center", backgroundColor: mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "#f9f9f9" }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>Log In</Typography>
-          
-          <TextField 
-            fullWidth 
-            label="Email" 
-            type="email" 
-            autoComplete="email"  
-            variant="outlined"  
-            margin="normal" 
-            value={email} 
-            onChange={handleEmailChange} 
-            error={!!emailError}
-            helperText={emailError}
-          />
-          
-          <TextField 
-            fullWidth 
-            label="Password" 
-            type="password" 
-            autoComplete="current-password"  
-            variant="outlined" 
-            margin="normal" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", mt: 1 }}>
-            <FormControlLabel 
-              control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}  
-              label="Remember Me"
+    <div className='flex bs-full justify-center'>
+      <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
+        <Link className='absolute block-start-5 sm:block-start-[38px] inline-start-6 sm:inline-start-[38px]'> <Logo /></Link>
+        <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] border border-divider rounded-lg p-6 shadow-sm bg-backgroundPaper'>
+          <Typography variant='h4' className='text-center'>{`Log in`}</Typography>
+          <form onSubmit={handleLogin} className='flex flex-col gap-5'>
+            <TextField  autoFocus  fullWidth  label='Email'  value={email}  onChange={handleEmailChange} onBlur={() => {
+                if (email && !validateEmail(email)) { setEmailError('Please enter a valid email address') } }}
+              error={!!emailError}
+              helperText={emailError}
             />
-            <Link  
-              href="/forgot-password"  
-              sx={{ fontWeight: 600, color: "#6c4af7", textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
-            >
-              Forgot Password?
-            </Link>
-          </Box>
-
-          {/* Login Button */}
-          <Button 
-            fullWidth 
-            variant="contained" 
-            onClick={handleLogin} 
-            disabled={loading} 
-            sx={{ marginTop: 3, padding: 1.5, backgroundColor: "#6c4af7", "&:hover": { backgroundColor: "#5633e3" } }}
-          >
-            {loading ? <CircularProgress size={24} color="inherit" /> : "Log In"}
-          </Button>
-
-          {/* Form Error Message */}
-          {formError && (
-            <Typography 
-              sx={{ 
-                marginTop: 1, 
-                fontSize: 14,
-                textAlign: 'center',
-                color: '#ff3d3d',
-                fontWeight: 'bold'
+            <TextField fullWidth label='Password' value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password"
+              InputProps={{
+                endAdornment: ( <InputAdornment position='end'>  <IconButton size='small' edge='end' onClick={handleClickShowPassword}> </IconButton> </InputAdornment>),
+                // Use inputProps (lowercase) to access the input element's props
+                inputProps: {
+                  // This prevents browser from showing the default password toggle
+                  type: isPasswordShown ? 'text' : 'password',
+                }
               }}
-            >
-              {formError}
-            </Typography>
-          )}
-          
-          {/* Register link */}
-          <Typography sx={{ marginTop: 2, fontSize: 14, color: mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "#555" }}>
-            Already have an account?{" "}
-            <Link href="/register" sx={{ fontWeight: 600, color: "#6c4af7", textDecoration: "none", "&:hover": { textDecoration: "underline" } }}>
-              Sign in instead
-            </Link>
-          </Typography>
-        </Paper>
-      </Container>
+            />
+            <div className='flex justify-between items-center flex-wrap gap-x-3 gap-y-1'>
+              <FormControlLabel  control={<Checkbox  checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}  label='Remember me' />
+              <Typography  className='text-end'  color='primary.main'  component={Link} href="/forgotpassword" sx={{ textDecoration: 'underline' }}> Forgot password?</Typography>
+            </div>
+            <Button fullWidth variant='contained' type='submit'> Log In </Button>{error && (
+              <Typography  variant="caption"  color="error"  className='text-center mt-3'> {error} </Typography>
+            )}
+            <Typography className='text-center mt-4'> Don't have an account? <Link href="/register" className="text-primary underline">Sign up instead</Link> </Typography>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-      {/* Footer*/}
-      <Box sx={{ textAlign: "center", paddingY: 2, backgroundColor: "transparent" }}>
-        <Footer />
-      </Box>
-    </Box>
-  );
-};
-
-export default LoginPageClient;
+export default LoginV2

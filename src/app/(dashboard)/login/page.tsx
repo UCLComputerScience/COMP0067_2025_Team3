@@ -1,59 +1,22 @@
-import React from "react";
+// Next Imports
+import type { Metadata } from 'next'
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import jwt from 'jsonwebtoken';
-import LoginClient from '@/views/Login';
-import { getCurrentUser } from '@/actions/userActions';
+// Component Imports
+import Login from '@views/Login'
 
-// Check user authentication status
-const checkAuthenticated = async () => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('auth-token')?.value;
+// Server Action Imports
+import { getServerMode } from '@core/utils/serverHelpers'
 
-  if (!token) {
-    return false;
-  }
-
-  try {
-    jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
-    const user = await getCurrentUser();
-    return user;
-  } catch (error) {
-    return null;
-  }
-};
-
-export default async function LoginPage() {
-  const user = await checkAuthenticated();
-
-  if (user && user.role) {
-    let role = String(user.role).toLowerCase();
-    let redirectPath = '/dashboard';
-
-    switch (role) {
-      case 'clinician':
-        redirectPath = '/clinician-allpatients';
-        break;
-      case 'admin':
-        redirectPath = '/admin-allusers';
-        break;
-      case 'researcher':
-        redirectPath = '/researcher-download';
-        break;
-      case 'patient':
-        redirectPath = '/my-records';
-        break;
-      default:
-        redirectPath = '/dashboard';
-    }
-
-    console.log('User Data:', user);
-    console.log('User Role:', user?.role);
-    console.log('🔄 Redirecting to:', redirectPath);
-    
-    redirect(redirectPath);
-  }
-
-  return <LoginClient />;
+export const metadata: Metadata = {
+  title: 'Login',
+  description: 'Login to your account'
 }
+
+const LoginPage = async () => {
+  // Vars
+  const mode = await getServerMode()
+
+  return <Login mode={mode} />
+}
+
+export default LoginPage

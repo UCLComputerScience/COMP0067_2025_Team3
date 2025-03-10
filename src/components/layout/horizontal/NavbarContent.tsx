@@ -14,62 +14,35 @@ import NavToggle from './NavToggle'
 import ModeDropdown from '@components/layout/shared/ModeDropdown'
 import SpiderLogo from '@components/layout/horizontal/spider_logo_1.png'
 
+// NextAuth Imports
+import { useSession, signOut } from 'next-auth/react'
+
 // Hook Imports
 import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
-import { getCurrentUser, logoutUser } from '@/actions/userActions'
 import { useRouter, usePathname } from 'next/navigation'
 
 const NavbarContentInner = () => {
   // Hooks
   const { isBreakpointReached } = useHorizontalNav()
   const router = useRouter()
-  const pathname = usePathname();
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  const fetchUser = async () => {
-    try { 
-      const userData = await getCurrentUser();
-      if (userData) {
-        setUser(userData);
-      }
-    } catch (error) { 
-      console.error("Failed to get user information:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // obtain current information
-  useEffect(() => {
-    console.log("URL change to recapture user information...");
-    fetchUser();
-  }, [pathname]);
+  const pathname = usePathname()
+  
+  // Use NextAuth session
+  const { data: session, status } = useSession()
+  const loading = status === 'loading'
+  const user = session?.user
 
   // Logout
   const handleLogout = async () => {
-    console.log("Logout button clicked");
+    console.log("Logout button clicked")
     try {
-      // remian function of rememberme function
-      // localStorage.removeItem("rememberedPassword");
-      
-      console.log("Call Server Logout...");
-      await logoutUser();
-      console.log("Server logout results:");
-      setUser(null);
-      
-      // Handling redirects on the client side
-      console.log("Prepare to redirect...");
-      window.location.href = '/home';
-      console.log("Redirect is sent");
-      return; 
-      router.refresh();
-      console.log("Page Refresh Requested");
+      await signOut({ redirect: false })
+      window.location.href = '/home'
     } catch (error) {
-      console.error('Failed to logout:', error);
+      console.error('Failed to logout:', error)
     }
   }
 
@@ -79,7 +52,7 @@ const NavbarContentInner = () => {
       <div className={classnames(horizontalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
         <div className="p-4 text-gray-500">Loading...</div>
       </div>
-    );
+    )
   }
 
   //Generate menu items based on user roles
@@ -132,7 +105,7 @@ const NavbarContentInner = () => {
           </>
         )
       default:
-        return null;
+        return null
     }
   }
 
