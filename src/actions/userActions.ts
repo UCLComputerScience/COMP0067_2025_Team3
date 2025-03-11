@@ -2,7 +2,7 @@
 
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/prisma/client'
-import select from '@/@core/theme/overrides/select';
+// import select from '@/@core/theme/overrides/select';
 
 // Save User Profile Settings
 export async function saveUserProfile(formData: {
@@ -25,7 +25,7 @@ export async function saveUserProfile(formData: {
                 phoneNumber: formData.phoneNumber === "" ? null : formData.phoneNumber,
                 address: formData.address === "" ? null : formData.address,
                 hospitalNumber: formData.hostipallNumber === "" ? null : formData.hostipallNumber,
-                dateOfBirth: formData.dateOfBirth ? null : formData.dateOfBirth,
+                dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null,
             },
         });
 

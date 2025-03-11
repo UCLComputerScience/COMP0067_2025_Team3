@@ -1,6 +1,3 @@
-//The date of birth shows current date and not actual date from the database 
-// save doesnt work for date of birth as well because of that
-
 // whats wrong with passworddddd typing
 // test changing passwords and new password + add validation???
 
@@ -82,17 +79,21 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
 
   const handleSave = async () => {
     try {
-      const response = await saveUserProfile(formData);
+      const updatedFormData = {
+        ...formData,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null, // Convert back to Date
+      };
+
+      const response = await saveUserProfile(updatedFormData);
       if (!response.success) {
         throw new Error('Failed to update profile');
       }
-      alert('Profile changed saved successfully!');
+      alert('Profile changes saved successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
       alert('Error saving profile changes.');
     }
-
-  };
+};
 
   const handleReset = async () => {
       const resetData = await resetUserProfile(formData.id);
@@ -225,7 +226,7 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
                     <TextField fullWidth label="Address" name="address" value={formData.address || ""} onChange={handleChange} />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth || ""} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+                    <TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString().split('T')[0] : ""} onChange={handleChange} InputLabelProps={{ shrink: true }} />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
                     <TextField fullWidth label="Hospital Number" name="hospitalNumber" value={formData.hospitalNumber || ""} onChange={handleChange} />
