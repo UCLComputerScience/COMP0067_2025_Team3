@@ -10,7 +10,7 @@ import { useState, useEffect, useRef} from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, Button, Card, CardContent, Typography, TextField, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, IconButton} from '@mui/material';
 import Grid from '@mui/material/Grid2'
-import { saveNewClinician, sendInvitation } from '@/actions/userActions';
+import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions';
 import { AllClinicians, PatientId } from '@/app/(dashboard)/my-profile/patient-settings/add-clinician/page'
 
 interface Props {
