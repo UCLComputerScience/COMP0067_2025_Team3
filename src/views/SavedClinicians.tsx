@@ -1,91 +1,98 @@
 "use client";
 
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Clinician } from "./ClinicianSearch";
 
 interface SavedCliniciansProps {
   clinicians: Clinician[];
-  onRemoveClinician: (clinicianId: string) => void;
+  onRemoveClinician: (id: string) => void;
 }
 
-const SavedClinicians = ({ clinicians, onRemoveClinician }: SavedCliniciansProps) => {
+const SavedClinicians: React.FC<SavedCliniciansProps> = ({ clinicians, onRemoveClinician }) => {
   if (clinicians.length === 0) {
     return null;
   }
 
   return (
-    <Box sx={{ mb: 4, mt: 2 }}>
-      <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
-        Clinicians
-      </Typography>
-      <Box sx={{ 
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 2
-      }}>
-        {clinicians.map((clinician) => (
-          <Box 
-            key={clinician.id} 
-            sx={{ 
-              position: 'relative',
-              width: '220px', 
-              p: 2, 
-              bgcolor: 'rgba(255, 255, 255, 0.05)', 
+    <Box
+      sx={{
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '8px',
+        padding: 2,
+        maxHeight: '300px',
+        overflowY: 'auto',
+        // Add scrollbar styling for dark theme
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'rgba(255, 255, 255, 0.05)',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(255, 255, 255, 0.2)',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: 'rgba(255, 255, 255, 0.3)',
+        },
+      }}
+    >
+      {clinicians.map((clinician) => (
+        <Box
+          key={clinician.id}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: 1.5,
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            '&:last-child': {
+              borderBottom: 'none',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: '24px',
+              height: '24px',
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
+              bgcolor: '#6e41e2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 2,
+              color: 'white',
+              fontSize: '14px',
             }}
           >
-            {/* Delete button */}
-            <Box 
-              sx={{ 
-                position: 'absolute', 
-                top: 5, 
-                right: 5, 
-                cursor: 'pointer',
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '16px',
-                lineHeight: 1,
-                padding: '2px',
-                '&:hover': {
-                  color: 'rgba(255,255,255,0.8)',
-                }
-              }}
-              onClick={() => onRemoveClinician(clinician.id)}
-            >
-              ×
-            </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box sx={{ 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '4px',
-                bgcolor: '#ffd700',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 2,
-                color: 'white',
-                fontSize: '16px'
-              }}>
-                🔒
-              </Box>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography sx={{ fontWeight: 'bold', fontSize: '14px', color: 'white' }}>
-                  {clinician.firstName} {clinician.lastName}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
-                  {clinician.institution || "No Institution"}
-                </Typography> 
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
-                  {clinician.email}
-                </Typography>
-              </Box>
-            </Box>
+            ✓
           </Box>
-        ))}
-      </Box>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography sx={{ fontWeight: 'bold', fontSize: '14px', color: 'white' }}>
+              {clinician.firstName} {clinician.lastName}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
+              {clinician.institution || "No Institution"}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
+              {clinician.email}
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => onRemoveClinician(clinician.id)}
+            sx={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              '&:hover': {
+                color: 'white',
+                bgcolor: 'rgba(255, 0, 0, 0.1)',
+              },
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      ))}
     </Box>
   );
 };

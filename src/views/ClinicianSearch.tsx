@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { 
-  Box, Typography, TextField, Button, Link,
-  InputAdornment
-} from "@mui/material";
+import { Box, Typography, TextField, Button, Link, InputAdornment } from "@mui/material";
 import { searchClinicians } from "@/actions/registerActions";
 
 // Define the Clinician interface
@@ -144,9 +141,8 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
               }
             }
           }}
-          InputLabelProps={{
-            shrink: true,
-            sx: { color: 'rgba(255, 255, 255, 0.7)' }
+          inputProps={{
+            style: { color: 'white' }
           }}
           sx={{ 
             '& .MuiOutlinedInput-root': {
@@ -160,6 +156,9 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
                 borderColor: '#6e41e2',
               },
             },
+            '& .MuiInputLabel-root': {
+              color: 'rgba(255, 255, 255, 0.7)',
+            }
           }}
         />
         <TextField 
@@ -175,9 +174,8 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
               color: 'white' 
             }
           }}
-          InputLabelProps={{
-            shrink: true,
-            sx: { color: 'rgba(255, 255, 255, 0.7)' }
+          inputProps={{
+            style: { color: 'white' }
           }}
           sx={{ 
             '& .MuiOutlinedInput-root': {
@@ -191,6 +189,9 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
                 borderColor: '#6e41e2',
               },
             },
+            '& .MuiInputLabel-root': {
+              color: 'rgba(255, 255, 255, 0.7)',
+            }
           }}
         />
         <TextField 
@@ -206,9 +207,8 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
               color: 'white' 
             }
           }}
-          InputLabelProps={{
-            shrink: true,
-            sx: { color: 'rgba(255, 255, 255, 0.7)' }
+          inputProps={{
+            style: { color: 'white' }
           }}
           sx={{ 
             '& .MuiOutlinedInput-root': {
@@ -222,6 +222,9 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
                 borderColor: '#6e41e2',
               },
             },
+            '& .MuiInputLabel-root': {
+              color: 'rgba(255, 255, 255, 0.7)',
+            }
           }}
         />
         <TextField 
@@ -237,9 +240,8 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
               color: 'white' 
             }
           }}
-          InputLabelProps={{
-            shrink: true,
-            sx: { color: 'rgba(255, 255, 255, 0.7)' }
+          inputProps={{
+            style: { color: 'white' }
           }}
           sx={{ 
             '& .MuiOutlinedInput-root': {
@@ -253,6 +255,9 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
                 borderColor: '#6e41e2',
               },
             },
+            '& .MuiInputLabel-root': {
+              color: 'rgba(255, 255, 255, 0.7)',
+            }
           }}
         />
       </Box>
@@ -275,9 +280,9 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
 
       {/* No Results Message */}
       {searchPerformed && clinicianList.length === 0 && (
-        <Box sx={{ textAlign: 'center', marginTop: 2, color: '#666' }}>
+        <Box sx={{ textAlign: 'center', marginTop: 2, color: 'rgba(255, 255, 255, 0.7)' }}>
           <Typography variant="body2">
-            Cannot find your clinician? <Link href="#" sx={{ color: '#6e41e2' }}>Invite them to create an account</Link>
+            Cannot find your clinician? <Link href="#" sx={{ color: '#9575cd' }}>Invite them to create an account</Link>
           </Typography>
         </Box>
       )}
@@ -285,7 +290,7 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
       {/* Clinician Results Count */}
       {clinicianList.length > 0 && (
         <Box sx={{ marginTop: 2 }}>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
             {clinicianList.length} Results
           </Typography>
         </Box>
@@ -296,7 +301,21 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
         <Box sx={{ 
           marginTop: 2, 
           maxHeight: "400px", 
-          overflowY: "auto"
+          overflowY: "auto",
+          // Add scrollbar styling for dark theme
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'rgba(255, 255, 255, 0.05)',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgba(255, 255, 255, 0.3)',
+          },
         }}>
           {clinicianList.slice(0, visibleCount).map((clinician, index) => (
             <Box 
@@ -304,11 +323,12 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
               sx={{ 
                 padding: 1.5,
                 cursor: "pointer", 
-                borderBottom: index < clinicianList.length - 1 ? "1px solid #eee" : "none",
-                backgroundColor: selectedClinician?.id === clinician.id ? "#f8f5ff" : "transparent",
-                "&:hover": { backgroundColor: "#f8f5ff" },
+                borderBottom: index < clinicianList.length - 1 ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
+                backgroundColor: selectedClinician?.id === clinician.id ? "rgba(110, 65, 226, 0.2)" : "transparent",
+                "&:hover": { backgroundColor: "rgba(110, 65, 226, 0.1)" },
                 display: 'flex',
                 alignItems: 'center',
+                borderRadius: '4px',
               }}
               onClick={() => handleSelectClinician(clinician)}
             >
@@ -321,15 +341,21 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginRight: 2,
-                color: 'white',
+                color: '#333',
                 fontSize: '16px'
               }}>
                 🔒
               </Box>
               <Box sx={{ flexGrow: 1 }}>
-                <Typography sx={{ fontWeight: 'bold', fontSize: '14px' }}>{clinician.firstName} {clinician.lastName}</Typography>
-                <Typography variant="body2" sx={{ color: '#666', fontSize: '12px' }}>{clinician.institution || "No Institution"}</Typography> 
-                <Typography variant="body2" sx={{ color: '#666', fontSize: '12px' }}>{clinician.email}</Typography>
+                <Typography sx={{ fontWeight: 'bold', fontSize: '14px', color: 'white' }}>
+                  {clinician.firstName} {clinician.lastName}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
+                  {clinician.institution || "No Institution"}
+                </Typography> 
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
+                  {clinician.email}
+                </Typography>
               </Box>
             </Box>
           ))}
@@ -343,12 +369,16 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
           <Button 
             variant="contained"
             sx={{ 
-              bgcolor: '#7e57c2', 
+              bgcolor: '#6e41e2', 
               color: 'white', 
-              '&:hover': { bgcolor: '#6a4db4' },
+              '&:hover': { bgcolor: '#5835b5' },
               borderRadius: '4px',
               padding: '8px 16px',
-              textTransform: 'none'
+              textTransform: 'none',
+              '&.Mui-disabled': {
+                backgroundColor: 'rgba(110, 65, 226, 0.3)',
+                color: 'rgba(255, 255, 255, 0.5)'
+              }
             }}
             onClick={handleSaveClinician}
             disabled={!selectedClinician}

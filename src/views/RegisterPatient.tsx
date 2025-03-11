@@ -1,265 +1,134 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  Box, Typography, TextField, Button, Checkbox, FormControlLabel, 
-  Grid, Link, Switch, InputAdornment, IconButton
+  Box, 
+  Typography, 
+  Button, 
+  Switch, 
+  FormControlLabel, 
+  Alert, 
+  Snackbar, 
+  CircularProgress,
+  Card,
+  CardContent
 } from "@mui/material";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Clinician } from "@/actions/registerActions";
 import ClinicianSearch from "./ClinicianSearch";
 import SavedClinicians from "./SavedClinicians";
-import { Clinician } from "./ClinicianSearch";
+import { completeRegistration } from "@/actions/registerActions";
+import { useRouter } from "next/navigation";
 
 // Define the props interface
 interface RegisterPatientProps {
   onBack: () => void;
   accountType: string;
+  userId: string | null;
 }
 
-// Create the component as a regular function component
-const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }) => {
-  console.log('Current account type:', accountType);
-  const [step, setStep] = useState(0);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+// Create the component focusing only on the Data Privacy step
+const RegisterPatient = ({ onBack, accountType, userId }: RegisterPatientProps) => {
+  const router = useRouter();
+
+  // State for data privacy settings
   const [consentToClinicians, setConsentToClinicians] = useState(false);
   const [consentToResearchers, setConsentToResearchers] = useState(true);
-
-  // Account details form fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  
-  // Password visibility
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Save list of selected clinicians
   const [savedClinicians, setSavedClinicians] = useState<Clinician[]>([]);
 
-  // Toggle password visibility
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
+  // UI state
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  // Toggle confirm password visibility
-  const handleToggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword((prev) => !prev);
-  };
+  // Effect to control success message visibility
+  useEffect(() => {
+    setSuccess(null);
+    return () => {
+      setSuccess(null);
+    };
+  }, []);
 
   // Add clinician to saved list
   const handleSaveClinician = (clinician: Clinician) => {
-    setSavedClinicians(prev => [...prev, clinician]);
+    // Prevent duplicates
+    if (!savedClinicians.some(saved => saved.id === clinician.id)) {
+      setSavedClinicians(prev => [...prev, clinician]);
+    }
   };
-  
+
   // Remove clinician from saved list
   const handleRemoveClinician = (clinicianId: string) => {
     setSavedClinicians(prev => prev.filter(clinician => clinician.id !== clinicianId));
   };
 
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!userId) {
+      setError("User registration incomplete. Please go back and try again.");
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Show success message before redirecting
+      setSuccess("Account created successfully! Redirecting to dashboard...");
+      
+      // Submit data privacy settings after a brief delay to show the success message
+      setTimeout(async () => {
+        try {
+          // Complete the patient registration with privacy settings
+          await completeRegistration(userId, {
+            researchConsent: consentToResearchers,
+            clinicianAccess: consentToClinicians,
+            selectedClinicians: savedClinicians
+          });
+          
+          // Redirect to dashboard
+          router.push('/dashboard');
+        } catch (submitErr) {
+          console.error("Registration completion error:", submitErr);
+          setError(submitErr instanceof Error ? submitErr.message : "An unexpected error occurred");
+          setIsLoading(false);
+        }
+      }, 1500);
+      
+    } catch (err) {
+      console.error("Registration completion error:", err);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box sx={{ maxWidth: "600px", marginX: "auto" }}>
-      {/* Account Details */}
-      {step === 0 && (
-        <>
-          <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1 }}>
-            Account Details
-          </Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ marginBottom: 3 }}>
-            Enter your account details below.
-          </Typography>
-
-          {/* Form fields */}
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField 
-                label="First name" 
-                fullWidth 
-                variant="outlined"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                sx={{ 
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField 
-                label="Last name" 
-                fullWidth 
-                variant="outlined"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                sx={{ 
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField 
-                label="Email" 
-                type="email"
-                fullWidth 
-                variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                sx={{ 
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField 
-                label="Password" 
-                type={showPassword ? "text" : "password"}
-                fullWidth 
-                variant="outlined"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePasswordVisibility}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-                sx={{ 
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField 
-                label="Confirm password" 
-                type={showConfirmPassword ? "text" : "password"}
-                fullWidth 
-                variant="outlined"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleToggleConfirmPasswordVisibility}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-                sx={{ 
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField 
-                label="Date of birth" 
-                type="date"
-                fullWidth 
-                variant="outlined"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                InputLabelProps={{ 
-                  shrink: true,
-                }}
-                sx={{ 
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          <FormControlLabel
-            control={
-              <Checkbox 
-                checked={agreeTerms} 
-                onChange={(e) => setAgreeTerms(e.target.checked)}
-                sx={{
-                  color: '#6e41e2',
-                  '&.Mui-checked': {
-                    color: '#6e41e2',
-                  },
-                }}
-              />
-            }
-            label={
-              <Typography variant="body2">
-                I agree to <Link href="#" sx={{ color: '#6e41e2' }}>privacy policy & terms</Link>
-              </Typography>
-            }
-            sx={{ mb: 2 }}
-          />
-
-          {/* Buttons */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
-            <Button 
-              variant="outlined" 
-              onClick={onBack}
-              sx={{ 
-                borderRadius: '8px',
-                borderColor: '#6e41e2',
-                color: '#6e41e2',
-                '&:hover': {
-                  borderColor: '#5835b5',
-                  backgroundColor: 'rgba(110, 65, 226, 0.04)',
-                },
-              }}
-            >
-              ← Previous
-            </Button>
-            <Button 
-              variant="contained"
-              onClick={() => setStep(1)}
-              disabled={!agreeTerms}
-              sx={{ 
-                borderRadius: '8px',
-                backgroundColor: '#6e41e2',
-                '&:hover': {
-                  backgroundColor: '#5835b5',
-                },
-                '&.Mui-disabled': {
-                  backgroundColor: '#ded5f7',
-                  color: '#ffffff',
-                }
-              }}
-            >
-              Next →
-            </Button>
-          </Box>
-        </>
-      )}
-
-      {/* Data Privacy */}
-      {step === 1 && (
-        <Box sx={{ bgcolor: '#2d2a43', p: 4, borderRadius: '8px', color: 'white' }}>
+      {/* Error and success notifications */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
+      
+      <Snackbar
+        open={!!success}
+        autoHideDuration={6000}
+        onClose={() => setSuccess(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSuccess(null)}>
+          {success}
+        </Alert>
+      </Snackbar>
+      
+      {/* Data Privacy Section */}
+      <Card sx={{ mb: 4, bgcolor: '#2d2a43', color: 'white' }}>
+        <CardContent sx={{ p: 4 }}>
           <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 2, color: 'white' }}>
             Data Privacy
           </Typography>
@@ -270,6 +139,7 @@ const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }
                 <Switch 
                   checked={consentToResearchers} 
                   onChange={(e) => setConsentToResearchers(e.target.checked)}
+                  disabled={isLoading}
                   sx={{
                     '& .MuiSwitch-switchBase.Mui-checked': {
                       color: '#6e41e2',
@@ -293,6 +163,7 @@ const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }
                 <Switch 
                   checked={consentToClinicians} 
                   onChange={(e) => setConsentToClinicians(e.target.checked)}
+                  disabled={isLoading}
                   sx={{
                     '& .MuiSwitch-switchBase.Mui-checked': {
                       color: '#6e41e2',
@@ -312,14 +183,21 @@ const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }
             />
           </Box>
 
-          {/* Clinician search */}
+          {/* Clinician search section (conditionally rendered) */}
           {consentToClinicians && (
             <>
-              {/* Display saved clinicians */}
-              <SavedClinicians 
-                clinicians={savedClinicians} 
-                onRemoveClinician={handleRemoveClinician} 
-              />
+              {/* Display saved clinicians if any exist */}
+              {savedClinicians.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
+                    Your Selected Clinicians
+                  </Typography>
+                  <SavedClinicians 
+                    clinicians={savedClinicians} 
+                    onRemoveClinician={handleRemoveClinician} 
+                  />
+                </Box>
+              )}
 
               {/* Clinician search component */}
               <ClinicianSearch 
@@ -333,7 +211,8 @@ const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }
           <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
             <Button 
               variant="outlined" 
-              onClick={() => setStep(0)}
+              onClick={onBack}
+              disabled={isLoading}
               sx={{ 
                 borderRadius: '8px',
                 borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -348,7 +227,8 @@ const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }
             </Button>
             <Button 
               variant="contained" 
-              onClick={() => console.log("Submit")}
+              onClick={handleSubmit}
+              disabled={isLoading}
               sx={{ 
                 bgcolor: '#4CAF50', 
                 color: 'white', 
@@ -356,11 +236,15 @@ const RegisterPatient: React.FC<RegisterPatientProps> = ({ onBack, accountType }
                 borderRadius: '8px'
               }}
             >
-              Submit ✔
+              {isLoading ? (
+                <CircularProgress size={24} sx={{ color: 'white' }} />
+              ) : (
+                'Submit ✓'
+              )}
             </Button>
           </Box>
-        </Box>
-      )}
+        </CardContent>
+      </Card>
     </Box>
   );
 };
