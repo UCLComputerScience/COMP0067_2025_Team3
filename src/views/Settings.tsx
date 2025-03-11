@@ -1,5 +1,4 @@
-// whats wrong with passworddddd typing
-// test changing passwords and new password + add validation???
+// 'change password'  validation
 
 // Form validation
 
@@ -17,11 +16,12 @@
 import { Box, Button, Card, CardContent, TextField, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import React, { useState, useEffect} from 'react'
-import { ClinicianData, UserData, AllClinicians } from '@/app/(dashboard)/my-profile/patient-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveNewClinician, saveShareData, deleteClinician} from '@/actions/userActions'
+import { ClinicianData, UserData } from '@/app/(dashboard)/my-profile/patient-settings/page'
+import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveShareData, deleteClinician} from '@/actions/userActions'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation';
+import Alert from '@mui/material/Alert'
 
 
 
@@ -102,19 +102,37 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
 
 
   const handleChangePassword = async () => {
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setPasswordError('Passwords do not match.') //make that red
-        return
-      }
-      setPasswordError(null)
-      const success = await changeUserPassword(formData.id, passwordData)
-      if (success) {
-        alert('Password changed successfully!')
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      } else {
-        alert('Error changing password.') 
-      }
+
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        // console.error("Error: One or more password fields are empty");
+        setPasswordError("All fields are required.");
+        return;
     }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+        // console.error("Error: Passwords do not match");
+        setPasswordError("Passwords do not match.");
+        return;
+    }
+
+    setPasswordError(null);
+    
+    try {
+        const response = await changeUserPassword(formData.id, passwordData);
+        // console.log("Change password success:", response.success);
+
+        if (response.success) {
+            alert("Password changed successfully!");
+            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        } else {
+            // console.error("Error changing password.");
+            setPasswordError(response.message);
+        }
+    } catch (error) {
+        // console.error("Unexpected error while changing password:", error);
+        setPasswordError("An error occurred while changing the password.");
+    }
+};
 
 
   const handlePasswordChangeReset = async () => {
@@ -124,6 +142,7 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
         newPassword: '',
         confirmPassword: ''
       });
+      setPasswordError(null);
   };
 
     
@@ -257,6 +276,7 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
                 fullWidth
                 label='Current Password'
                 type={isCurrentPasswordShown ? 'text' : 'password'}
+                name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordFieldChange}
                 slotProps={{
@@ -286,6 +306,7 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
                 fullWidth
                 label='New Password'
                 type={isNewPasswordShown ? 'text' : 'password'}
+                name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordFieldChange}
                 slotProps={{
@@ -311,6 +332,7 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
                 fullWidth
                 label='Confirm New Password'
                 type={isConfirmPasswordShown ? 'text' : 'password'}
+                name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordFieldChange}
                 slotProps={{
@@ -354,7 +376,7 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
               </div>
             </Grid>
             {/* Password Error */}
-            {passwordError && <Typography color="error" sx={{ mt: 1 }}>{passwordError}</Typography>}
+            {passwordError && <Alert severity="error">{passwordError}</Alert>}
 
             {/* Change Password and Reset buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>

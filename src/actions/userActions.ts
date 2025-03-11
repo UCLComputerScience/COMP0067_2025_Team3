@@ -77,20 +77,20 @@ export const changeUserPassword = async (userId: string, { currentPassword, newP
         // Verify the current password with bcrypt
         const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword)
         
-        if (!isMatch) throw new Error('Current password is incorrect');
+        if (!isMatch) return { success: false, message: "Current password is incorrect" };
     
         // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10)
     
         // Update the password in the database
         await prisma.user.update({
-        where: { id: 'userId' },
+        where: { id: userId },
         data: { hashedPassword: hashedPassword }
         })
     
-        return { success: true }
+        return { success: true, message: "Password changed successfully." }
     } catch (error) {
-        console.error('Error changing password:', error)
+        // console.error('Error changing password:', error)
         return {success: false, message: 'Failed to change password'}
     }
     }
