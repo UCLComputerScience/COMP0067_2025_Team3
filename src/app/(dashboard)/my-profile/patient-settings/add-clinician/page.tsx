@@ -60,7 +60,7 @@ const Clinicians = async () => {
 
   return (
     // Pass user data to the client component
-    <ClinicianLinkPage id={userIdValue} cliniciansList={allClinicians} />
+    <ClinicianLinkPage id={{id: userIdValue}} cliniciansList={allClinicians} />
   );
 }
 

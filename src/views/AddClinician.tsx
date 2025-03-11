@@ -8,13 +8,13 @@
 
 import { useState, useEffect, useRef} from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, Card, CardContent, Typography, TextField, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, IconButton} from '@mui/material';
+import { Box, Button, Card, CardContent, Typography, TextField, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Alert} from '@mui/material';
 import Grid from '@mui/material/Grid2'
 import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions';
 import { AllClinicians, PatientId } from '@/app/(dashboard)/my-profile/patient-settings/add-clinician/page'
 
 interface Props {
-    id: string;
+    id: PatientId;
     cliniciansList: AllClinicians [];
 }
 
@@ -27,6 +27,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   const clinicianListRef = useRef<HTMLDivElement>(null); // Ref to detect clicks outside the clinician list
   const saveButtonRef = useRef<HTMLButtonElement | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const [clinicianError, setClinicianError] = useState<string | null>(null)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value });
@@ -81,15 +82,18 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
     const handleClinicianSave = async () => {
     if (selectedClinician) {
         try{
-        const save = await saveNewClinician(selectedClinician.id, id);
-        if (!save.success) {
-            throw new Error ('This clinician is already linked to your account.');
+        const save = await saveNewClinician(selectedClinician.id, id.id);
+        if (save.success) {
+            alert ('Clinician added successfully');
+            router.push('/my-profile/patient-settings')
+
+        } else {
+            // console.error("Error changing password.");
+            setClinicianError(save.message);
         }
-        alert ('Clinician added successfully')
-        router.push('/my-profile/patient-settings')
-        console.log("Selected Clinician:", selectedClinician);
+        // console.log("Selected Clinician:", selectedClinician);
         } catch (error) {
-        console.error('Failed to save changes:', error);
+        // console.error('Failed to save changes:', error);
         alert('Error saving changes.');
         }
     } else {
@@ -150,6 +154,9 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
       <Card sx={{ width: 1132, p: 3 }}>
+        {/* Password Error */}
+        {clinicianError && <Alert severity="error">{clinicianError}</Alert>}
+        
       <Typography variant="h5" gutterBottom>Link a Clinician</Typography>
       <Typography color = 'secondary' variant="body2" sx={{alignItems: "center"}}>
          Link your clinicians to share your data with them

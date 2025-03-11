@@ -142,7 +142,7 @@ export async function saveNewClinician (selectedClinician:string, patientId:stri
         });
   
         if (existingRelationship) {
-            console.log('This clinician is already linked to your account.');
+            // console.log('This clinician is already linked to your account.');
             return { success: false, message: 'This clinician is already linked to your account.' };
       }
         const newRelationship = await prisma.clinicianPatient.create({
@@ -151,11 +151,11 @@ export async function saveNewClinician (selectedClinician:string, patientId:stri
                 patientId: patientId
             }
         })
-        console.log('New relationship created:', newRelationship);
-        return {success : true, newRelationship} ;
+        // console.log('New relationship created:', newRelationship);
+        return {success : true, newRelationship, message: null} ;
     } catch (error) {
         console.error ('Error adding new clinician:', error);
-        return {success : false};
+        return {success : false, message: 'Error adding new clinician.'};
     }
 }
 
