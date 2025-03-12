@@ -4,21 +4,18 @@ import debounce from "lodash/debounce";
 import Stack from "@mui/material/Stack";
 import { useRouter } from "next/navigation";
 import RegisterPatient from "./RegisterPatient";
+import DateOfBirthPicker from "./DateOfBirthPicker";
 import RegisterClinician from "./RegisterClinician";
 import RegisterResearcher from "./RegisterResearcher";
+import PrivacyPolicyTerms from "./PrivacyPolicyTerms";
 import { SelectChangeEvent } from '@mui/material/Select';
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import React, { useState, useEffect, useCallback } from "react";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { registerUser, checkUserDuplicates } from "@/actions/registerActions";
 import { Grid, Box, Typography, Radio, RadioGroup,FormControlLabel, Button, Stepper, Step, StepLabel, TextField, Checkbox, Link, InputAdornment, IconButton, Snackbar, Alert, CircularProgress, Select, MenuItem, InputLabel, FormControl,} from "@mui/material";
 
 
-// Define country codes
-const countryCodes = [ { code: "+44", country: "United Kingdom", length: 10 }, { code: "+1", country: "United States", length: 10 }, { code: "+86", country: "China", length: 11 }, { code: "+91", country: "India", length: 10 }, { code: "+33", country: "France", length: 9 },];
-
 // Define form interfaces
-export interface AccountDetailsForm { firstName: string; lastName: string; email: string; password: string; confirmPassword: string; dateOfBirth?: string; address?: string; countryCode: string;  phoneNumber?: string; registrationNumber?: string; institution?: string; profession?: string;}
+export interface AccountDetailsForm { firstName: string; lastName: string; email: string; password: string; confirmPassword: string; dateOfBirth?: string; address?: string; phoneNumber?: string; registrationNumber?: string; institution?: string; profession?: string;}
 interface FormErrors { firstName: string; lastName: string; email: string; password: string; confirmPassword: string; dateOfBirth?: string; address?: string; phoneNumber?: string; registrationNumber?: string; institution?: string; profession?: string;}
 interface DuplicateCheckResult { emailExists: boolean; phoneExists: boolean; registrationNumberExists: boolean;}
 
@@ -37,7 +34,9 @@ const Register = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [completedSteps, setCompletedSteps] = useState<boolean[]>([]);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState<AccountDetailsForm>({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "", dateOfBirth: "", address: "", countryCode: "+44",  phoneNumber: "", registrationNumber: "", institution: "", profession: "",});
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
+  const [openPrivacyTerms, setOpenPrivacyTerms] = useState<boolean>(false);
+  const [formData, setFormData] = useState<AccountDetailsForm>({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "", dateOfBirth: "", address: "",  phoneNumber: "", registrationNumber: "", institution: "", profession: "",});
   const [formErrors, setFormErrors] = useState<FormErrors>({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "", dateOfBirth: "", address: "", phoneNumber: "", registrationNumber: "", institution: "", profession: "",});
  
  
@@ -45,11 +44,8 @@ const Register = () => {
   // Define debouncedCheckDuplicates 
   const debouncedCheckDuplicates = useCallback(
     debounce(async (email: string, phoneNumber: string, registrationNumber: string) => {
-      if (email.trim() || phoneNumber.trim() || registrationNumber.trim()) {
-        const fullPhoneNumber = phoneNumber ? `${formData.countryCode}${phoneNumber}` : "";
-        const result: DuplicateCheckResult = await checkUserDuplicates( email, fullPhoneNumber, registrationNumber);
-        setFormErrors((prev) => ({
-          ...prev,
+      if (email.trim() || phoneNumber.trim() || registrationNumber.trim()) { const result: DuplicateCheckResult = await checkUserDuplicates( email, phoneNumber, registrationNumber);
+        setFormErrors((prev) => ({ ...prev,
           email: result.emailExists ? "This email already exists" : prev.email,
           phoneNumber: result.phoneExists ? "The phone number already exists" : prev.phoneNumber,
           registrationNumber: result.registrationNumberExists
@@ -58,7 +54,7 @@ const Register = () => {
         }));
       }
     }, 500),
-    [formData.countryCode]
+    []
   );
 
   // Define functions before useEffect
@@ -75,44 +71,62 @@ const Register = () => {
     }
   };
 
+  const handleOpenPrivacyTerms = (): void => {
+    setOpenPrivacyTerms(true);
+  };
+  
+  const handleClosePrivacyTerms = (): void => {
+    setOpenPrivacyTerms(false);
+  };
+
   const validateForm = (fieldName?: string) => {
     const errors: FormErrors = { ...formErrors };
     let isValid = true;
-    if (!fieldName || fieldName === "firstName") { errors.firstName = !formData.firstName.trim() ? "First name is required" : ""; isValid = isValid && !errors.firstName;}
-    if (!fieldName || fieldName === "lastName") { errors.lastName = !formData.lastName.trim() ? "Last name is required" : ""; isValid = isValid && !errors.lastName}
-    if (!fieldName || fieldName === "email") {errors.email = !formData.email.trim()? "Email is required": !/^\S+@\S+\.\S+$/.test(formData.email)? "Please enter a valid email address": "";isValid = isValid && !errors.email;}
-    if (!fieldName || fieldName === "password") {errors.password = !formData.password? "Password is required": formData.password.length < 8? "Password must be at least 8 characters": "";isValid = isValid && !errors.password;}
-    if (!fieldName || fieldName === "confirmPassword") { errors.confirmPassword = formData.password !== formData.confirmPassword ? "Passwords do not match"  : "";isValid = isValid && !errors.confirmPassword}
-    if (!fieldName || fieldName === "dateOfBirth") { errors.dateOfBirth = accountType === "patient" && !formData.dateOfBirth ? "Date of birth is required" : "";isValid = isValid && !errors.dateOfBirth;}
-    if (!fieldName || fieldName === "registrationNumber") { errors.registrationNumber = accountType === "clinician" && !formData.registrationNumber?.trim()  ? "Registration number is required"  : "";isValid = isValid && !errors.registrationNumber;}
-    if (!fieldName || fieldName === "institution") {errors.institution = (accountType === "clinician" || accountType === "researcher") && !formData.institution?.trim()   ? "Institution is required": ""; isValid = isValid && !errors.institution;}
-    if (!fieldName || fieldName === "profession") {errors.profession = accountType === "clinician" && !formData.profession?.trim()  ? "Profession is required" : "";isValid = isValid && !errors.profession;}
-    if (!fieldName || fieldName === "phoneNumber" || fieldName === "countryCode") {
-       const country = countryCodes.find((c) => c.code === formData.countryCode);
-       const phoneLength = country ? country.length : 10;
-      
-      if (formData.phoneNumber) {
+  
+    if (!fieldName || fieldName === "firstName") {  errors.firstName = !formData.firstName.trim() ? "First name is required" : ""; isValid = isValid && !errors.firstName;}
+    if (!fieldName || fieldName === "lastName") { errors.lastName = !formData.lastName.trim() ? "Last name is required" : ""; isValid = isValid && !errors.lastName;}
+    if (!fieldName || fieldName === "email") { if (!formData.email.trim()) {
+        errors.email = ""; 
+      } else {  errors.email = !/^\S+@\S+\.\S+$/.test(formData.email) ? "Please enter a valid email address" : "";
+      }isValid = isValid && !errors.email;
+    }
+    if (!fieldName || fieldName === "password") { if (!fieldName && !formData.password) {
+        errors.password = "Password is required";
+      } else if (formData.password && formData.password.length < 8) { errors.password = "Password must be at least 8 characters";
+      } else { errors.password = "";
+      } isValid = isValid && !errors.password;
+    }
+    if (!fieldName || fieldName === "confirmPassword") { 
+      if (formData.password && formData.password !== formData.confirmPassword) { 
+        console.log("Password:", formData.password);
+        console.log("Confirm:", formData.confirmPassword);
+        errors.confirmPassword = "Passwords do not match";  
+      } else { 
+        errors.confirmPassword = "";
+      } 
+      isValid = isValid && !errors.confirmPassword;
+    }
+    if (!fieldName || fieldName === "phoneNumber") { if (formData.phoneNumber) {
         const cleanedPhoneNumber = formData.phoneNumber.replace(/\D/g, '');
-        if (cleanedPhoneNumber !== formData.phoneNumber) {
-          setFormData(prev => ({
-            ...prev,
-            phoneNumber: cleanedPhoneNumber
-          }));
-        }        
         const isValidDigits = /^\d+$/.test(cleanedPhoneNumber);
-        const isValidLength = cleanedPhoneNumber.length === phoneLength;
-               
+        const isValidLength = cleanedPhoneNumber.length === 10;        
         errors.phoneNumber = !isValidDigits 
           ? "Phone numbers can only contain digits" 
           : !isValidLength 
-            ? `The length of the phone number should be ${phoneLength} bits.` 
+            ? "The length of the phone number should be 10 digits." 
             : "";
-      } else { errors.phoneNumber = ""; }  isValid = isValid && !errors.phoneNumber;}
+      } else { errors.phoneNumber = ""; 
+      }isValid = isValid && !errors.phoneNumber;
+}
+    if ((!fieldName || fieldName === "dateOfBirth") && accountType === "patient") { errors.dateOfBirth = !fieldName && !formData.dateOfBirth ? "Date of birth is required" : ""; isValid = isValid && !errors.dateOfBirth;}
+    if ((!fieldName || fieldName === "registrationNumber") && accountType === "clinician") {errors.registrationNumber = !fieldName && !formData.registrationNumber?.trim()  ? "Registration number is required"  : ""; isValid = isValid && !errors.registrationNumber;}
+    if ((!fieldName || fieldName === "institution") &&   (accountType === "clinician" || accountType === "researcher")) {errors.institution = !fieldName && !formData.institution?.trim()  ? "Institution is required"   : ""; isValid = isValid && !errors.institution;}
+    if ((!fieldName || fieldName === "profession") && accountType === "clinician") { errors.profession = !fieldName && !formData.profession?.trim()  ? "Profession is required" : ""; isValid = isValid && !errors.profession;}
+
     setFormErrors(errors);
     return isValid;
   };
 
-  // Use Effects
   useEffect(() => { setMounted(true);
     return () => { setSuccess(null); setError(null);
     };
@@ -121,8 +135,7 @@ const Register = () => {
   useEffect(() => { setSuccess(null);setError(null);
   }, [step, accountType]);
 
-  useEffect(() => { validateForm("confirmPassword");
-  }, [formData.password, formData.confirmPassword]);
+  
 
   if (!mounted) return null;
 
@@ -131,68 +144,42 @@ const Register = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    if (name === "phoneNumber") { setFormData((prev) => ({ ...prev, [name]: value,}));
-    } else { setFormData((prev) => ({...prev, [name]: value.trim(), }));}
-    
-    setTimeout(() => {
+    console.log(`Input ${name}:`, value);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  
+    if (name === "confirmPassword") { setTimeout(() => {
+        if (formData.password !== value) { setFormErrors((prev) => ({ ...prev, confirmPassword: "Passwords do not match",}));
+        } else { setFormErrors((prev) => ({ ...prev, confirmPassword: "",}));}
+      }, 300); 
+    } else {
       validateForm(name);
-      
-      if (name === "email" || name === "phoneNumber" || name === "registrationNumber") {
-        debouncedCheckDuplicates(
-          name === "email" ? value : formData.email || "",
-          name === "phoneNumber" ? `${formData.countryCode}${value}` : formData.phoneNumber ? `${formData.countryCode}${formData.phoneNumber}` : "",
-          accountType === "clinician" && name === "registrationNumber" ? value : formData.registrationNumber || ""
-        );
-      }
-    }, 0);
+    }
+  
+    if ( (name === "email" && value.trim()) || (name === "phoneNumber" && value.trim()) || (name === "registrationNumber" && value.trim())) {
+      debouncedCheckDuplicates( name === "email" ? value : formData.email || "", name === "phoneNumber" ? value : formData.phoneNumber || "", accountType === "clinician" && name === "registrationNumber" ? value : formData.registrationNumber || "");
+    } else { setFormErrors((prev) => ({ ...prev,...(name === "email" && { email: "" }), ...(name === "phoneNumber" && { phoneNumber: "" }), ...(name === "registrationNumber" && { registrationNumber: "" }),
+      }));
+    }
   };
   
   const handleSelectChange = (event: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>, child?: React.ReactNode) => {
     const name = event.target.name as keyof AccountDetailsForm;
     const value = event.target.value as string;
-    setFormData((prev) => ({ ...prev, [name]: value,}));
-    setTimeout(() => { validateForm(name as string);
-      if (name === "countryCode") { debouncedCheckDuplicates(  formData.email || "", formData.phoneNumber ? `${value}${formData.phoneNumber}` : "", accountType === "clinician" ? formData.registrationNumber || "" : "");}}, 0);};
-  const handleTogglePasswordVisibility = () => { setShowPassword((prev) => !prev)};
+    setFormData((prev) => ({ 
+      ...prev, 
+      [name]: value,
+    }));
+    setTimeout(() => { 
+      validateForm(name as string);
+    }, 0);
+  };  const handleTogglePasswordVisibility = () => { setShowPassword((prev) => !prev)};
   const handleToggleConfirmPasswordVisibility = () => { setShowConfirmPassword((prev) => !prev);};
   const handleNext = async () => {setSuccess(null);
     if (step === 1) {
       if (!validateForm() || !agreeTerms) {
         return;
-      }
-    
-      try {  setIsLoading(true); setError(null);
-    
-        // The same registration logic for all usertypes
-        const fullPhoneNumber = formData.phoneNumber
-          ? `${formData.countryCode}${formData.phoneNumber}`
-          : "";
-        const result = await registerUser({  firstName: formData.firstName, lastName: formData.lastName, email: formData.email, password: formData.password, dateOfBirth: formData.dateOfBirth || "",
-          address: formData.address,
-          phoneNumber: fullPhoneNumber,
-          registrationNumber:
-            accountType === "clinician" ? formData.registrationNumber : undefined,
-          profession: accountType === "clinician" ? formData.profession : undefined,
-          institution:
-            accountType === "clinician" || accountType === "researcher"
-              ? formData.institution
-              : undefined,
-          accountType,
-        });
-    
-        if (!result.success) { throw new Error(result.error || "Failed to register user");}
-        setUserId(result?.userId || null);
-      } catch (err) {
-        console.error("Registration error:", err);
-        setError(err instanceof Error ? err.message : "An unexpected error occurred");
-        setIsLoading(false);
-        return;
-      } finally {
-        setIsLoading(false);
-      }
+      }    
     }
-
     if (step < maxStep) {setCompletedSteps((prev) => {const newCompleted = [...prev]; newCompleted[step] = true; return newCompleted;});setStep((prevStep) => prevStep + 1);}};
   const handlePrevious = () => { if (step > 0) {setStep((prevStep) => prevStep - 1);}};
   const renderAccountTypeStep = () => (
@@ -208,8 +195,8 @@ const Register = () => {
       </RadioGroup>
 
       <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 3, paddingX: 8 }}>
-        <Button  variant="contained" size="large" onClick={handlePrevious} sx={{ fontSize: "20px", paddingX: 1, paddingY: 1.5, backgroundColor: "#6C4AF7", color: "white", "&:hover": { backgroundColor: "#5633E3" }, }}> ← Previous</Button>
-        <Button variant="contained" size="large" onClick={handleNext} sx={{   fontSize: "20px",  paddingX: 7,  paddingY: 1.5, backgroundColor: "#6C4AF7",  "&:hover": { backgroundColor: "#5633E3" }, }}> Next →</Button></Box></Box>);
+      <Button   variant="outlined" onClick={handlePrevious}  sx={{  borderRadius: "8px",    borderColor: "#6e41e2",  color: "#6e41e2",  "&:hover": {    borderColor: "#5835b5",   backgroundColor: "rgba(110, 65, 226, 0.04)",   }, }}> ← Previous</Button>     
+   <Button variant="contained" onClick={handleNext}  sx={{  borderRadius: "8px",    borderColor: "#6e41e2",   "&:hover": { borderColor: "#5835b5", }, "&.Mui-disabled": { backgroundColor: "#ded5f7", color: "#ffffff",   }, }}> Next →</Button></Box></Box>);
 
   const renderAccountDetailsStep = () => (
     <Box sx={{ maxWidth: "600px", marginX: "auto" }}>
@@ -219,52 +206,54 @@ const Register = () => {
         <Grid item xs={6}> <TextField label="First name" name="firstName" fullWidth variant="outlined" value={formData.firstName} onChange={handleInputChange} error={!!formErrors.firstName} helperText={formErrors.firstName} sx={{  mb: 2, "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }} /></Grid>
         <Grid item xs={6}> <TextField label="Last name" name="lastName" fullWidth variant="outlined" value={formData.lastName} onChange={handleInputChange} error={!!formErrors.lastName} helperText={formErrors.lastName} sx={{  mb: 2, "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }} /></Grid>
         <Grid item xs={12}><TextField label="Email" name="email" type="email" fullWidth variant="outlined" value={formData.email} onChange={handleInputChange} error={!!formErrors.email} helperText={formErrors.email} sx={{   mb: 2, "& .MuiOutlinedInput-root": {    borderRadius: "8px",  },}}/></Grid>
-        <Grid item xs={12}>
-          <TextField label="Address"name="address" fullWidth variant="outlined" value={formData.address}  onChange={handleInputChange}  error={!!formErrors.address}  helperText={formErrors.address}  sx={{    mb: 2,  "& .MuiOutlinedInput-root": {    borderRadius: "8px", }, }}/></Grid>
-        <Grid item xs={12}><Box sx={{ display: "flex", alignItems: "center", gap: 1 }}><FormControl sx={{ minWidth: 120 }}><InputLabel id="country-code-label">Country Code</InputLabel>
-        <Select labelId="country-code-label"name="countryCode"value={formData.countryCode}onChange={handleSelectChange} label="Country Code"sx={{ borderRadius: "8px", height: "56px",  }}>{countryCodes.map((country) => ( <MenuItem key={country.code} value={country.code}>  {country.code} ({country.country})</MenuItem>))}</Select>
-    </FormControl>
-    <TextField label="Phone Number" name="phoneNumber" fullWidth variant="outlined" value={formData.phoneNumber} onChange={handleInputChange}  error={!!formErrors.phoneNumber} helperText={formErrors.phoneNumber} sx={{   mb: 2, "& .MuiOutlinedInput-root": {   borderRadius: "8px",  },}}/></Box></Grid>
-        <Grid item xs={12}> <TextField label="Password" name="password" type={showPassword ? "text" : "password"}fullWidth variant="outlined" value={formData.password} onChange={handleInputChange} error={!!formErrors.password} helperText={formErrors.password} InputProps={{ endAdornment: (
-              <InputAdornment position="end"><IconButton onClick={handleTogglePasswordVisibility} edge="end" > {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment> ),}}sx={{ mb: 2,"& .MuiOutlinedInput-root": { borderRadius: "8px", },}}/>
-       </Grid>
-        <Grid item xs={12}>
-          <TextField label="Confirm password" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} fullWidth variant="outlined" value={formData.confirmPassword} onChange={handleInputChange} error={!!formErrors.confirmPassword} helperText={formErrors.confirmPassword} InputProps={{ endAdornment: (
-                <InputAdornment position="end"><IconButton onClick={handleToggleConfirmPasswordVisibility} edge="end">{showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />} </IconButton></InputAdornment> ),}}sx={{ mb: 2, "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }}/></Grid>
-
+        <Grid item xs={12}> <TextField label="Address"name="address" fullWidth variant="outlined" value={formData.address}  onChange={handleInputChange}  error={!!formErrors.address}  helperText={formErrors.address}  sx={{    mb: 2,  "& .MuiOutlinedInput-root": {    borderRadius: "8px", }, }}/></Grid>
+        <Grid item xs={12}>  <TextField  label="Phone Number"  name="phoneNumber"  fullWidth  variant="outlined"  value={formData.phoneNumber}  onChange={handleInputChange}  error={!!formErrors.phoneNumber}  helperText={formErrors.phoneNumber}  InputLabelProps={{    shrink: isPhoneFocused || !!formData.phoneNumber }} onFocus={() => setIsPhoneFocused(true)} onBlur={() => setIsPhoneFocused(!!formData.phoneNumber)} sx={{ mb: 2, "& .MuiOutlinedInput-root": {  borderRadius: "8px" }}} /> </Grid>
+        <Grid item xs={12}><TextField label="Password" name="password" type="password"  fullWidth variant="outlined" value={formData.password} onChange={handleInputChange} error={!!formErrors.password} helperText={formErrors.password} sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: "8px" } }}/></Grid>
+        <Grid item xs={12}> <TextField label="Confirm password" name="confirmPassword" type="password"  fullWidth variant="outlined" value={formData.confirmPassword} onChange={handleInputChange} error={!!formErrors.confirmPassword} helperText={formErrors.confirmPassword} sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: "8px" } }} /></Grid>
         {accountType === "patient" && (
           <Grid item xs={12}>
-            <TextField label="Date of birth" name="dateOfBirth"type="date"fullWidth variant="outlined" value={formData.dateOfBirth} onChange={handleInputChange} error={!!formErrors.dateOfBirth} helperText={formErrors.dateOfBirth} InputLabelProps={{ shrink: true }} sx={{   mb: 2,  "& .MuiOutlinedInput-root": { borderRadius: "8px",  }, }}/>
-          </Grid>
-        )}
-
+          <DateOfBirthPicker
+            value={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null} // 转换为 Date 对象
+            onChange={(newDate) => {
+              setFormData((prev) => ({
+                ...prev,
+                dateOfBirth: newDate ? newDate.toISOString().split("T")[0] : "",
+              }));
+              validateForm("dateOfBirth");
+            }}
+            label="Date of birth"
+            error={!!formErrors.dateOfBirth}
+            helperText={formErrors.dateOfBirth}
+          />
+        </Grid>        )}
         {accountType === "clinician" && (
           <>
-            <Grid item xs={12}>
-              <TextField label="Registration Number"  name="registrationNumber" fullWidth variant="outlined" value={formData.registrationNumber} onChange={handleInputChange} error={!!formErrors.registrationNumber} helperText={formErrors.registrationNumber} sx={{  mb: 2,  "& .MuiOutlinedInput-root": {  borderRadius: "8px",  }, }}/>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Institution" name="institution"  fullWidth  variant="outlined"  value={formData.institution}  onChange={handleInputChange}  error={!!formErrors.institution}  helperText={formErrors.institution}  sx={{   mb: 2,  "& .MuiOutlinedInput-root": {    borderRadius: "8px", }, }} />
-             </Grid>
-            <Grid item xs={12}>
-              <TextField label="Profession" name="profession"  fullWidth variant="outlined" value={formData.profession} onChange={handleInputChange} error={!!formErrors.profession} helperText={formErrors.profession} sx={{ mb: 2, "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }}/>
-            </Grid>
+            <Grid item xs={12}> <TextField label="Registration Number"  name="registrationNumber" fullWidth variant="outlined" value={formData.registrationNumber} onChange={handleInputChange} error={!!formErrors.registrationNumber} helperText={formErrors.registrationNumber} sx={{  mb: 2,  "& .MuiOutlinedInput-root": {  borderRadius: "8px",  }, }}/> </Grid>
+            <Grid item xs={12}> <TextField label="Institution" name="institution"  fullWidth  variant="outlined"  value={formData.institution}  onChange={handleInputChange}  error={!!formErrors.institution}  helperText={formErrors.institution}  sx={{   mb: 2,  "& .MuiOutlinedInput-root": {    borderRadius: "8px", }, }} /></Grid>
+            <Grid item xs={12}> <TextField label="Profession" name="profession"  fullWidth variant="outlined" value={formData.profession} onChange={handleInputChange} error={!!formErrors.profession} helperText={formErrors.profession} sx={{ mb: 2, "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }}/> </Grid>
           </>
         )}
 
         {accountType === "researcher" && (
-          <Grid item xs={12}>
-            <TextField label="Institution" name="institution"  fullWidth variant="outlined" value={formData.institution}onChange={handleInputChange} error={!!formErrors.institution} helperText={formErrors.institution} sx={{  mb: 2,  "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }}/>
-          </Grid>
+          <Grid item xs={12}> <TextField label="Institution" name="institution"  fullWidth variant="outlined" value={formData.institution}onChange={handleInputChange} error={!!formErrors.institution} helperText={formErrors.institution} sx={{  mb: 2,  "& .MuiOutlinedInput-root": {   borderRadius: "8px", }, }}/></Grid>
         )}
       </Grid>
 
       <FormControlLabel
-        control={
-          <Checkbox checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} sx={{ color: "#6e41e2","&.Mui-checked": { color: "#6e41e2", },}}/>}
-        label={
-          <Typography variant="body2"> I agree to <Link href="#" sx={{ color: "#6e41e2" }}>privacy policy & terms</Link></Typography>
-        }sx={{ mb: 2 }} />
+  control={
+    <Checkbox checked={agreeTerms} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAgreeTerms(e.target.checked)} sx={{ color: "#6e41e2","&.Mui-checked": { color: "#6e41e2", },}}/>}
+  label={
+    <Typography variant="body2"> I agree to <Link 
+      component="button"
+      variant="body2"
+      onClick={handleOpenPrivacyTerms} 
+      sx={{ color: "#6e41e2", textDecoration: "underline", border: "none", background: "none", p: 0, cursor: "pointer" }}
+    >
+      privacy policy & terms
+    </Link></Typography>
+  }
+  sx={{ mb: 2 }} 
+/>
 
       <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
         <Button variant="outlined" onClick={handlePrevious} disabled={isLoading} sx={{  borderRadius: "8px",  borderColor: "#6e41e2", color: "#6e41e2", "&:hover": {   borderColor: "#5835b5",  backgroundColor: "rgba(110, 65, 226, 0.04)",  }, }}> ← Previous</Button>
@@ -302,18 +291,15 @@ const Register = () => {
 
           {step === 0 && renderAccountTypeStep()}
           {step === 1 && renderAccountDetailsStep()}
-          {step === 2 && accountType === "patient" && (
-            <RegisterPatient onBack={handlePrevious}  accountType={accountType} userId={userId}/>
+          {step === 2 && accountType === "patient" && ( <RegisterPatient onBack={handlePrevious}  accountType={accountType} formData={formData}  userId={null}/>
           )}
-          {step === 2 && accountType === "researcher" && ( <RegisterResearcher onBack={handlePrevious} accountType={accountType} userId={userId}/>           
+          {step === 2 && accountType === "researcher" && ( <RegisterResearcher onBack={handlePrevious} accountType={accountType} formData={formData} userId={null}/>           
           )}
-          {step === 2 && accountType === "clinician" && (
-          <RegisterClinician onBack={handlePrevious} accountType={accountType} userId={userId} formData={formData}
-
-          />
+          {step === 2 && accountType === "clinician" && (<RegisterClinician onBack={handlePrevious} accountType={accountType} formData={formData} userId={null}/>
         )}
         </Grid>
       </Grid>
+      <PrivacyPolicyTerms open={openPrivacyTerms} onClose={handleClosePrivacyTerms} />
     </Box>
   );
 };

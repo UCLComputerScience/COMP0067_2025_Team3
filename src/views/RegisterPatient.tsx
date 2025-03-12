@@ -1,247 +1,131 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Switch, 
-  FormControlLabel, 
-  Alert, 
-  Snackbar, 
-  CircularProgress,
-  Card,
-  CardContent
-} from "@mui/material";
-import { Clinician } from "@/actions/registerActions";
+import { useRouter } from "next/navigation";
 import ClinicianSearch from "./ClinicianSearch";
 import SavedClinicians from "./SavedClinicians";
-import { completeRegistration } from "@/actions/registerActions";
-import { useRouter } from "next/navigation";
+import { AccountDetailsForm } from "./Register";
+import React, { useState, useEffect } from "react";
+import { Clinician, RegisterResult } from "@/actions/registerActions";
+import { registerUser, completeRegistration } from "@/actions/registerActions";
+import {Box,Typography,Button,Switch,FormControlLabel,CircularProgress,Card,CardContent,Dialog,DialogTitle,DialogContent,DialogActions,} from "@mui/material";
 
-// Define the props interface
-interface RegisterPatientProps {
-  onBack: () => void;
-  accountType: string;
-  userId: string | null;
-}
 
-// Create the component focusing only on the Data Privacy step
-const RegisterPatient = ({ onBack, accountType, userId }: RegisterPatientProps) => {
+
+interface RegisterPatientProps { onBack: () => void; accountType: string; userId: string | null;formData: AccountDetailsForm}
+
+const RegisterPatient: React.FC<RegisterPatientProps> = ({onBack,accountType,userId,formData,}) => {
   const router = useRouter();
 
-  // State for data privacy settings
   const [consentToClinicians, setConsentToClinicians] = useState(false);
   const [consentToResearchers, setConsentToResearchers] = useState(true);
   const [savedClinicians, setSavedClinicians] = useState<Clinician[]>([]);
-
-  // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+  const [openErrorDialog, setOpenErrorDialog] = useState(false);
 
-  // Effect to control success message visibility
   useEffect(() => {
-    setSuccess(null);
-    return () => {
-      setSuccess(null);
-    };
-  }, []);
+  }, [userId, formData]);
 
   // Add clinician to saved list
   const handleSaveClinician = (clinician: Clinician) => {
-    // Prevent duplicates
-    if (!savedClinicians.some(saved => saved.id === clinician.id)) {
-      setSavedClinicians(prev => [...prev, clinician]);
+    if (!savedClinicians.some((saved) => saved.id === clinician.id)) { setSavedClinicians((prev) => [...prev, clinician]);
     }
   };
-
   // Remove clinician from saved list
   const handleRemoveClinician = (clinicianId: string) => {
-    setSavedClinicians(prev => prev.filter(clinician => clinician.id !== clinicianId));
+    setSavedClinicians((prev) => prev.filter((clinician) => clinician.id !== clinicianId)
+    );
   };
 
   // Handle form submission
   const handleSubmit = async () => {
-    if (!userId) {
-      setError("User registration incomplete. Please go back and try again.");
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Show success message before redirecting
-      setSuccess("Account created successfully! Redirecting to dashboard...");
-      
-      // Submit data privacy settings after a brief delay to show the success message
-      setTimeout(async () => {
-        try {
-          // Complete the patient registration with privacy settings
-          await completeRegistration(userId, {
-            researchConsent: consentToResearchers,
-            clinicianAccess: consentToClinicians,
-            selectedClinicians: savedClinicians
-          });
-          
-          // Redirect to dashboard
-          router.push('/dashboard');
-        } catch (submitErr) {
-          console.error("Registration completion error:", submitErr);
-          setError(submitErr instanceof Error ? submitErr.message : "An unexpected error occurred");
-          setIsLoading(false);
+    try { setIsLoading(true); setError(null);
+      let finalUserId = userId;
+      if (!userId) {
+        console.log("Form Data being sent to registerUser:", formData);
+        const fullPhoneNumber = formData.phoneNumber || "";
+        const registerResult: RegisterResult = await registerUser({firstName: formData.firstName,lastName: formData.lastName,email: formData.email,password: formData.password,dateOfBirth: formData.dateOfBirth || "",address: formData.address,phoneNumber: fullPhoneNumber,registrationNumber: "", profession: "", institution: "", accountType,});
+        console.log("Register Result:", registerResult);
+        if (!registerResult.success) { throw new Error(registerResult.error || "Failed to register user");
         }
-      }, 1500);
-      
-    } catch (err) {
-      console.error("Registration completion error:", err);
+        if (!registerResult.userId) { throw new Error(  "User ID is missing after successful registration");
+        }
+        finalUserId = registerResult.userId;
+      }
+
+      // Complete registration with privacy settings
+      const completionResult = await completeRegistration(finalUserId!, {researchConsent: consentToResearchers,clinicianAccess: consentToClinicians, selectedClinicians: savedClinicians,}, accountType);
+      if (!completionResult.success) {
+        throw new Error(completionResult.error || "Failed to complete registration"
+        );
+      }
+      setSuccess("Congratulations! Your account has been created successfully!");
+      setOpenSuccessDialog(true);
+    } catch (err) {console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
-      setIsLoading(false);
-    }
+      setOpenErrorDialog(true);
+    } finally {setIsLoading(false);}
   };
+
+  // Handle navigation to login after success
+  const handleGoToLogin = () => {setOpenSuccessDialog(false);router.push("/login");};
 
   return (
     <Box sx={{ maxWidth: "600px", marginX: "auto" }}>
-      {/* Error and success notifications */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      </Snackbar>
-      
-      <Snackbar
-        open={!!success}
-        autoHideDuration={6000}
-        onClose={() => setSuccess(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity="success" onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      </Snackbar>
-      
-      {/* Data Privacy Section */}
-      <Card sx={{ mb: 4, bgcolor: '#2d2a43', color: 'white' }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 2, color: 'white' }}>
-            Data Privacy
-          </Typography>
+      {/* Error and Success dialog */}
+      <Dialog open={openErrorDialog}onClose={() => setOpenErrorDialog(false)}aria-labelledby="error-dialog-title">
+        <DialogTitle id="error-dialog-title">Error</DialogTitle>
+        <DialogContent><Typography variant="body1">{error}</Typography></DialogContent>
+        <DialogActions><Button onClick={() => setOpenErrorDialog(false)}variant="contained"sx={{bgcolor: "#6e41e2",color: "white","&:hover": { bgcolor: "#5835b5" },borderRadius: "8px",}}>Close</Button></DialogActions>
+      </Dialog>
 
+      <Dialog open={openSuccessDialog}onClose={() => setOpenSuccessDialog(false)}aria-labelledby="success-dialog-title">
+        <DialogTitle id="success-dialog-title">Success</DialogTitle>
+        <DialogContent><Typography variant="body1">{success}</Typography></DialogContent>
+        <DialogActions><Button onClick={handleGoToLogin}variant="contained"sx={{bgcolor: "#6e41e2",color: "white","&:hover": { bgcolor: "#5835b5" },borderRadius: "8px",}}>Go to Login</Button></DialogActions>
+      </Dialog>
+
+      {/* Data Privacy Section */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography variant="h4"fontWeight="bold"sx={{ marginBottom: 2 }} >Data Privacy</Typography>
           <Box sx={{ mb: 4 }}>
-            <FormControlLabel 
+            <FormControlLabel
               control={
-                <Switch 
-                  checked={consentToResearchers} 
-                  onChange={(e) => setConsentToResearchers(e.target.checked)}
-                  disabled={isLoading}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#6e41e2',
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: '#6e41e2',
-                    },
-                  }}
-                />
-              } 
+                <Switch checked={consentToResearchers}onChange={(e) => setConsentToResearchers(e.target.checked)}disabled={isLoading}sx={{"& .MuiSwitch-switchBase.Mui-checked": {color: "#6e41e2",},"& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {backgroundColor: "#6e41e2"},}}/>}
               label={
-                <Typography variant="body2" sx={{ color: 'white' }}>
-                  I consent to being contacted about researchers accessing my data for medical research
-                </Typography>
-              }
-              sx={{ display: 'flex', mb: 2 }}
-            />
-            
-            <FormControlLabel 
+                <Typography variant="body2">I consent to being contacted about researchers accessing my data for medical research</Typography>}sx={{ display: "flex", mb: 2 }}/>
+            <FormControlLabel
               control={
-                <Switch 
-                  checked={consentToClinicians} 
-                  onChange={(e) => setConsentToClinicians(e.target.checked)}
-                  disabled={isLoading}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#6e41e2',
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: '#6e41e2',
-                    },
-                  }}
-                />
-              } 
+                <Switch checked={consentToClinicians}onChange={(e) => setConsentToClinicians(e.target.checked)}disabled={isLoading}   sx={{"& .MuiSwitch-switchBase.Mui-checked": {color: "#6e41e2",},"& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {backgroundColor: "#6e41e2",},}}/> }
               label={
-                <Typography variant="body2" sx={{ color: 'white' }}>
-                  I consent to the clinicians I approve being able to access my data
-                </Typography>
-              }
-              sx={{ display: 'flex', mb: 2 }}
-            />
-          </Box>
+                <Typography variant="body2">  I consent to the clinicians I approve being able to access my data</Typography> }sx={{ display: "flex", mb: 2 }} /></Box>
 
           {/* Clinician search section (conditionally rendered) */}
           {consentToClinicians && (
             <>
-              {/* Display saved clinicians if any exist */}
               {savedClinicians.length > 0 && (
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
-                    Your Selected Clinicians
-                  </Typography>
-                  <SavedClinicians 
-                    clinicians={savedClinicians} 
-                    onRemoveClinician={handleRemoveClinician} 
+                  <Typography variant="h6" sx={{ mb: 2 }}>Your Selected Clinicians</Typography>
+                  <SavedClinicians
+                    clinicians={savedClinicians}
+                    onRemoveClinician={handleRemoveClinician}
                   />
                 </Box>
               )}
 
-              {/* Clinician search component */}
-              <ClinicianSearch 
-                onSaveClinician={handleSaveClinician} 
-                savedClinicians={savedClinicians} 
+              <ClinicianSearch
+                onSaveClinician={handleSaveClinician}
+                savedClinicians={savedClinicians}
               />
             </>
           )}
 
           {/* Navigation Buttons */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
-            <Button 
-              variant="outlined" 
-              onClick={onBack}
-              disabled={isLoading}
-              sx={{ 
-                borderRadius: '8px',
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                '&:hover': {
-                  borderColor: 'rgba(255, 255, 255, 0.5)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                },
-              }}
-            >
-              ← Previous
-            </Button>
-            <Button 
-              variant="contained" 
-              onClick={handleSubmit}
-              disabled={isLoading}
-              sx={{ 
-                bgcolor: '#4CAF50', 
-                color: 'white', 
-                '&:hover': { bgcolor: '#45a049' },
-                borderRadius: '8px'
-              }}
-            >
-              {isLoading ? (
-                <CircularProgress size={24} sx={{ color: 'white' }} />
-              ) : (
-                'Submit ✓'
-              )}
-            </Button>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+            <Button variant="outlined"onClick={onBack}disabled={isLoading}sx={{borderRadius: "8px",borderColor: "#6e41e2",color: "#6e41e2","&:hover": {borderColor: "#5835b5",backgroundColor: "rgba(110, 65, 226, 0.04)",},}}>← Previous</Button>
+            <Button variant="contained"onClick={handleSubmit}disabled={isLoading}sx={{borderRadius: "8px",backgroundColor: "#6e41e2","&:hover": { backgroundColor: "#5835b5" },"&.Mui-disabled": {backgroundColor: "#ded5f7",color: "#ffffff",},}}  >{isLoading ? (<CircularProgress size={24} color="inherit" />) : ("Submit ✓")}</Button>
           </Box>
         </CardContent>
       </Card>

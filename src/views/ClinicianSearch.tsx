@@ -1,25 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
-import { Box, Typography, TextField, Button, Link, InputAdornment } from "@mui/material";
 import { searchClinicians } from "@/actions/registerActions";
+import { Box, Typography, TextField, Button, Link, InputAdornment } from "@mui/material";
+import { alpha } from '@mui/material/styles';
 
-// Define the Clinician interface
-export interface Clinician {
-  id: string;
-  firstName: string;
-  lastName: string;
-  institution: string;
-  email: string;
-}
+export interface Clinician { id: string; firstName: string; lastName: string; institution: string; email: string}
 
-interface ClinicianSearchProps {
-  onSaveClinician: (clinician: Clinician) => void;
-  savedClinicians: Clinician[];
-}
+interface ClinicianSearchProps { onSaveClinician: (clinician: Clinician) => void; savedClinicians: Clinician[];}
 
 const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchProps) => {
-  // Clinician search and selection states
   const [searchFirstName, setSearchFirstName] = useState("");
   const [searchLastName, setSearchLastName] = useState("");
   const [searchInstitution, setSearchInstitution] = useState("");
@@ -27,21 +18,16 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
   const [clinicianList, setClinicianList] = useState<Clinician[]>([]);
   const [selectedClinician, setSelectedClinician] = useState<Clinician | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
-
-  // Infinite scroll states
   const [visibleCount, setVisibleCount] = useState(10);
   const observerRef = useRef(null);
 
   const loadMoreClinicians = () => {
-    setVisibleCount((prev) => prev + 10); // Load 10 more items each time
-  };
+    setVisibleCount((prev) => prev + 10); };
 
   useEffect(() => {
-    if (!observerRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
+    if (!observerRef.current) return; const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
-          loadMoreClinicians(); // Load more when scrolled to bottom
+          loadMoreClinicians(); 
         }
       },
       { threshold: 1.0 }
@@ -89,22 +75,23 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
     setSelectedClinician(clinician);
   };
 
+  // Check if clinician is already saved
+  const isClinicianAlreadySaved = (clinician: Clinician) => {
+    return savedClinicians.some(
+      saved => 
+        saved.id === clinician.id || 
+        (saved.firstName === clinician.firstName && 
+         saved.lastName === clinician.lastName && 
+         saved.email === clinician.email)
+    );
+  };
+
   // Save the selected clinician
   const handleSaveClinician = () => {
-    if (!selectedClinician) {
-      alert("Please select a clinician first.");
-      return;
-    }
+    if (!selectedClinician) {return; }
     
-    // Check if clinician is already saved
-    const isClinicalAlreadySaved = savedClinicians.some(
-      clinician => clinician.id === selectedClinician.id
-    );
-    
-    if (isClinicalAlreadySaved) {
-      alert("This clinician is already saved.");
-      return;
-    }
+    // Check if clinician is already saved 
+    if (isClinicianAlreadySaved(selectedClinician)) { return; }
     
     // Add to saved clinicians list via callback
     onSaveClinician(selectedClinician);
@@ -119,272 +106,57 @@ const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianSearchPr
     setSelectedClinician(null);
   };
 
+  // Individual search results item
+  const ResultItem = ({ clinician, index, isLast }: { clinician: Clinician, index: number, isLast: boolean }) => {
+    const alreadySaved = isClinicianAlreadySaved(clinician);
+    
+    return (
+      <Box   key={index} sx={(theme) => ({   padding: 1.5, cursor: alreadySaved ? "default" : "pointer",  borderBottom: isLast ? "none" : `1px solid ${theme.palette.divider}`, backgroundColor: selectedClinician?.id === clinician.id ? alpha(theme.palette.primary.main, 0.2) : "transparent", "&:hover": { backgroundColor: alreadySaved ? "transparent" : alpha(theme.palette.primary.main, 0.1) }, display: 'flex', alignItems: 'center', borderRadius: '4px',})} 
+        onClick={() => !alreadySaved && handleSelectClinician(clinician)} >
+        <Image src="/images/pages/savedclinician-logo.png"  alt="Hospital Logo" width={40} height={40} style={{ marginRight: 8 }}/>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography sx={(theme) => ({ fontWeight: 'bold', fontSize: '14px', color: theme.palette.text.primary })}>{clinician.firstName} {clinician.lastName}</Typography>
+          <Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: '12px' })}>{clinician.institution || "No Institution"}</Typography> 
+          <Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: '12px' })}>{clinician.email}</Typography>
+        </Box>{alreadySaved && (<Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.disabled, fontSize: '12px', fontStyle: 'italic' })}>Already saved</Typography>)}</Box>
+    );
+  };
+
   return (
     <>
-      <Typography variant="h6" sx={{ marginTop: 3, marginBottom: 2, color: 'white' }}>
-        Search Clinician
-      </Typography>
+      <Typography variant="h6" sx={(theme) => ({ marginTop: 3, marginBottom: 2, color: theme.palette.text.primary })}>Search Clinician</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <TextField 
-          placeholder="First Name"
-          fullWidth 
-          variant="outlined"
-          value={searchFirstName} 
-          onChange={(e) => setSearchFirstName(e.target.value)}
-          InputProps={{
-            sx: { 
-              bgcolor: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: '4px',
-              color: 'white',
-              '&::placeholder': {
-                color: 'rgba(255, 255, 255, 0.7)',
-              }
-            }
-          }}
-          inputProps={{
-            style: { color: 'white' }
-          }}
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              },
-              '&:hover fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#6e41e2',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'rgba(255, 255, 255, 0.7)',
-            }
-          }}
-        />
-        <TextField 
-          placeholder="Last Name"
-          fullWidth 
-          variant="outlined"
-          value={searchLastName} 
-          onChange={(e) => setSearchLastName(e.target.value)}
-          InputProps={{
-            sx: { 
-              bgcolor: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: '4px',
-              color: 'white' 
-            }
-          }}
-          inputProps={{
-            style: { color: 'white' }
-          }}
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              },
-              '&:hover fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#6e41e2',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'rgba(255, 255, 255, 0.7)',
-            }
-          }}
-        />
-        <TextField 
-          placeholder="Organization"
-          fullWidth 
-          variant="outlined"
-          value={searchInstitution} 
-          onChange={(e) => setSearchInstitution(e.target.value)}
-          InputProps={{
-            sx: { 
-              bgcolor: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: '4px',
-              color: 'white' 
-            }
-          }}
-          inputProps={{
-            style: { color: 'white' }
-          }}
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              },
-              '&:hover fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#6e41e2',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'rgba(255, 255, 255, 0.7)',
-            }
-          }}
-        />
-        <TextField 
-          placeholder="Email"
-          fullWidth 
-          variant="outlined"
-          value={searchEmail} 
-          onChange={(e) => setSearchEmail(e.target.value)}
-          InputProps={{
-            sx: { 
-              bgcolor: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: '4px',
-              color: 'white' 
-            }
-          }}
-          inputProps={{
-            style: { color: 'white' }
-          }}
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              },
-              '&:hover fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#6e41e2',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'rgba(255, 255, 255, 0.7)',
-            }
-          }}
-        />
+        <TextField  placeholder="First Name" fullWidth   variant="outlined"  value={searchFirstName}   onChange={(e) => setSearchFirstName(e.target.value)}  sx={(theme) => ({ '& .MuiOutlinedInput-root': {bgcolor: alpha(theme.palette.background.paper, 0.05),borderRadius: '4px','& fieldset': { borderColor: theme.palette.divider },'&:hover fieldset': { borderColor: theme.palette.divider },'&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },}, '& .MuiInputLabel-root': { color: theme.palette.text.secondary }})}/>
+        <TextField  placeholder="Last Name" fullWidth  variant="outlined" value={searchLastName}  onChange={(e) => setSearchLastName(e.target.value)} sx={(theme) => ({ '& .MuiOutlinedInput-root': {bgcolor: alpha(theme.palette.background.paper, 0.05),borderRadius: '4px','& fieldset': { borderColor: theme.palette.divider },'&:hover fieldset': { borderColor: theme.palette.divider },'&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },}, '& .MuiInputLabel-root': { color: theme.palette.text.secondary }})}/>
+        <TextField   placeholder="Organization" fullWidth  variant="outlined"  value={searchInstitution}   onChange={(e) => setSearchInstitution(e.target.value)}sx={(theme) => ({ '& .MuiOutlinedInput-root': {bgcolor: alpha(theme.palette.background.paper, 0.05),borderRadius: '4px','& fieldset': { borderColor: theme.palette.divider },'&:hover fieldset': { borderColor: theme.palette.divider },'&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },}, '& .MuiInputLabel-root': { color: theme.palette.text.secondary }})}/>
+        <TextField  placeholder="Email"fullWidth variant="outlined"value={searchEmail}  onChange={(e) => setSearchEmail(e.target.value)}sx={(theme) => ({ '& .MuiOutlinedInput-root': {bgcolor: alpha(theme.palette.background.paper, 0.05),borderRadius: '4px','& fieldset': { borderColor: theme.palette.divider },'&:hover fieldset': { borderColor: theme.palette.divider },'&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },}, '& .MuiInputLabel-root': { color: theme.palette.text.secondary }})}/>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
-        <Button 
-          variant="contained" 
-          onClick={handleSearchClinician}
-          sx={{ 
-            bgcolor: '#6e41e2', 
-            color: 'white', 
-            '&:hover': { bgcolor: '#5835b5' },
-            borderRadius: '4px',
-            padding: '8px 16px',
-            textTransform: 'none'
-          }}
-        >
-          Search
-        </Button>
-      </Box>
+        <Button variant="contained" color="primary"onClick={handleSearchClinician}sx={{borderRadius: '4px',padding: '8px 16px',textTransform: 'none'   }}>Search</Button>
+        </Box>
 
-      {/* No Results Message */}
       {searchPerformed && clinicianList.length === 0 && (
-        <Box sx={{ textAlign: 'center', marginTop: 2, color: 'rgba(255, 255, 255, 0.7)' }}>
-          <Typography variant="body2">
-            Cannot find your clinician? <Link href="#" sx={{ color: '#9575cd' }}>Invite them to create an account</Link>
-          </Typography>
+        <Box sx={(theme) => ({ textAlign: 'center', marginTop: 2, color: theme.palette.text.secondary })}>
+          <Typography variant="body2">Cannot find your clinician? <Link sx={(theme) => ({ color: theme.palette.primary.light })}>Invite them to create an account</Link></Typography>
         </Box>
       )}
 
-      {/* Clinician Results Count */}
       {clinicianList.length > 0 && (
-        <Box sx={{ marginTop: 2 }}>
-          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-            {clinicianList.length} Results
-          </Typography>
+        <Box sx={(theme) => ({ marginTop: 2, color: theme.palette.text.secondary })}>
+          <Typography variant="body2">{clinicianList.length} Results</Typography>
         </Box>
       )}
 
-      {/* Clinician search results with infinite scroll */}
       {clinicianList.length > 0 && (
-        <Box sx={{ 
-          marginTop: 2, 
-          maxHeight: "400px", 
-          overflowY: "auto",
-          // Add scrollbar styling for dark theme
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'rgba(255, 255, 255, 0.05)',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(255, 255, 255, 0.2)',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb:hover': {
-            background: 'rgba(255, 255, 255, 0.3)',
-          },
-        }}>
+        <Box sx={(theme) => ({  marginTop: 2,  maxHeight: "400px",  overflowY: "auto",'&::-webkit-scrollbar': { width: '8px' }, '&::-webkit-scrollbar-track': { background: alpha(theme.palette.background.paper, 0.05) }, '&::-webkit-scrollbar-thumb': { background: alpha(theme.palette.background.paper, 0.2), borderRadius: '4px' },  '&::-webkit-scrollbar-thumb:hover': { background: alpha(theme.palette.background.paper, 0.3) },})}>
           {clinicianList.slice(0, visibleCount).map((clinician, index) => (
-            <Box 
-              key={index} 
-              sx={{ 
-                padding: 1.5,
-                cursor: "pointer", 
-                borderBottom: index < clinicianList.length - 1 ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
-                backgroundColor: selectedClinician?.id === clinician.id ? "rgba(110, 65, 226, 0.2)" : "transparent",
-                "&:hover": { backgroundColor: "rgba(110, 65, 226, 0.1)" },
-                display: 'flex',
-                alignItems: 'center',
-                borderRadius: '4px',
-              }}
-              onClick={() => handleSelectClinician(clinician)}
-            >
-              <Box sx={{ 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '4px',
-                bgcolor: '#ffd700',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 2,
-                color: '#333',
-                fontSize: '16px'
-              }}>
-                🔒
-              </Box>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography sx={{ fontWeight: 'bold', fontSize: '14px', color: 'white' }}>
-                  {clinician.firstName} {clinician.lastName}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
-                  {clinician.institution || "No Institution"}
-                </Typography> 
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '12px' }}>
-                  {clinician.email}
-                </Typography>
-              </Box>
-            </Box>
-          ))}
-          <div ref={observerRef}></div>
+            <ResultItem key={clinician.id} clinician={clinician} index={index}isLast={index === clinicianList.length - 1} />))}<div ref={observerRef}></div>
         </Box>
       )}
 
-      {/* Save Button */}
       {clinicianList.length > 0 && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', margin: '20px 0' }}>
-          <Button 
-            variant="contained"
-            sx={{ 
-              bgcolor: '#6e41e2', 
-              color: 'white', 
-              '&:hover': { bgcolor: '#5835b5' },
-              borderRadius: '4px',
-              padding: '8px 16px',
-              textTransform: 'none',
-              '&.Mui-disabled': {
-                backgroundColor: 'rgba(110, 65, 226, 0.3)',
-                color: 'rgba(255, 255, 255, 0.5)'
-              }
-            }}
-            onClick={handleSaveClinician}
-            disabled={!selectedClinician}
-          >
-            Save
-          </Button>
+          <Button variant="contained"color="primary"onClick={handleSaveClinician}disabled={!selectedClinician || isClinicianAlreadySaved(selectedClinician)}sx={(theme) => ({borderRadius: '4px',padding: '8px 16px',textTransform: 'none','&.Mui-disabled': {backgroundColor: alpha(theme.palette.primary.main, 0.3),color: alpha(theme.palette.common.white, 0.5)}})}>Save</Button>
         </Box>
       )}
     </>
