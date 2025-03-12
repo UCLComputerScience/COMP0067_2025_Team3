@@ -3,7 +3,7 @@
 // Third-party Imports
 import Image from 'next/image'
 
-import Link from 'next/link'
+import Link from '@/components/Link'
 
 import classnames from 'classnames'
 
@@ -22,50 +22,55 @@ import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 import { Role } from '@prisma/client'
+import { Typography } from '@mui/material'
+import { usePathname } from 'next/navigation'
 
 const NavbarContent = () => {
   // Hooks
   const { data: session } = useSession()
   const { isBreakpointReached } = useHorizontalNav()
+  const pathname = usePathname()
 
   const userRole = session?.user?.role || 'GUEST'
   const menuItems = [
     ...(userRole === 'GUEST'
       ? [
-          { label: 'Home', href: '/' },
+          { label: 'Home', href: '/home' },
           { label: 'The Spider', href: '/about' }
         ]
       : userRole === Role.RESEARCHER
         ? [
-            { label: 'Home', href: '/' },
+            { label: 'Home', href: '/home' },
             { label: 'Download', href: '/download' },
             { label: 'My Profile', href: '/my-profile' }
           ]
         : userRole === Role.CLINICIAN
           ? [
-              { label: 'Home', href: '/' },
+              { label: 'Home', href: '/home' },
               { label: 'All Patients', href: '/all-patients' },
               { label: 'My Profile', href: '/my-profile' }
             ]
           : userRole === Role.PATIENT
             ? [
-                { label: 'Home', href: '/' },
+                { label: 'Home', href: '/home' },
                 { label: 'The Spider', href: '/about' },
                 { label: 'My Records', href: '/my-records' },
                 { label: 'My Profile', href: '/my-profile' }
               ]
             : userRole === Role.ADMIN
               ? [
-                  { label: 'Home', href: '/' },
+                  { label: 'Home', href: '/home' },
                   { label: 'All Users', href: '/all-users' },
                   { label: 'My Profile', href: '/my-profile' }
                 ]
               : [])
   ]
 
-  useEffect(() => {
-    console.log(session)
-  }, [])
+  // debug
+  // useEffect(() => {
+  //   console.log(session)
+  //   console.log(pathname)
+  // }, [])
 
   return (
     <div
@@ -77,16 +82,32 @@ const NavbarContent = () => {
       </div>
       <div className='flex items-center'>
         {menuItems.map(item => (
-          <MenuItem key={item.href} component={Link} href={item.href}>
+          <MenuItem
+            key={item.href}
+            component={Link}
+            href={item.href}
+            className={classnames('font-small plb-3 pli-1.5 mr-2 hover:text-primary', {
+              'text-primary': pathname.includes(item.href),
+              'font-medium': pathname.includes(item.href)
+            })}
+          >
             {item.label}
           </MenuItem>
         ))}
         {session ? (
-          <MenuItem onClick={() => signOut({ callbackUrl: '/home', redirect: true })} style={{ cursor: 'pointer' }}>
+          <MenuItem
+            onClick={() => signOut({ callbackUrl: '/home', redirect: true })}
+            className={classnames('font-small plb-3 pli-1.5 mr-2 hover:text-primary')}
+            style={{ cursor: 'pointer' }}
+          >
             Log Out
           </MenuItem>
         ) : (
-          <MenuItem component={Link} href='/login'>
+          <MenuItem
+            component={Link}
+            href='/login'
+            className={classnames('font-small plb-3 pli-1.5 mr-2 hover:text-primary')}
+          >
             Log In
           </MenuItem>
         )}

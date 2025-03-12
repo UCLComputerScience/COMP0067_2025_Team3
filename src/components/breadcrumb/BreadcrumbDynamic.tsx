@@ -40,6 +40,14 @@ const BreadcrumbDynamic = () => {
         let href = `/${clientPath.slice(0, index + 1).join('/')}`
         let itemLink = formatLinkName(link)
 
+        if (link === 'study-application') {
+          return (
+            <Typography key={index} style={{ color: 'disabled ' }}>
+              {itemLink}
+            </Typography>
+          )
+        }
+
         if (paths === href) {
           return <Typography key={index}>{itemLink}</Typography>
         }

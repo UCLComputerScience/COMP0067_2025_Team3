@@ -3,6 +3,7 @@
 import { Data } from '@/app/(dashboard)/my-records/page'
 import TrendCharts from '@/components/charts/TrendCharts'
 import RecordListTable from '@/components/record-list-table'
+import { formatDate } from '@/utils/dateUtils'
 import { Box } from '@mui/material'
 import React, { useEffect } from 'react'
 import { toast } from 'react-toastify'
@@ -13,7 +14,7 @@ interface Props {
 
 type DataItem = {
   submissionId: string
-  date: string
+  date: string | Date
   neuromusculoskeletal: number
   pain: number
   fatigue: number
@@ -46,7 +47,7 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
   const groupedByDate: Record<string, DataItem[]> = {}
 
   data.forEach(item => {
-    const formattedDate = formatDate(item.date) // Convert to MM/DD/YYYY
+    const formattedDate = formatDate(item.date)
     if (!groupedByDate[formattedDate]) {
       groupedByDate[formattedDate] = []
     }
@@ -70,16 +71,6 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
   })
 
   return result
-}
-
-// Function to format date to MM/DD/YYYY
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  const month = (date.getMonth() + 1).toString().padStart(2, '0') // Months are 0-indexed
-  const day = date.getDate().toString().padStart(2, '0')
-  const year = date.getFullYear()
-
-  return `${month}/${day}/${year}`
 }
 
 // Helper function to capitalize the first letter of each word in the subject, so work for
