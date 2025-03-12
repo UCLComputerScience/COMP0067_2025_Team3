@@ -2,7 +2,7 @@
 
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/prisma/client'
-import select from '@/@core/theme/overrides/select';
+// import select from '@/@core/theme/overrides/select';
 
 // Save User Profile Settings
 export async function saveUserProfile(formData: {
@@ -25,7 +25,7 @@ export async function saveUserProfile(formData: {
                 phoneNumber: formData.phoneNumber === "" ? null : formData.phoneNumber,
                 address: formData.address === "" ? null : formData.address,
                 hospitalNumber: formData.hostipallNumber === "" ? null : formData.hostipallNumber,
-                dateOfBirth: formData.dateOfBirth ? null : formData.dateOfBirth,
+                dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null,
             },
         });
 
@@ -77,20 +77,20 @@ export const changeUserPassword = async (userId: string, { currentPassword, newP
         // Verify the current password with bcrypt
         const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword)
         
-        if (!isMatch) throw new Error('Current password is incorrect');
+        if (!isMatch) return { success: false, message: "Current password is incorrect" };
     
         // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10)
     
         // Update the password in the database
         await prisma.user.update({
-        where: { id: 'userId' },
+        where: { id: userId },
         data: { hashedPassword: hashedPassword }
         })
     
-        return { success: true }
+        return { success: true, message: "Password changed successfully." }
     } catch (error) {
-        console.error('Error changing password:', error)
+        // console.error('Error changing password:', error)
         return {success: false, message: 'Failed to change password'}
     }
     }
@@ -142,7 +142,7 @@ export async function saveNewClinician (selectedClinician:string, patientId:stri
         });
   
         if (existingRelationship) {
-            console.log('This clinician is already linked to your account.');
+            // console.log('This clinician is already linked to your account.');
             return { success: false, message: 'This clinician is already linked to your account.' };
       }
         const newRelationship = await prisma.clinicianPatient.create({
@@ -151,11 +151,11 @@ export async function saveNewClinician (selectedClinician:string, patientId:stri
                 patientId: patientId
             }
         })
-        console.log('New relationship created:', newRelationship);
-        return {success : true, newRelationship} ;
+        // console.log('New relationship created:', newRelationship);
+        return {success : true, newRelationship, message: null} ;
     } catch (error) {
         console.error ('Error adding new clinician:', error);
-        return {success : false};
+        return {success : false, message: 'Error adding new clinician.'};
     }
 }
 
