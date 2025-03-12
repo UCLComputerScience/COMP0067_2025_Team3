@@ -7,8 +7,9 @@ import {UserData } from '@/app/(dashboard)/my-profile/clinician-settings/page'
 import {saveUserProfile, resetUserProfile, changeUserPassword} from '@/actions/clinicianSettings/userActions'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
-import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert'
+import { safeParse } from 'valibot';
+import { userProfileSchema, passwordSchema } from '@/actions/formValidation';
 
 
 
@@ -17,7 +18,6 @@ interface Props {
 }
 
 const UserProfile = ({ initialData}: Props) => {
-    const router = useRouter();
     const [formData, setFormData] = useState <UserData | null>(initialData)
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -25,7 +25,10 @@ const UserProfile = ({ initialData}: Props) => {
         confirmPassword: ''
       })
 
-    const [passwordError, setPasswordError] = useState<string | null>(null)
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
 
     useEffect(() => {
@@ -59,25 +62,40 @@ const UserProfile = ({ initialData}: Props) => {
   
 
   const handleSave = async () => {
+    setErrorMessage(null); 
+    setSuccessMessage(null);
+    const result = safeParse(userProfileSchema, formData);
+    if (!result.success) {
+      setErrorMessage(result.issues.map(issue => issue.message).join('\n'));
+      return;
+    }
     try {
       const response = await saveUserProfile(formData);
       if (!response.success) {
-        throw new Error('Failed to update profile');
+        setErrorMessage('Failed to update profile');
       }
-      alert('Profile changes saved successfully!');
+      setSuccessMessage('Profile changes saved successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('Error saving profile changes.');
+      setErrorMessage('Error saving profile changes.');
     }
 };
 
   const handleReset = async () => {
+      setErrorMessage(null); 
+      setSuccessMessage(null);
       const resetData = await resetUserProfile(formData.id);
       if (resetData) setFormData(resetData);
   };
 
 
   const handleChangePassword = async () => {
+    const result = safeParse(passwordSchema, passwordData);
+    
+    if (!result.success) {
+      setPasswordError(result.issues.map(issue => issue.message).join('\n'));
+      return;
+    }
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
         // console.error("Error: One or more password fields are empty");
@@ -98,7 +116,7 @@ const UserProfile = ({ initialData}: Props) => {
         // console.log("Change password success:", response.success);
 
         if (response.success) {
-            alert("Password changed successfully!");
+            setPasswordSuccess("Password changed successfully!");
             setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
         } else {
             // console.error("Error changing password.");
@@ -119,6 +137,8 @@ const UserProfile = ({ initialData}: Props) => {
         confirmPassword: ''
       });
       setPasswordError(null);
+      setPasswordSuccess(null)
+
   };
 
 
@@ -156,6 +176,16 @@ const UserProfile = ({ initialData}: Props) => {
                     <TextField fullWidth label="Profession" name="profession" value={formData.profession || ""} onChange={handleChange} />
                 </Grid>
                 </Grid>
+                {/* Error */}
+                {errorMessage && (
+                  <Alert severity="error">
+                    {errorMessage.split('\n').map((msg, index) => (
+                      <div key={index}>{msg}</div>
+                    ))}
+                  </Alert>
+                  )}
+                {/* Success */}
+                {successMessage && <Alert severity="success">{successMessage}</Alert>}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
                     <Button variant="contained" color="primary" onClick={handleSave}>
                         Save Changes
@@ -281,7 +311,15 @@ const UserProfile = ({ initialData}: Props) => {
               </div>
             </Grid>
             {/* Password Error */}
-            {passwordError && <Alert severity="error">{passwordError}</Alert>}
+            {passwordError && (
+              <Alert severity="error">
+                {passwordError.split('\n').map((msg, index) => (
+                  <div key={index}>{msg}</div>
+                ))}
+              </Alert>
+            )}
+            {/* Success */}
+            {passwordSuccess && <Alert severity="success">{passwordSuccess}</Alert>}
 
             {/* Change Password and Reset buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>

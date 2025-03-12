@@ -1,13 +1,10 @@
-// 'change password'  validation
-
-// Form validation
-
 // move to components? (could only move password box maybe)
 
 // hydration error
 
 // *Could have* --> requirements changing to green as they are satisfied 
 // *Could have* --> invited clinicians saved in the database
+// *Could have* --> phone number validation
 
 
 
@@ -22,6 +19,8 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert'
+import { safeParse } from 'valibot';
+import { userProfileSchema, passwordSchema } from '@/actions/formValidation';
 
 
 
@@ -39,7 +38,10 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
         confirmPassword: ''
       })
 
-    const [passwordError, setPasswordError] = useState<string | null>(null)
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [agreedForResearch, setAgreedForResearch] = useState(!!formData?.agreedForResearch);
     const [cliniciansData, setCliniciansData] = useState(clinicians);
 
@@ -75,9 +77,15 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
           [name]: value,
       }));
   };
-  
 
   const handleSave = async () => {
+    setErrorMessage(null); 
+    setSuccessMessage(null);
+    const result = safeParse(userProfileSchema, formData);
+    if (!result.success) {
+      setErrorMessage(result.issues.map(issue => issue.message).join('\n'));
+      return;
+    }
     try {
       const updatedFormData = {
         ...formData,
@@ -86,27 +94,29 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
 
       const response = await saveUserProfile(updatedFormData);
       if (!response.success) {
-        throw new Error('Failed to update profile');
+        setErrorMessage('Failed to update profile');
       }
-      alert('Profile changes saved successfully!');
+      setSuccessMessage('Profile changes saved successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('Error saving profile changes.');
+      setErrorMessage('Error saving profile changes.');
     }
 };
 
   const handleReset = async () => {
+      setErrorMessage(null); 
+      setSuccessMessage(null);
       const resetData = await resetUserProfile(formData.id);
       if (resetData) setFormData(resetData);
   };
 
 
   const handleChangePassword = async () => {
+    const result = safeParse(passwordSchema, passwordData);
 
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-        // console.error("Error: One or more password fields are empty");
-        setPasswordError("All fields are required.");
-        return;
+    if (!result.success) {
+      setPasswordError(result.issues.map(issue => issue.message).join('\n'));
+      return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -122,7 +132,7 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
         // console.log("Change password success:", response.success);
 
         if (response.success) {
-            alert("Password changed successfully!");
+            setPasswordSuccess("Password changed successfully!");
             setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
         } else {
             // console.error("Error changing password.");
@@ -143,6 +153,7 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
         confirmPassword: ''
       });
       setPasswordError(null);
+      setPasswordSuccess(null)
   };
 
     
@@ -251,6 +262,16 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
                     <TextField fullWidth label="Hospital Number" name="hospitalNumber" value={formData.hospitalNumber || ""} onChange={handleChange} />
                 </Grid>
                 </Grid>
+                  {/* Error */}
+                  {errorMessage && (
+                    <Alert severity="error">
+                      {errorMessage.split('\n').map((msg, index) => (
+                        <div key={index}>{msg}</div>
+                      ))}
+                    </Alert>
+                    )}
+                  {/* Success */}
+                  {successMessage && <Alert severity="success">{successMessage}</Alert>}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
                     <Button variant="contained" color="primary" onClick={handleSave}>
                         Save Changes
@@ -376,7 +397,15 @@ const confirmDelete = (clinicianId: string, patientId:string) => {
               </div>
             </Grid>
             {/* Password Error */}
-            {passwordError && <Alert severity="error">{passwordError}</Alert>}
+            {passwordError && (
+              <Alert severity="error">
+                {passwordError.split('\n').map((msg, index) => (
+                  <div key={index}>{msg}</div>
+                ))}
+              </Alert>
+            )}
+            {/* Success */}
+            {passwordSuccess && <Alert severity="success">{passwordSuccess}</Alert>}
 
             {/* Change Password and Reset buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
