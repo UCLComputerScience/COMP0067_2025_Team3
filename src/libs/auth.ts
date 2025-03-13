@@ -30,6 +30,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email', placeholder: 'Email' },
         password: { label: 'Password', type: 'password', placeholder: 'Password' }
       },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async authorize(credentials, __req) {
         /*
          * You need to provide your own logic here that takes the credentials submitted and returns either

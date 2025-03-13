@@ -25,7 +25,6 @@ import Divider from '@mui/material/Divider'
 // Component Imports
 import Link from '@components/Link'
 import Logo from '@components/layout/shared/Logo'
-// import Illustrations from '@components/Illustrations'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'

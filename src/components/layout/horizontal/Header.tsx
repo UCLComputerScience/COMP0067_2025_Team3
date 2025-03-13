@@ -6,11 +6,11 @@ import Navbar from '@layouts/components/horizontal/Navbar'
 import LayoutHeader from '@layouts/components/horizontal/Header'
 
 // Hook Imports
-import useHorizontalNav from '@menu/hooks/useHorizontalNav'
+// import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 
 const Header = () => {
   // Hooks
-  const { isBreakpointReached } = useHorizontalNav()
+  // const { isBreakpointReached } = useHorizontalNav()
 
   return (
     <>

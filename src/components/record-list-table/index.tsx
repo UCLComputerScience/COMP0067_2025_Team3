@@ -48,7 +48,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
-  const [rows, __unsedVar] = React.useState<Data[]>(data)
+  const [rows] = React.useState<Data[]>(data)
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === 'asc'
