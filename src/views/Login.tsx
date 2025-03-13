@@ -20,7 +20,6 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
 
 // Third-party Imports
-// import classnames from 'classnames'
 
 // Component Imports
 import Link from '@components/Link'
@@ -33,7 +32,8 @@ import themeConfig from '@configs/themeConfig'
 // import { useImageVariant } from '@core/hooks/useImageVariant'
 // import { useSettings } from '@core/hooks/useSettings'
 
-const LoginV2 = () => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const LoginV2 = ({ mode }: { mode: string }) => {
   // States
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
