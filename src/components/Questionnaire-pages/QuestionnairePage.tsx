@@ -1,25 +1,27 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
 import * as React from 'react'
 
 import { Button, Grid2, Typography, Box } from '@mui/material'
 
 import styles from './styles.module.css'
 
-import Question from '@/components/Question/Question'
+import Question from '@/components/Questionnaire-pages/Question/Question'
 
-import Tooltip from '@mui/material/Tooltip'
+export default function QuestionPage({ domain, handleNext, handlePrev }) {
+  const [questions, setQuestions] = useState([])
 
-const { PrismaClient } = require('@prisma/client')
+  useEffect(() => {
+    fetch('/api/questions')
+      .then(res => res.json())
+      .then(data => {
+        const filteredQuestions = data.filter(q => q.domain.includes(domain))
 
-const prisma = new PrismaClient()
-
-export default async function QuestionPage({ domain, nextPage, previousPage }) {
-  const questions = await prisma.Question.findMany({
-    where: { domain },
-    select: {
-      question: true,
-      note: true
-    }
-  })
+        setQuestions(filteredQuestions)
+      })
+  }, [domain])
 
   return (
     <Box>
@@ -60,7 +62,7 @@ export default async function QuestionPage({ domain, nextPage, previousPage }) {
       </Grid2>
       <form>
         {questions.map((questions, i) => (
-          <div key={i}>
+          <div key={i} id={questions.id}>
             <Question question={questions.question} note={questions.note} />
             <br />
           </div>
@@ -68,14 +70,18 @@ export default async function QuestionPage({ domain, nextPage, previousPage }) {
       </form>
       <Grid2 container sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Grid2 size={6}>
-          <Button href={previousPage} variant='contained'>
+          <Button onClick={handlePrev} variant='contained'>
             Previous
           </Button>
         </Grid2>
         <Box display='flex' justifyContent='flex-end'>
-          <Button href={nextPage} variant='contained'>
-            Next
-          </Button>
+          {domain === 'Depression' ? (
+            <Button variant='contained'>Submit</Button>
+          ) : (
+            <Button onClick={handleNext} variant='contained'>
+              Next
+            </Button>
+          )}
         </Box>
       </Grid2>
     </Box>

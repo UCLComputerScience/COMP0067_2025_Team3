@@ -37,7 +37,7 @@ const NavbarContent = () => {
         <MenuItem component={Link} href='/'>
           Home
         </MenuItem>
-        <MenuItem component={Link} href='/about'>
+        <MenuItem component={Link} href='/questionnaire'>
           The Spider
         </MenuItem>
         <MenuItem component={Link} href='/login'>
