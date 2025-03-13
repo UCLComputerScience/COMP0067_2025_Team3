@@ -1,7 +1,11 @@
-import { prisma } from '@/prisma/client'
-import { RelationshipStatus } from '@prisma/client';
-import UserProfile from '@/views/Settings'
+import type { RelationshipStatus } from '@prisma/client';
+
 import { getServerSession } from 'next-auth'
+
+import { prisma } from '@/prisma/client'
+import UserProfile from '@/views/Settings'
+
+
 import { authOptions } from '@/libs/auth'
 
 
@@ -33,6 +37,8 @@ const getUserProfile = async (userId: string) => {
         dateOfBirth: true
       }
     })
+
+
     // Log the fetched user data to the console
     console.log("User Profile fetched from DB:", userProfile)
 
@@ -80,6 +86,8 @@ const getClinicians = async (userId: string) => {
           status: true
       }
   });
+
+
   // Log the fetched user data to the console
   console.log("Clinician data fetched from DB:", clinicians)
 
@@ -108,15 +116,19 @@ export interface AllClinicians {
 
 const ProfilePage = async () => {
     const session = await getServerSession(authOptions)
+
     console.log(session)
+
     if (!session?.user?.id) {
       return <p>Unauthorized</p>
   }
+
     const userData = await getUserProfile(session.user.id)
     const clinicianData = await getClinicians(session.user.id)
     
  
     return (
+
       // Pass user data to the client component
       <UserProfile initialData={userData} clinicians={clinicianData}/>
     )

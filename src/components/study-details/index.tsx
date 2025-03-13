@@ -7,14 +7,15 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 
 // Actions / API Calls
-import { getApplicationById } from '@/actions/researcher/applicationAction'
 
 // MUI (Material-UI) Imports
-import { Card, CardHeader, CardContent, Typography, CardActions, Chip, Button } from '@mui/material'
+import { Card, CardHeader, CardContent, Typography, CardActions, Button } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
+import { getApplicationById } from '@/actions/researcher/applicationAction'
+
 // Utility Functions
-import { FormValues } from '@/components/DataAccessApplicationForm'
+import type { FormValues } from '@/components/DataAccessApplicationForm'
 
 // Component Imports
 import DataAccessApplicationForm from '@/components/DataAccessApplicationForm'
@@ -54,6 +55,7 @@ const studyDetailsTypeToFormType = (studyDetails: StudyDetailsType): FormValues 
     summary: studyDetails.summary,
     documents: studyDetails.documents.map(document => {
       const filePath = document.documentPath
+
       return new File([filePath], extractFileName(filePath))
     }),
     demographicDataAccess: reverseMapDataAccessFields(studyDetails.demographicDataAccess, 'demographic'),
@@ -80,6 +82,7 @@ const StudyDetails = () => {
     const fetchStudy = async (id: number) => {
       try {
         const res = await getApplicationById(id)
+
         console.log(res.documents)
         setStudy(res)
       } catch (error) {

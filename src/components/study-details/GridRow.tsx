@@ -1,6 +1,7 @@
 import { Typography, Chip } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { capitalize } from 'lodash'
+
 import { getChipColor } from '../study-list'
 
 const GridRow = ({ label, value }: { label: string; value: string }) => {

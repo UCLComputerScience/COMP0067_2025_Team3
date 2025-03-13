@@ -1,14 +1,17 @@
 'use client'
 
-import { Box, Button, Card, CardContent, TextField, Typography} from '@mui/material'
-import Grid from '@mui/material/Grid2'
 import React, { useState, useEffect} from 'react'
-import {UserData } from '@/app/(dashboard)/my-profile/clinician-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword} from '@/actions/clinicianSettings/userActions'
+
+import Grid from '@mui/material/Grid2'
+import { Box, Button, Card, CardContent, TextField, Typography} from '@mui/material'
+
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import Alert from '@mui/material/Alert'
 import { safeParse } from 'valibot';
+
+import type {UserData } from '@/app/(dashboard)/my-profile/clinician-settings/page'
+import {saveUserProfile, resetUserProfile, changeUserPassword} from '@/actions/clinicianSettings/userActions'
 import { userProfileSchema, passwordSchema } from '@/actions/formValidation';
 
 
@@ -19,6 +22,7 @@ interface Props {
 
 const UserProfile = ({ initialData}: Props) => {
     const [formData, setFormData] = useState <UserData | null>(initialData)
+
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -52,8 +56,10 @@ const UserProfile = ({ initialData}: Props) => {
     const handleClickShowCurrentPassword = () => {
       setIsCurrentPasswordShown(!isCurrentPasswordShown)
     }
+
     const handlePasswordFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
+
       setPasswordData(prevState => ({
           ...prevState,
           [name]: value,
@@ -65,15 +71,20 @@ const UserProfile = ({ initialData}: Props) => {
     setErrorMessage(null); 
     setSuccessMessage(null);
     const result = safeParse(userProfileSchema, formData);
+
     if (!result.success) {
       setErrorMessage(result.issues.map(issue => issue.message).join('\n'));
-      return;
+      
+return;
     }
+
     try {
       const response = await saveUserProfile(formData);
+
       if (!response.success) {
         setErrorMessage('Failed to update profile');
       }
+
       setSuccessMessage('Profile changes saved successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -85,6 +96,7 @@ const UserProfile = ({ initialData}: Props) => {
       setErrorMessage(null); 
       setSuccessMessage(null);
       const resetData = await resetUserProfile(formData.id);
+
       if (resetData) setFormData(resetData);
   };
 
@@ -94,25 +106,29 @@ const UserProfile = ({ initialData}: Props) => {
     
     if (!result.success) {
       setPasswordError(result.issues.map(issue => issue.message).join('\n'));
-      return;
+      
+return;
     }
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
         // console.error("Error: One or more password fields are empty");
         setPasswordError("All fields are required.");
-        return;
+        
+return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
         // console.error("Error: Passwords do not match");
         setPasswordError("Passwords do not match.");
-        return;
+        
+return;
     }
 
     setPasswordError(null);
     
     try {
         const response = await changeUserPassword(formData.id, passwordData);
+
         // console.log("Change password success:", response.success);
 
         if (response.success) {

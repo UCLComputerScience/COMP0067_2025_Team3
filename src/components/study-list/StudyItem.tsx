@@ -1,6 +1,8 @@
 import { Typography, Chip, Button } from '@mui/material'
 import { capitalize } from 'lodash'
-import { StudyListType, getChipColor } from '.'
+
+import type { StudyListType} from '.';
+import { getChipColor } from '.'
 import DialogsAlert from '../DialogsAlert'
 import Link from '../Link'
 import { formatDate } from '@/utils/dateUtils'

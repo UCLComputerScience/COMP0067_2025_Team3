@@ -1,6 +1,7 @@
+import { getServerSession } from 'next-auth'
+
 import { prisma } from '@/prisma/client'
 import UserProfile from '@/views/ClinicianSettings'
-import { getServerSession } from 'next-auth'
 import { authOptions } from '@/libs/auth'
 
 
@@ -32,6 +33,8 @@ const getUserProfile = async (userId: string) => {
         profession: true
       }
     })
+
+
     // Log the fetched user data to the console
     console.log("User Profile fetched from DB:", userProfile)
 
@@ -50,14 +53,18 @@ const getUserProfile = async (userId: string) => {
 
 const ProfilePage = async () => {
     const session = await getServerSession(authOptions)
+
     console.log(session)
+
     if (!session?.user?.id) {
       return <p>Unauthorized</p>
   }
+
     const userData = await getUserProfile(session.user.id)
     
  
     return (
+
       // Pass user data to the client component
       <UserProfile initialData={userData}/>
     )

@@ -10,16 +10,24 @@
 
 'use client'
 
+import React, { useState, useEffect} from 'react'
+
+import { useRouter } from 'next/navigation';
+
 import { Box, Button, Card, CardContent, TextField, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Chip, FormControlLabel, FormGroup} from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import React, { useState, useEffect} from 'react'
-import { ClinicianData, UserData } from '@/app/(dashboard)/my-profile/patient-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveShareData, deleteClinician} from '@/actions/patientSettings/userActions'
+
+
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
-import { useRouter } from 'next/navigation';
+
+
 import Alert from '@mui/material/Alert'
 import { safeParse } from 'valibot';
+
+import {saveUserProfile, resetUserProfile, changeUserPassword, saveResearch, saveShareData, deleteClinician} from '@/actions/patientSettings/userActions'
+import type { ClinicianData, UserData } from '@/app/(dashboard)/my-profile/patient-settings/page'
+
 import { userProfileSchema, passwordSchema } from '@/actions/formValidation';
 
 
@@ -32,6 +40,7 @@ interface Props {
 const UserProfile = ({ initialData, clinicians =[]}: Props) => {
     const router = useRouter();
     const [formData, setFormData] = useState <UserData | null>(initialData)
+
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -70,8 +79,10 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
     const handleClickShowCurrentPassword = () => {
       setIsCurrentPasswordShown(!isCurrentPasswordShown)
     }
+
     const handlePasswordFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
+
       setPasswordData(prevState => ({
           ...prevState,
           [name]: value,
@@ -82,10 +93,13 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
     setErrorMessage(null); 
     setSuccessMessage(null);
     const result = safeParse(userProfileSchema, formData);
+
     if (!result.success) {
       setErrorMessage(result.issues.map(issue => issue.message).join('\n'));
-      return;
+      
+return;
     }
+
     try {
       const updatedFormData = {
         ...formData,
@@ -93,9 +107,11 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
       };
 
       const response = await saveUserProfile(updatedFormData);
+
       if (!response.success) {
         setErrorMessage('Failed to update profile');
       }
+
       setSuccessMessage('Profile changes saved successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -107,6 +123,7 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
       setErrorMessage(null); 
       setSuccessMessage(null);
       const resetData = await resetUserProfile(formData.id);
+
       if (resetData) setFormData(resetData);
   };
 
@@ -116,19 +133,22 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
 
     if (!result.success) {
       setPasswordError(result.issues.map(issue => issue.message).join('\n'));
-      return;
+      
+return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
         // console.error("Error: Passwords do not match");
         setPasswordError("Passwords do not match.");
-        return;
+        
+return;
     }
 
     setPasswordError(null);
     
     try {
         const response = await changeUserPassword(formData.id, passwordData);
+
         // console.log("Change password success:", response.success);
 
         if (response.success) {
@@ -192,9 +212,11 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
                 : clinician
         )
     );
+
       try {
         formData.id === patientId
           const result = await saveShareData(clinicianId, newValue, patientId);
+
           if (!result.success) {
               throw new Error('Failed to save clinician data share consent');
           }
@@ -211,11 +233,13 @@ const UserProfile = ({ initialData, clinicians =[]}: Props) => {
 };
 
 const handleDelete = async (clinicianId: string, patientId: string) => {
-  const prevClinicians = [...cliniciansData]; 
+  const prevClinicians = [...cliniciansData];
+ 
   setCliniciansData(prevClinicians.filter(clinician => clinician.id !== clinicianId));
 
   try {
-      const result = await deleteClinician(clinicianId, patientId); 
+      const result = await deleteClinician(clinicianId, patientId);
+ 
       if (!result.success) {
           throw new Error('Failed to delete clinician');
       }

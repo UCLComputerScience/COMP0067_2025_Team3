@@ -1,7 +1,9 @@
 'use server';
 
 import bcrypt from 'bcryptjs'
+
 import { prisma } from '@/prisma/client'
+
 // import select from '@/@core/theme/overrides/select';
 
 // Save User Profile Settings
@@ -32,7 +34,8 @@ export async function saveUserProfile(formData: {
         return { success: true };
     } catch (error) {
         console.error('Error saving user profile:', error);
-        return { success: false, message: 'Failed to update profile' };
+        
+return { success: false, message: 'Failed to update profile' };
     }
 }
 
@@ -62,7 +65,8 @@ export async function resetUserProfile(userId: string) {
         };
     } catch (error) {
         console.error('Error resetting user profile:', error);
-        return null;
+        
+return null;
     }
 }
 
@@ -105,10 +109,12 @@ export async function saveResearch(agreedForResearch: {agreedForResearch: boolea
                 agreedForResearch: agreedForResearch.agreedForResearch
             },
         });
-        return { success: true, value : agreedForResearch };
+        
+return { success: true, value : agreedForResearch };
     } catch (error) {
         console.error('Error saving user profile:', error);
-        return { success: false, message: 'Failed to update profile' };
+        
+return { success: false, message: 'Failed to update profile' };
     }
 }
 
@@ -122,10 +128,12 @@ export async function saveShareData(clinicianId: string, agreedToShareData: bool
                 agreedToShareData: agreedToShareData
             },
         });
-        return { success: true, value : agreedToShareData };
+        
+return { success: true, value : agreedToShareData };
     } catch (error) {
         console.error('Error saving user profile:', error);
-        return { success: false, message: 'Failed to update profile' };
+        
+return { success: false, message: 'Failed to update profile' };
     }
 }
 
@@ -145,17 +153,21 @@ export async function saveNewClinician (selectedClinician:string, patientId:stri
             // console.log('This clinician is already linked to your account.');
             return { success: false, message: 'This clinician is already linked to your account.' };
       }
+
         const newRelationship = await prisma.clinicianPatient.create({
             data: {
                 clinicianId: selectedClinician,
                 patientId: patientId
             }
         })
+
+
         // console.log('New relationship created:', newRelationship);
         return {success : true, newRelationship, message: null} ;
     } catch (error) {
         console.error ('Error adding new clinician:', error);
-        return {success : false, message: 'Error adding new clinician.'};
+        
+return {success : false, message: 'Error adding new clinician.'};
     }
 }
 
@@ -169,10 +181,13 @@ export async function deleteClinician (clinicianId: string, patientId: string){
         if (deleteRelationship.count === 0) {
             return { success: false, message: 'Clinician relationship not found' };
         }
-        return { success: true };
+
+        
+return { success: true };
     } catch (error) {
         console.error('Error deleting clinician:', error);
-        return { success: false, message: 'Failed to delete clinician' };
+        
+return { success: false, message: 'Failed to delete clinician' };
     }
 }
 
@@ -180,7 +195,8 @@ export async function deleteClinician (clinicianId: string, patientId: string){
 export async function sendInvitation (email: string, message: string ){
     try{
         console.log('Action to send email here.')
-        return {success: true};
+        
+return {success: true};
     } catch (error) {
         return {success: false}
     }

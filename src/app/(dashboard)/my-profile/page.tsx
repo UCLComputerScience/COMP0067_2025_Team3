@@ -1,9 +1,14 @@
-import StudyList from '@/components/study-list'
+import { redirect } from 'next/navigation';
+
 import { Role } from '@prisma/client'
 
 import { getServerSession } from 'next-auth'
+
+import StudyList from '@/components/study-list'
+
+
 import { authOptions } from '@/libs/auth'
-import { redirect } from 'next/navigation';
+
 
 const Page = async () => {
   const session = await getServerSession(authOptions)
@@ -18,6 +23,7 @@ const Page = async () => {
   if (role === Role.PATIENT) {
     redirect('/my-profile/patient-settings')
   }
+
   if (role === Role.CLINICIAN) {
     redirect('/my-profile/clinician-settings')
   }

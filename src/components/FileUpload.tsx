@@ -66,6 +66,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
     },
     onDrop: (acceptedFiles: File[]) => {
       const updatedFiles = [...files, ...acceptedFiles]
+
       setFiles(updatedFiles)
       if (onChange) onChange(updatedFiles) // Notify parent of file change
     }
@@ -81,6 +82,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
 
   const handleRemoveFile = (file: FileProp) => {
     const updatedFiles = files.filter(f => f.name !== file.name)
+
     setFiles(updatedFiles)
     if (onChange) onChange(updatedFiles) // Notify parent of file change
   }

@@ -1,11 +1,12 @@
+import { getServerSession } from 'next-auth'
+
 import { prisma } from '@/prisma/client'
-import { groupBy } from 'lodash'
 
 // Component
 import Records from '@/views/Records'
 
 // Auth
-import { getServerSession } from 'next-auth'
+
 import { authOptions } from '@/libs/auth'
 
 export interface Data {
@@ -43,6 +44,7 @@ const getResponseDataByUser = async (userId: string) => {
       createdAt: true
     }
   })
+
   const groupedResults: Record<string, SubmissionResult> = {}
 
   responses.forEach(result => {
@@ -83,9 +85,11 @@ const Page = async () => {
 
   // debug, and secure the end point and remove this later.
   console.log('session:', session)
+
   if (!session?.user?.id) {
     return <p>Unauthorized</p>
   }
+
   const data = await getResponseDataByUser(session.user.id)
 
   return <Records data={data} />
