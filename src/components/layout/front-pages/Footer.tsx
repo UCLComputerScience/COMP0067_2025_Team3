@@ -17,8 +17,10 @@ import Logo from '@components/layout/shared/Logo'
 import { frontLayoutClasses } from '@layouts/utils/layoutClasses'
 
 // Styles Imports
+
 // eslint-disable-next-line import/no-duplicates
 import styles from './styles.module.css'
+// eslint-disable-next-line import/no-duplicates
 import frontCommonStyles from './styles.module.css'
 
 const Footer = () => {

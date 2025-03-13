@@ -1,308 +1,344 @@
 'use client'
 
-import React, { useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 
 import Grid from '@mui/material/Grid2'
-import { Box, Button, Card, CardContent, TextField, Typography} from '@mui/material'
+import { Box, Button, Card, CardContent, TextField, Typography } from '@mui/material'
 
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import Alert from '@mui/material/Alert'
-import { safeParse } from 'valibot';
+import { safeParse } from 'valibot'
 
-import type {UserData } from '@/app/(dashboard)/my-profile/clinician-settings/page'
-import {saveUserProfile, resetUserProfile, changeUserPassword} from '@/actions/clinicianSettings/userActions'
-import { userProfileSchema, passwordSchema } from '@/actions/formValidation';
-
-
+import type { UserData } from '@/app/(dashboard)/my-profile/clinician-settings/page'
+import { saveUserProfile, resetUserProfile, changeUserPassword } from '@/actions/clinicianSettings/userActions'
+import { userProfileSchema, passwordSchema } from '@/actions/formValidation'
 
 interface Props {
-    initialData: UserData;
+  initialData: UserData
 }
 
-const UserProfile = ({ initialData}: Props) => {
-    const [formData, setFormData] = useState <UserData | null>(initialData)
+const UserProfile = ({ initialData }: Props) => {
+  const [formData, setFormData] = useState<UserData | null>(initialData)
 
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      })
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
 
-    const [passwordError, setPasswordError] = useState<string | null>(null);
-    const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-    useEffect(() => {
-        setFormData(initialData);
-      }, [initialData])
-    
-      if (!formData) {
-        return <div>Loading...</div> // Render loading until user data is available
-      }
+  useEffect(() => {
+    setFormData(initialData)
+  }, [initialData])
 
-  
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(e.target.name, e.target.value);
-      setFormData({ ...formData, [e.target.name]: e.target.value })
-    }
+  if (!formData) {
+    return <div>Loading...</div> // Render loading until user data is available
+  }
 
-    const [isCurrentPasswordShown, setIsCurrentPasswordShown] = useState(false)
-    const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
-    const [isNewPasswordShown, setIsNewPasswordShown] = useState(false)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.name, e.target.value)
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
-    const handleClickShowCurrentPassword = () => {
-      setIsCurrentPasswordShown(!isCurrentPasswordShown)
-    }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isCurrentPasswordShown, setIsCurrentPasswordShown] = useState(false)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isNewPasswordShown, setIsNewPasswordShown] = useState(false)
 
-    const handlePasswordFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
+  const handleClickShowCurrentPassword = () => {
+    setIsCurrentPasswordShown(!isCurrentPasswordShown)
+  }
 
-      setPasswordData(prevState => ({
-          ...prevState,
-          [name]: value,
-      }));
-  };
-  
+  const handlePasswordFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+
+    setPasswordData(prevState => ({
+      ...prevState,
+      [name]: value
+    }))
+  }
 
   const handleSave = async () => {
-    setErrorMessage(null); 
-    setSuccessMessage(null);
-    const result = safeParse(userProfileSchema, formData);
+    setErrorMessage(null)
+    setSuccessMessage(null)
+    const result = safeParse(userProfileSchema, formData)
 
     if (!result.success) {
-      setErrorMessage(result.issues.map(issue => issue.message).join('\n'));
-      
-return;
+      setErrorMessage(result.issues.map(issue => issue.message).join('\n'))
+
+      return
     }
 
     try {
-      const response = await saveUserProfile(formData);
+      const response = await saveUserProfile(formData)
 
       if (!response.success) {
-        setErrorMessage('Failed to update profile');
+        setErrorMessage('Failed to update profile')
       }
 
-      setSuccessMessage('Profile changes saved successfully!');
+      setSuccessMessage('Profile changes saved successfully!')
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      setErrorMessage('Error saving profile changes.');
+      console.error('Failed to update profile:', error)
+      setErrorMessage('Error saving profile changes.')
     }
-};
+  }
 
   const handleReset = async () => {
-      setErrorMessage(null); 
-      setSuccessMessage(null);
-      const resetData = await resetUserProfile(formData.id);
+    setErrorMessage(null)
+    setSuccessMessage(null)
+    const resetData = await resetUserProfile(formData.id)
 
-      if (resetData) setFormData(resetData);
-  };
-
+    if (resetData) setFormData(resetData)
+  }
 
   const handleChangePassword = async () => {
-    const result = safeParse(passwordSchema, passwordData);
-    
+    const result = safeParse(passwordSchema, passwordData)
+
     if (!result.success) {
-      setPasswordError(result.issues.map(issue => issue.message).join('\n'));
-      
-return;
+      setPasswordError(result.issues.map(issue => issue.message).join('\n'))
+
+      return
     }
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-        // console.error("Error: One or more password fields are empty");
-        setPasswordError("All fields are required.");
-        
-return;
+      // console.error("Error: One or more password fields are empty");
+      setPasswordError('All fields are required.')
+
+      return
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-        // console.error("Error: Passwords do not match");
-        setPasswordError("Passwords do not match.");
-        
-return;
+      // console.error("Error: Passwords do not match");
+      setPasswordError('Passwords do not match.')
+
+      return
     }
 
-    setPasswordError(null);
-    
+    setPasswordError(null)
+
     try {
-        const response = await changeUserPassword(formData.id, passwordData);
+      const response = await changeUserPassword(formData.id, passwordData)
 
-        // console.log("Change password success:", response.success);
+      // console.log("Change password success:", response.success);
 
-        if (response.success) {
-            setPasswordSuccess("Password changed successfully!");
-            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        } else {
-            // console.error("Error changing password.");
-            setPasswordError(response.message);
-        }
+      if (response.success) {
+        setPasswordSuccess('Password changed successfully!')
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      } else {
+        // console.error("Error changing password.");
+        setPasswordError(response.message)
+      }
     } catch (error) {
-        // console.error("Unexpected error while changing password:", error);
-        setPasswordError("An error occurred while changing the password.");
+      // console.error("Unexpected error while changing password:", error);
+      setPasswordError('An error occurred while changing the password.')
     }
-};
-
+  }
 
   const handlePasswordChangeReset = async () => {
-      // Reset the password fields when the function is called
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      setPasswordError(null);
-      setPasswordSuccess(null)
+    // Reset the password fields when the function is called
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    })
+    setPasswordError(null)
+    setPasswordSuccess(null)
+  }
 
-  };
-
-
-    return (
-        <>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Card sx={{ width: 1132, p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-                Account Settings
-            </Typography>
-            <CardContent>
-                <Grid container spacing={2}>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} />
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} />
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Email" name="email" value={formData.email} onChange={handleChange} />
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Organization" name="institution" value={formData.institution || ""} onChange={handleChange}/>
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Phone Number" name="phoneNumber" value={formData.phoneNumber || ""} onChange={handleChange} />
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Address" name="address" value={formData.address || ""} onChange={handleChange} />
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Registration Number" name="registrationNumber" value={formData.registrationNumber || ""} onChange={handleChange}/>
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                    <TextField fullWidth label="Profession" name="profession" value={formData.profession || ""} onChange={handleChange} />
-                </Grid>
-                </Grid>
-                {/* Error */}
-                {errorMessage && (
-                  <Alert severity="error">
-                    {errorMessage.split('\n').map((msg, index) => (
-                      <div key={index}>{msg}</div>
-                    ))}
-                  </Alert>
-                  )}
-                {/* Success */}
-                {successMessage && <Alert severity="success">{successMessage}</Alert>}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                    <Button variant="contained" color="primary" onClick={handleSave}>
-                        Save Changes
-                    </Button>
-                    <Button variant="outlined" color="secondary" onClick={handleReset}>
-                        Reset
-                    </Button>
-                </Box>
-            </CardContent>
-            </Card>
-        </Box>
-        {/* Change Password Card */}
+  return (
+    <>
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Card sx={{ width: 1132, p: 3 }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant='h5' gutterBottom>
+            Account Settings
+          </Typography>
+          <CardContent>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='First Name'
+                  name='firstName'
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='Last Name'
+                  name='lastName'
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField fullWidth label='Email' name='email' value={formData.email} onChange={handleChange} />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='Organization'
+                  name='institution'
+                  value={formData.institution || ''}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='Phone Number'
+                  name='phoneNumber'
+                  value={formData.phoneNumber || ''}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='Address'
+                  name='address'
+                  value={formData.address || ''}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='Registration Number'
+                  name='registrationNumber'
+                  value={formData.registrationNumber || ''}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 6 }}>
+                <TextField
+                  fullWidth
+                  label='Profession'
+                  name='profession'
+                  value={formData.profession || ''}
+                  onChange={handleChange}
+                />
+              </Grid>
+            </Grid>
+            {/* Error */}
+            {errorMessage && (
+              <Alert severity='error'>
+                {errorMessage.split('\n').map((msg, index) => (
+                  <div key={index}>{msg}</div>
+                ))}
+              </Alert>
+            )}
+            {/* Success */}
+            {successMessage && <Alert severity='success'>{successMessage}</Alert>}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+              <Button variant='contained' color='primary' onClick={handleSave}>
+                Save Changes
+              </Button>
+              <Button variant='outlined' color='secondary' onClick={handleReset}>
+                Reset
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+      {/* Change Password Card */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Card sx={{ width: 1132, p: 3 }}>
+          <Typography variant='h5' gutterBottom>
             Change Password
           </Typography>
           <CardContent>
             {/* Current Password */}
             <Grid container spacing={2}>
               <Grid size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                label='Current Password'
-                type={isCurrentPasswordShown ? 'text' : 'password'}
-                name="currentPassword"
-                value={passwordData.currentPassword}
-                onChange={handlePasswordFieldChange}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton
-                          size='small'
-                          edge='end'
-                          onClick={handleClickShowCurrentPassword}
-                          onMouseDown={e => e.preventDefault()}
-                        >
-                          <i className={isCurrentPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }
-                }}
-              />
+                <TextField
+                  fullWidth
+                  label='Current Password'
+                  type={isCurrentPasswordShown ? 'text' : 'password'}
+                  name='currentPassword'
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordFieldChange}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            size='small'
+                            edge='end'
+                            onClick={handleClickShowCurrentPassword}
+                            onMouseDown={e => e.preventDefault()}
+                          >
+                            <i className={isCurrentPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
 
             {/* New Password and Confirm Password */}
             <Grid container spacing={2} sx={{ mt: 2 }}>
               <Grid size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                label='New Password'
-                type={isNewPasswordShown ? 'text' : 'password'}
-                name="newPassword"
-                value={passwordData.newPassword}
-                onChange={handlePasswordFieldChange}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton
-                          size='small'
-                          edge='end'
-                          onClick={() => setIsNewPasswordShown(!isNewPasswordShown)}
-                          onMouseDown={e => e.preventDefault()}
-                        >
-                          <i className={isNewPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }
-                }}
-              />
+                <TextField
+                  fullWidth
+                  label='New Password'
+                  type={isNewPasswordShown ? 'text' : 'password'}
+                  name='newPassword'
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordFieldChange}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            size='small'
+                            edge='end'
+                            onClick={() => setIsNewPasswordShown(!isNewPasswordShown)}
+                            onMouseDown={e => e.preventDefault()}
+                          >
+                            <i className={isNewPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                label='Confirm New Password'
-                type={isConfirmPasswordShown ? 'text' : 'password'}
-                name="confirmPassword"
-                value={passwordData.confirmPassword}
-                onChange={handlePasswordFieldChange}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton
-                          size='small'
-                          edge='end'
-                          onClick={() => setIsConfirmPasswordShown(!isConfirmPasswordShown)}
-                          onMouseDown={e => e.preventDefault()}
-                        >
-                          <i className={isConfirmPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }
-                }}
-              />
+                <TextField
+                  fullWidth
+                  label='Confirm New Password'
+                  type={isConfirmPasswordShown ? 'text' : 'password'}
+                  name='confirmPassword'
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordFieldChange}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            size='small'
+                            edge='end'
+                            onClick={() => setIsConfirmPasswordShown(!isConfirmPasswordShown)}
+                            onMouseDown={e => e.preventDefault()}
+                          >
+                            <i className={isConfirmPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
 
@@ -328,24 +364,24 @@ return;
             </Grid>
             {/* Password Error */}
             {passwordError && (
-              <Alert severity="error">
+              <Alert severity='error'>
                 {passwordError.split('\n').map((msg, index) => (
                   <div key={index}>{msg}</div>
                 ))}
               </Alert>
             )}
             {/* Success */}
-            {passwordSuccess && <Alert severity="success">{passwordSuccess}</Alert>}
+            {passwordSuccess && <Alert severity='success'>{passwordSuccess}</Alert>}
 
             {/* Change Password and Reset buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                    <Button variant="contained" color="primary" onClick={handleChangePassword}>
-                        Save Changes
-                    </Button>
-                    <Button variant="outlined" color="secondary" onClick={handlePasswordChangeReset}>
-                        Reset
-                    </Button>
-                </Box>
+              <Button variant='contained' color='primary' onClick={handleChangePassword}>
+                Save Changes
+              </Button>
+              <Button variant='outlined' color='secondary' onClick={handlePasswordChangeReset}>
+                Reset
+              </Button>
+            </Box>
           </CardContent>
         </Card>
       </Box>
@@ -353,4 +389,4 @@ return;
   )
 }
 
-  export default UserProfile
+export default UserProfile
