@@ -1,11 +1,14 @@
 // Third-party Imports
 import CredentialProvider from 'next-auth/providers/credentials'
+
 // import GoogleProvider from 'next-auth/providers/google'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@/prisma/client'
+
 import type { NextAuthOptions } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
 import bcrypt from 'bcryptjs'
+
+import { prisma } from '@/prisma/client'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
@@ -27,7 +30,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email', placeholder: 'Email' },
         password: { label: 'Password', type: 'password', placeholder: 'Password' }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials, __req) {
         /*
          * You need to provide your own logic here that takes the credentials submitted and returns either
          * an object representing a user or value that is false/null if the credentials are invalid.
@@ -43,6 +46,7 @@ export const authOptions: NextAuthOptions = {
         if (!user) return null
 
         const passwordsMatch = await bcrypt.compare(credentials.password, user.hashedPassword)
+
         if (!passwordsMatch) return null
 
         console.log('auth.ts: user', user)

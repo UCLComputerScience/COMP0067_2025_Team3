@@ -1,18 +1,25 @@
 'use client'
 
 // MUI Imports
+import React from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import { Button, CardActions } from '@mui/material'
 
-import React from 'react'
-import { useRouter } from 'next/navigation'
+
 import { ApplicationStatus } from '@prisma/client'
-import { deleteApplicationById, getApplications } from '@/actions/researcher/applicationAction'
+
 import { useSession } from 'next-auth/react'
+
 import { toast } from 'react-toastify'
+
+import { deleteApplicationById, getApplications } from '@/actions/researcher/applicationAction'
+
 import StudyItem from './StudyItem'
 
 export interface StudyListType {
@@ -30,7 +37,8 @@ export const getChipColor = (status: string) => {
   if (status === ApplicationStatus.PENDING) return 'warning'
   if (status === ApplicationStatus.APPROVED) return 'success'
   if (status === ApplicationStatus.REJECTED) return 'error'
-  return 'default'
+  
+return 'default'
 }
 
 const StudyList = () => {
@@ -84,6 +92,7 @@ const StudyList = () => {
         {studies.length !== 0 ? (
           studies.map((item, index) => <StudyItem key={index} item={item} handleDelete={handleDelete} />)
         ) : (
+
           // make it looks better
           <Typography className='flex md:flex-row md:justify-between gap-4 p-4 rounded bg-actionHover'>
             No studies found. Please add a study to proceed.

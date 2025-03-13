@@ -45,6 +45,7 @@ const DialogsAlert = ({
     if (onConfirm) {
       onConfirm()
     }
+
     handleClose()
   }
 

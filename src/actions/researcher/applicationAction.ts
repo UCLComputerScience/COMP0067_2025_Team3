@@ -6,12 +6,15 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 
 // prisma
-import { prisma } from '@/prisma/client'
+import { revalidatePath } from 'next/cache'
+
 import { ApplicationStatus } from '@prisma/client'
+
+import { prisma } from '@/prisma/client'
 
 // utils
 import { mapDataAccessFields } from '@/libs/mappers'
-import { revalidatePath } from 'next/cache'
+
 
 export async function createApplication(formData: FormData, userId: string) {
   try {
@@ -60,7 +63,8 @@ export async function createApplication(formData: FormData, userId: string) {
     return true
   } catch (error) {
     console.error('Form submission failed:', error)
-    return false
+    
+return false
   }
 }
 
@@ -98,6 +102,7 @@ export async function getApplications(userId: string) {
     where: {
       userId: userId
     }
+
     // include: {
     //   documents: true
     // }
@@ -222,6 +227,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
         documentsToDelete.push(existingDocPath) // Document removed
       } else {
         const newDoc = newDocuments.find(newDoc => `${Date.now()}-${newDoc.name}` === existingDocPath)
+
         if (newDoc) {
           documentsToReplace.push({ oldPath: existingDocPath, newFile: newDoc }) // Document replaced
         }
@@ -230,6 +236,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
 
     // Upload new documents if there are any to add
     let newDocumentPaths: string[] = []
+
     if (documentsToAdd.length > 0) {
       newDocumentPaths = await uploadDocuments(formData)
     }
@@ -237,6 +244,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     // Handle deleted documents (remove from disk)
     for (const docPath of documentsToDelete) {
       const filePath = join(process.cwd(), docPath)
+
       if (existsSync(filePath)) {
         await fs.unlink(filePath) // Delete the file from the local disk
       }
@@ -245,12 +253,14 @@ export async function updateApplication(formData: FormData, userId: string, appl
     // Handle replaced documents (remove old ones, upload new ones)
     for (const doc of documentsToReplace) {
       const filePath = join(process.cwd(), doc.oldPath)
+
       if (existsSync(filePath)) {
         await fs.unlink(filePath) // Delete the old file from the local disk
       }
 
       // Upload the new document
       const newFilePath = await uploadDocuments(formData)
+
       newDocumentPaths.push(newFilePath[0])
     }
 
@@ -289,6 +299,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     return true
   } catch (error) {
     console.error('Failed to update application:', error)
-    return false
+    
+return false
   }
 }

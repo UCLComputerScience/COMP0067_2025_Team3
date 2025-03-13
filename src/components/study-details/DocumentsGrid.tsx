@@ -1,13 +1,16 @@
 import { Typography, IconButton } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import { extractFileName } from '.'
-import { DocumentType } from '.'
+
+import type { DocumentType } from '.';
+import { extractFileName  } from '.'
+
 
 const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
   // Function to check if the file is an image
   const isImageFile = (filePath: string) => {
     console.log(filePath, /\.(jpeg|jpg|png)$/i.test(filePath))
-    return /\.(jpeg|jpg|png)$/i.test(filePath) // Check if the file has a .jpeg, .jpg, or .png extension
+    
+return /\.(jpeg|jpg|png)$/i.test(filePath) // Check if the file has a .jpeg, .jpg, or .png extension
   }
 
   // Function to determine the correct icon for non-image files
@@ -31,11 +34,13 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
           <div className='flex items-center gap-2.5 is-fit bg-actionHover rounded plb-[5px] pli-2.5 mt-2' key={key}>
             {/* Conditional Rendering: */}
             {isImageFile(document.documentPath) ? (
+
               // For image files (JPEG, JPG, PNG) - show image
               <i className='ri-file-image-line' />
             ) : document.documentPath.endsWith('.pdf') ||
               document.documentPath.endsWith('.doc') ||
               document.documentPath.endsWith('.docx') ? (
+
               // For document files (PDF, DOC, DOCX) - show document icon
               <img
                 height={20}
@@ -43,6 +48,7 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
                 src={getDocumentIcon(document.documentPath)}
               />
             ) : (
+
               // For unknown file types - show a default text icon
               <i className='ri-file-text-line' />
             )}

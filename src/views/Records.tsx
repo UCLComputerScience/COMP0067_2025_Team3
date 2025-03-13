@@ -1,12 +1,16 @@
 'use client'
 
-import { Data } from '@/app/(dashboard)/my-records/page'
+import React, { useEffect } from 'react'
+
+import { Box } from '@mui/material'
+
+import { toast } from 'react-toastify'
+
+import type { Data } from '@/app/(dashboard)/my-records/page'
 import TrendCharts from '@/components/charts/TrendCharts'
 import RecordListTable from '@/components/record-list-table'
 import { formatDate } from '@/utils/dateUtils'
-import { Box } from '@mui/material'
-import React, { useEffect } from 'react'
-import { toast } from 'react-toastify'
+
 
 interface Props {
   data: Data[]
@@ -48,9 +52,11 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
 
   data.forEach(item => {
     const formattedDate = formatDate(item.date)
+
     if (!groupedByDate[formattedDate]) {
       groupedByDate[formattedDate] = []
     }
+
     groupedByDate[formattedDate].push(item)
   })
 
@@ -63,6 +69,7 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
       submissions.forEach((item, index) => {
         // Unique key if there are multiple submissions on the same date
         const uniqueKey = submissions.length > 1 ? `${formattedDate} - ${index + 1}` : formattedDate
+
         transformed[uniqueKey] = item[subject]
       })
     })
@@ -93,6 +100,7 @@ const Records = ({ data }: Props) => {
       toast.warn('You can display a maximum of 3 questionnaire data.')
     } else {
       const selectedData = transformData(data.filter(e => selected.includes(e.submissionId)))
+
       setChartData(selectedData)
     }
   }

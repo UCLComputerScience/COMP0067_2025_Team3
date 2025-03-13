@@ -3,12 +3,19 @@
 // Third-party Imports
 import Image from 'next/image'
 
-import Link from '@/components/Link'
+import { usePathname } from 'next/navigation'
 
 import classnames from 'classnames'
 
-// Component Imports
 import MenuItem from '@mui/material/MenuItem'
+
+import { signOut, useSession } from 'next-auth/react'
+
+import { Role } from '@prisma/client'
+
+import Link from '@/components/Link'
+
+// Component Imports
 
 import NavToggle from './NavToggle'
 import ModeDropdown from '@components/layout/shared/ModeDropdown'
@@ -19,11 +26,6 @@ import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
-import { signOut, useSession } from 'next-auth/react'
-import { useEffect } from 'react'
-import { Role } from '@prisma/client'
-import { Typography } from '@mui/material'
-import { usePathname } from 'next/navigation'
 
 const NavbarContent = () => {
   // Hooks
@@ -32,6 +34,7 @@ const NavbarContent = () => {
   const pathname = usePathname()
 
   const userRole = session?.user?.role || 'GUEST'
+
   const menuItems = [
     ...(userRole === 'GUEST'
       ? [

@@ -20,21 +20,21 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
 
 // Third-party Imports
-import classnames from 'classnames'
+// import classnames from 'classnames'
 
 // Component Imports
 import Link from '@components/Link'
 import Logo from '@components/layout/shared/Logo'
-import Illustrations from '@components/Illustrations'
+// import Illustrations from '@components/Illustrations'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 // import { useImageVariant } from '@core/hooks/useImageVariant'
-import { useSettings } from '@core/hooks/useSettings'
+// import { useSettings } from '@core/hooks/useSettings'
 
-const LoginV2 = ({ mode }: { mode: string }) => {
+const LoginV2 = () => {
   // States
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -43,6 +43,7 @@ const LoginV2 = ({ mode }: { mode: string }) => {
 
   // Hooks
   const router = useRouter()
+
   // const { settings } = useSettings()
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)

@@ -1,7 +1,8 @@
 
+import { getServerSession } from 'next-auth'
+
 import { prisma } from '@/prisma/client'
 import ClinicianLinkPage from '@/views/AddClinician'
-import { getServerSession } from 'next-auth'
 import { authOptions } from '@/libs/auth'
 
 
@@ -23,7 +24,9 @@ const getCurrentUser = async (session: any): Promise<PatientId[]> => {
   if (!session?.user.id) {
     return []; 
   }
-  return [{ id: session.user.id }];
+
+  
+return [{ id: session.user.id }];
 }
 
 
@@ -59,6 +62,7 @@ const Clinicians = async () => {
   const userIdValue = userId[0]?.id;
 
   return (
+
     // Pass user data to the client component
     <ClinicianLinkPage id={{id: userIdValue}} cliniciansList={allClinicians} />
   );

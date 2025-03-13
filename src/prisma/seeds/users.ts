@@ -1,18 +1,21 @@
-import { prisma } from '../client'
 import { Role } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import {
-  generateRandomClincianInformation,
-  generateRandomPatientInformation,
-  generateRandomResearcherInformation
-} from './seedHelpers'
+
 import bcrypt from 'bcryptjs'
+
+// import {
+//   generateRandomClincianInformation,
+//   generateRandomPatientInformation,
+//   generateRandomResearcherInformation
+// } from './seedHelpers'
+import { prisma } from '../client'
 
 const patient1SubmissionUuid1 = uuidv4()
 const responseValues = [0, 25, 50, 75, 100]
 
 const getRandomResponseValue = () => {
   const randomIndex = Math.floor(Math.random() * responseValues.length)
+
   return responseValues[randomIndex]
 }
 
@@ -20,6 +23,7 @@ const getRandomResponseValue = () => {
 function getRandomDateWithinDays(days: number = 30): Date {
   const now = new Date()
   const pastDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000) // Days in the past
+
   return new Date(pastDate.getTime() + Math.random() * (now.getTime() - pastDate.getTime()))
 }
 

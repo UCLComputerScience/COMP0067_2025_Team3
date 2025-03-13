@@ -4,9 +4,12 @@ interface EnhancedTableToolbarProps {
   numSelected: number
   handleDisplayDataOnClick: (numSelected: number) => void
 }
+
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const { numSelected, handleDisplayDataOnClick } = props
-  return (
+
+  
+return (
     <Toolbar
       sx={[
         {

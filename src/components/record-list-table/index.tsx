@@ -10,10 +10,11 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Checkbox from '@mui/material/Checkbox'
 import { Card, IconButton } from '@mui/material'
+
 import EnhancedTableToolbar from './EnhancedTableToolbar'
 import EnhancedTableHead from './EnhancedTableHead'
 import { getComparator } from './tableSortHelper'
-import { Data } from '@/app/(dashboard)/my-records/page'
+import type { Data } from '@/app/(dashboard)/my-records/page'
 
 export type Order = 'asc' | 'desc'
 
@@ -47,10 +48,11 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
-  const [rows, _] = React.useState<Data[]>(data)
+  const [rows, __unsedVar] = React.useState<Data[]>(data)
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === 'asc'
+
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
   }
@@ -58,9 +60,12 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelected = rows.map(n => n.submissionId)
+
       setSelected(newSelected)
+
       return
     }
+
     setSelected([])
   }
 
@@ -77,6 +82,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
     }
+
     setSelected(newSelected)
   }
 
@@ -94,7 +100,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
 
   const visibleRows = React.useMemo(
     () => [...rows].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, rows]
   )
 
   return (

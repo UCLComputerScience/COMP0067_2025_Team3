@@ -1,7 +1,9 @@
 import { TableHead, TableRow, TableCell, Checkbox, TableSortLabel, Box } from '@mui/material'
-import { Order } from '.'
+
 import { visuallyHidden } from '@mui/utils'
-import { Data } from '@/app/(dashboard)/my-records/page'
+
+import type { Order } from '.'
+import type { Data } from '@/app/(dashboard)/my-records/page'
 
 interface HeadCell {
   disablePadding: boolean
@@ -30,6 +32,7 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props
+
   const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property)
   }

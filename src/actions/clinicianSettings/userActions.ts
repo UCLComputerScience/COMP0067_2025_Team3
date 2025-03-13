@@ -1,6 +1,7 @@
 'use server';
 
 import bcrypt from 'bcryptjs'
+
 import { prisma } from '@/prisma/client'
 
 // Save User Profile Settings
@@ -33,7 +34,8 @@ export async function saveUserProfile(formData: {
         return { success: true };
     } catch (error) {
         console.error('Error saving user profile:', error);
-        return { success: false, message: 'Failed to update profile' };
+        
+return { success: false, message: 'Failed to update profile' };
     }
 }
 
@@ -62,7 +64,8 @@ export async function resetUserProfile(userId: string) {
         };
     } catch (error) {
         console.error('Error resetting user profile:', error);
-        return null;
+        
+return null;
     }
 }
 

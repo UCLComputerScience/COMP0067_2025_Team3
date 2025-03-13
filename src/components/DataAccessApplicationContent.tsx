@@ -10,12 +10,17 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 
 // Styled Component Imports
+import type { Control, FieldErrors } from 'react-hook-form';
+import { Controller } from 'react-hook-form'
+
+import FormHelperText from '@mui/material/FormHelperText'
+
 import DateRangePicker from './DateRangePicker'
 import LabeledCheckbox from './LabeledCheckbox'
 import FileUpload from './FileUpload'
-import { Control, Controller, FieldErrors } from 'react-hook-form'
-import { FormValues } from './DataAccessApplicationForm'
-import FormHelperText from '@mui/material/FormHelperText'
+import type { FormValues } from './DataAccessApplicationForm'
+
+
 import { DATA_ACCESS_ATTRIBUTES } from '@/constants'
 
 interface Props {
@@ -191,6 +196,7 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
                       const newValue = e.target.checked
                         ? [...(field.value || []), label]
                         : (field.value || []).filter(item => item !== label)
+
                       field.onChange(newValue)
                     }}
                   />
@@ -218,6 +224,7 @@ const DataAccessApplicationContent = ({ control, errors }: Props) => {
                       const newValue = e.target.checked
                         ? [...(field.value || []), label]
                         : (field.value || []).filter(item => item !== label)
+
                       field.onChange(newValue)
                     }}
                   />

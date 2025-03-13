@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
 
 // Component Imports
-import HorizontalNav, { Menu, MenuItem } from '@menu/horizontal-menu'
+import HorizontalNav, { Menu } from '@menu/horizontal-menu'
 import VerticalNavContent from './VerticalNavContent'
 
 // Hook Imports

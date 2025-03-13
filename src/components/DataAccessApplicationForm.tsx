@@ -1,24 +1,29 @@
 'use client'
 
 // MUI
+import { useEffect } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import CardActions from '@mui/material/CardActions'
 import { CardHeader } from '@mui/material'
-import DataAccessApplicationContent from './DataAccessApplicationContent'
-import DialogsAlert from './DialogsAlert'
-import { useRouter } from 'next/navigation'
 
 // Components
-import { createApplication, updateApplication } from '@/actions/researcher/applicationAction'
+
 import { toast } from 'react-toastify'
 
 // Form validation
 import { useForm } from 'react-hook-form'
-import { object, minLength, string, pipe, nonEmpty, array, file, InferInput, date, custom } from 'valibot'
+import type { InferInput } from 'valibot'
+import { object, minLength, string, pipe, nonEmpty, array, file, date } from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+
+import { createApplication, updateApplication } from '@/actions/researcher/applicationAction'
+import DialogsAlert from './DialogsAlert'
+import DataAccessApplicationContent from './DataAccessApplicationContent'
 
 export type FormValues = InferInput<typeof schema> & { applicationId?: number }
 
@@ -96,9 +101,11 @@ const DataAccessApplicationForm = ({
     const formData = new FormData()
 
     const { dateRange, ...rest } = data
+
     if (dateRange.expectedStartDate) {
       formData.append('expectedStartDate', dateRange.expectedStartDate.toISOString())
     }
+
     if (dateRange.expectedEndDate) {
       formData.append('expectedEndDate', dateRange.expectedEndDate.toISOString())
     }
@@ -118,6 +125,7 @@ const DataAccessApplicationForm = ({
     try {
       if (submitTypes === 'create') {
         const success = await createApplication(formData, session?.user?.id as string)
+
         if (success) {
           toast.success('🎉 Your data application was created successfully!')
           router.push('/my-profile')
@@ -126,6 +134,7 @@ const DataAccessApplicationForm = ({
         }
       } else if (submitTypes === 'update') {
         const success = await updateApplication(formData, session?.user?.id as string, formValues.applicationId)
+
         if (success) {
           toast.success('🎉 Your data application was updated successfully!')
           router.push(`/my-profile`)
@@ -144,9 +153,11 @@ const DataAccessApplicationForm = ({
       <form
         onSubmit={e => {
           e.preventDefault()
+
           if (!isValid) {
             toast.error('Oops! Some fields need attention. Please check your input and try again.')
           }
+
           handleSubmit(onSubmit)()
         }}
       >

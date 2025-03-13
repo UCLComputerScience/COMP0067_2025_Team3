@@ -7,11 +7,14 @@
 'use client';
 
 import { useState, useEffect, useRef} from 'react';
+
 import { useRouter } from 'next/navigation';
+
 import { Box, Button, Card, CardContent, Typography, TextField, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Alert} from '@mui/material';
 import Grid from '@mui/material/Grid2'
+
 import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions';
-import { AllClinicians, PatientId } from '@/app/(dashboard)/my-profile/patient-settings/add-clinician/page'
+import type { AllClinicians, PatientId } from '@/app/(dashboard)/my-profile/patient-settings/add-clinician/page'
 
 interface Props {
     id: PatientId;
@@ -35,6 +38,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
   const handleSearch = () => {
     setHasSearched(true);
+
     // Trigger the search/filter logic manually
     setFilteredClinicians(
         cliniciansList.filter(clinician => {
@@ -76,13 +80,15 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        
+return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
  
     const handleClinicianSave = async () => {
     if (selectedClinician) {
         try{
         const save = await saveNewClinician(selectedClinician.id, id.id);
+
         if (save.success) {
             alert ('Clinician added successfully');
             router.push('/my-profile/patient-settings')
@@ -91,6 +97,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
             // console.error("Error changing password.");
             setClinicianError(save.message);
         }
+
         // console.log("Selected Clinician:", selectedClinician);
         } catch (error) {
         // console.error('Failed to save changes:', error);
@@ -136,9 +143,11 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
     if (message.email) {
         try{
         const invite = await sendInvitation(message.email, message.message);
+
         if (!invite.success) {
             throw new Error ('Failed to send the invitation');
         }
+
         alert ('Invitation sent successfully')
         handleCloseModal()
         console.log("Invitation:", message);

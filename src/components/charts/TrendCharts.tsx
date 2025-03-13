@@ -1,10 +1,12 @@
 'use client'
+import { useEffect, useState } from 'react'
+
 import { Card, CardContent, Grid2, Typography } from '@mui/material'
+
 import CustomLegend from './CustomLegend'
 import RechartsBarChart from './recharts/RechartsBarChart'
 import RechartsRadarChart from './recharts/RechartsRadarChart'
 import SelectedMenu from '../menu/SelectedMenu'
-import { useEffect, useState } from 'react'
 
 interface DataEntry {
   subject: string
@@ -82,13 +84,15 @@ const TrendCharts = ({ data = demoData }: Props) => {
     setOptions(
       data.reduce<string[]>((acc, e) => {
         acc.push(e.subject)
+
         return acc
       }, [])
     )
-  }, [])
+  }, [data])
 
   useEffect(() => {
     const currKeys = Object.keys(data[0]).filter(e => e !== 'subject')
+
     setKeys(currKeys)
   }, [data])
 
@@ -97,11 +101,12 @@ const TrendCharts = ({ data = demoData }: Props) => {
 
     if (foundEntry) {
       const transformedDomainData = convertToDomainData(foundEntry)
+
       setDomainData(transformedDomainData)
     } else {
       console.warn('No matching subject found')
     }
-  }, [selectedDomainIndex, data])
+  }, [selectedDomainIndex, data, options])
 
   return (
     <>

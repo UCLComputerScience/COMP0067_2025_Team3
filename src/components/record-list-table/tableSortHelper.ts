@@ -12,7 +12,8 @@ export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
   if (numB < numA) return -1
   if (numB > numA) return 1
-  return 0
+  
+return 0
 }
 
 export function getComparator<Key extends keyof any>(
