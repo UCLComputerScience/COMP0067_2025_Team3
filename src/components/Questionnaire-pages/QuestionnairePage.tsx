@@ -12,6 +12,7 @@ import Question from '@/components/Questionnaire-pages/Question/Question'
 
 export default function QuestionPage({ domain, handleNext, handlePrev }) {
   const [questions, setQuestions] = useState([])
+  const [answers, setAnswers] = useState({})
 
   useEffect(() => {
     fetch('/api/questions')
@@ -22,6 +23,13 @@ export default function QuestionPage({ domain, handleNext, handlePrev }) {
         setQuestions(filteredQuestions)
       })
   }, [domain])
+
+  const handleRadioChange = (questionId, value) => {
+    setAnswers(prevAnswers => ({
+      ...prevAnswers,
+      [questionId]: value
+    }))
+  }
 
   return (
     <Box>
@@ -61,9 +69,14 @@ export default function QuestionPage({ domain, handleNext, handlePrev }) {
         </Grid2>
       </Grid2>
       <form>
-        {questions.map((questions, i) => (
-          <div key={i} id={questions.id}>
-            <Question question={questions.question} note={questions.note} />
+        {questions.map(questions => (
+          <div key={questions.id}>
+            <Question
+              onValueChange={event => handleRadioChange(questions.id, event)}
+              selectedValue={answers[questions.id] || ''}
+              question={questions.question}
+              note={questions.note}
+            />
             <br />
           </div>
         ))}
@@ -76,7 +89,9 @@ export default function QuestionPage({ domain, handleNext, handlePrev }) {
         </Grid2>
         <Box display='flex' justifyContent='flex-end'>
           {domain === 'Depression' ? (
-            <Button variant='contained'>Submit</Button>
+            <Button variant='contained' onClick={() => console.log(answers)}>
+              Submit
+            </Button>
           ) : (
             <Button onClick={handleNext} variant='contained'>
               Next

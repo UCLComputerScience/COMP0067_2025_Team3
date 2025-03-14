@@ -6,17 +6,11 @@ import { useState } from 'react'
 
 import { Box, Grid2, Typography, Radio } from '@mui/material'
 
-import styles from './styles.module.css'
-
 import Tooltip from '@mui/material/Tooltip'
 
-function Question({ question, note }) {
-  const [selectedValue, setSelectedValue] = useState('')
+import styles from './styles.module.css'
 
-  const handleChange = (value: string) => {
-    setSelectedValue(value)
-  }
-
+function Question({ question, note, selectedValue, onValueChange }) {
   return (
     <Box>
       <Grid2 container spacing={2}>
@@ -35,42 +29,42 @@ function Question({ question, note }) {
           <Radio
             className={styles.question_button}
             checked={selectedValue === 'Null'}
-            onChange={() => handleChange('Null')}
+            onChange={() => onValueChange('Null')}
           />
         </Grid2>
         <Grid2 size={1.71}>
           <Radio
             className={styles.question_button}
             checked={selectedValue === '0'}
-            onChange={() => handleChange('0')}
+            onChange={() => onValueChange('0')}
           />
         </Grid2>
         <Grid2 size={1.71}>
           <Radio
             className={styles.question_button}
             checked={selectedValue === '25'}
-            onChange={() => handleChange('25')}
+            onChange={() => onValueChange('25')}
           />
         </Grid2>
         <Grid2 size={1.71}>
           <Radio
             className={styles.question_button}
             checked={selectedValue === '50'}
-            onChange={() => handleChange('50')}
+            onChange={() => onValueChange('50')}
           />
         </Grid2>
         <Grid2 size={1.71}>
           <Radio
             className={styles.question_button}
             checked={selectedValue === '75'}
-            onChange={() => handleChange('75')}
+            onChange={() => onValueChange('75')}
           />
         </Grid2>
         <Grid2 size={1.71}>
           <Radio
             className={styles.question_button}
             checked={selectedValue === '100'}
-            onChange={() => handleChange('100')}
+            onChange={() => onValueChange('100')}
           />
         </Grid2>
       </Grid2>
