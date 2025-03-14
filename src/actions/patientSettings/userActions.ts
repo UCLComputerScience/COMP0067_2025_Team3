@@ -4,8 +4,6 @@ import bcrypt from 'bcryptjs'
 
 import { prisma } from '@/prisma/client'
 
-// import select from '@/@core/theme/overrides/select';
-
 // Save User Profile Settings
 export async function saveUserProfile(formData: {
   id: string
@@ -188,7 +186,7 @@ export async function deleteClinician(clinicianId: string, patientId: string) {
   }
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function sendInvitation(email: string, message: string) {
   try {
     console.log('Action to send email here.')

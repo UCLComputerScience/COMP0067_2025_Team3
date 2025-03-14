@@ -11,7 +11,6 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import { Button, CardActions } from '@mui/material'
 
-
 import { ApplicationStatus } from '@prisma/client'
 
 import { useSession } from 'next-auth/react'
@@ -37,8 +36,8 @@ export const getChipColor = (status: string) => {
   if (status === ApplicationStatus.PENDING) return 'warning'
   if (status === ApplicationStatus.APPROVED) return 'success'
   if (status === ApplicationStatus.REJECTED) return 'error'
-  
-return 'default'
+
+  return 'default'
 }
 
 const StudyList = () => {
@@ -79,7 +78,7 @@ const StudyList = () => {
   }, [session?.user.id])
 
   return (
-    <Card>
+    <Card className='w-full'>
       <CardHeader title='My Studies' className='pbe-4' />
       <CardContent className='flex flex-col gap-6'>
         <Typography>
@@ -92,7 +91,6 @@ const StudyList = () => {
         {studies.length !== 0 ? (
           studies.map((item, index) => <StudyItem key={index} item={item} handleDelete={handleDelete} />)
         ) : (
-
           // make it looks better
           <Typography className='flex md:flex-row md:justify-between gap-4 p-4 rounded bg-actionHover'>
             No studies found. Please add a study to proceed.
