@@ -9,6 +9,7 @@ import bcrypt from 'bcryptjs'
 //   generateRandomResearcherInformation
 // } from './seedHelpers'
 import { prisma } from '../client'
+import { createRandomDataAccessForResearcher } from './researcher'
 
 const patient1SubmissionUuid1 = uuidv4()
 const responseValues = [0, 25, 50, 75, 100]
@@ -94,6 +95,16 @@ export async function initialiseUsersAndResponses() {
     }
   })
 
+  const admin1 = await prisma.user.create({
+    data: {
+      email: 'admin1@mail.com',
+      hashedPassword: hashedPassword,
+      firstName: 'admin1',
+      lastName: 'admin1',
+      role: Role.ADMIN
+    }
+  })
+
   const patientInfo1 = await prisma.patientInfo.create({
     data: {
       userId: patient1.id,
@@ -116,7 +127,8 @@ export async function initialiseUsersAndResponses() {
   // const clinicianAccountData = generateRandomClincianInformation(5)
   // const researcherAccountData = generateRandomResearcherInformation(5)
 
-  console.log(patient1, clinician1, researcher1, patientInfo1)
+  console.log(patient1, clinician1, researcher1, patientInfo1, admin1)
+  await createRandomDataAccessForResearcher()
   await createQuestionResponses(patient1.id, patient1SubmissionUuid1)
   await createQuestionResponses(patient1.id)
   await createQuestionResponses(patient1.id)

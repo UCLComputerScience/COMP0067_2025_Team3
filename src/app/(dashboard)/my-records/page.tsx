@@ -1,4 +1,8 @@
+import { redirect } from 'next/navigation'
+
 import { getServerSession } from 'next-auth'
+
+import { Role } from '@prisma/client'
 
 import { prisma } from '@/prisma/client'
 
@@ -87,7 +91,11 @@ const Page = async () => {
   console.log('session:', session)
 
   if (!session?.user?.id) {
-    return <p>Unauthorized</p>
+    redirect('/not-found')
+  }
+
+  if (session.user.role != Role.PATIENT) {
+    // forbidden()
   }
 
   const data = await getResponseDataByUser(session.user.id)

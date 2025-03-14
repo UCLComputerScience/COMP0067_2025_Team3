@@ -11,7 +11,6 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import { Button, CardActions } from '@mui/material'
 
-
 import { ApplicationStatus } from '@prisma/client'
 
 import { useSession } from 'next-auth/react'
@@ -37,8 +36,8 @@ export const getChipColor = (status: string) => {
   if (status === ApplicationStatus.PENDING) return 'warning'
   if (status === ApplicationStatus.APPROVED) return 'success'
   if (status === ApplicationStatus.REJECTED) return 'error'
-  
-return 'default'
+
+  return 'default'
 }
 
 const StudyList = () => {

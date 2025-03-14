@@ -15,7 +15,6 @@ import { prisma } from '@/prisma/client'
 // utils
 import { mapDataAccessFields } from '@/libs/mappers'
 
-
 export async function createApplication(formData: FormData, userId: string) {
   try {
     const rawFormData = {
@@ -63,8 +62,8 @@ export async function createApplication(formData: FormData, userId: string) {
     return true
   } catch (error) {
     console.error('Form submission failed:', error)
-    
-return false
+
+    return false
   }
 }
 
@@ -299,7 +298,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     return true
   } catch (error) {
     console.error('Failed to update application:', error)
-    
-return false
+
+    return false
   }
 }

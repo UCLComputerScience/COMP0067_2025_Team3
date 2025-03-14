@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2'
 import AccountSettingForm from '@/components/AccountSettingForm'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 
-const ClincianSettings = () => {
+const AdminSettings = () => {
   return (
     <Grid container spacing={4}>
       <AccountSettingForm />
@@ -12,4 +12,4 @@ const ClincianSettings = () => {
   )
 }
 
-export default ClincianSettings
+export default AdminSettings
