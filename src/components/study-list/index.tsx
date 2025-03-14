@@ -91,6 +91,7 @@ const StudyList = () => {
         {studies.length !== 0 ? (
           studies.map((item, index) => <StudyItem key={index} item={item} handleDelete={handleDelete} />)
         ) : (
+
           // make it looks better
           <Typography className='flex md:flex-row md:justify-between gap-4 p-4 rounded bg-actionHover'>
             No studies found. Please add a study to proceed.
