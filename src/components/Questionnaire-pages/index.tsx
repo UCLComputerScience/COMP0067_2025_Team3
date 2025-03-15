@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { Stepper, Step, StepLabel, Typography } from '@mui/material'
 
+import PatientInfoForm from '@/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
 import StepperCustomDot from '../stepper-dot'
 import StepperWrapper from '@/@core/styles/stepper'
 import QuestionPage from './QuestionnairePage'
@@ -28,7 +29,7 @@ const stepperStyle = {
 const getStepContent = (step: number, handleNext: () => void, handlePrev: () => void) => {
   switch (step) {
     case 0:
-      return <QuestionPage domain={'Pain'} handleNext={handleNext} handlePrev={handlePrev} />
+      return <PatientInfoForm handleNext={handleNext} />
     case 1:
       return <QuestionPage domain={'Pain'} handleNext={handleNext} handlePrev={handlePrev} />
     case 2:
