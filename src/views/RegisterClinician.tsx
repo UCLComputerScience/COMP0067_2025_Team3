@@ -18,8 +18,8 @@ import {
 } from '@mui/material'
 
 import type { AccountDetailsForm } from './RegisterUser'
-import type { RegisterResult , registerUser, completeRegistration } from '@/actions/register/registerActions'
-
+import type { RegisterResult } from '@/actions/register/registerActions'
+import { registerUser, completeRegistration } from '@/actions/register/registerActions'
 
 // Define the props interface
 interface RegisterClinicianProps {
@@ -43,8 +43,7 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
   useEffect(() => {
     setSuccess(null)
 
-    
-return () => {
+    return () => {
       setSuccess(null)
       setError(null)
     }
