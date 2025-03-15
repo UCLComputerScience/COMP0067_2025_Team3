@@ -2,8 +2,9 @@
 
 import bcrypt from 'bcryptjs'
 
+import type { AccountStatus, Role } from '@prisma/client'
+
 import { prisma } from '@/prisma/client'
-import { AccountStatus, Role } from '@prisma/client'
 
 export const updateUserPassword = async (
   userId: string,

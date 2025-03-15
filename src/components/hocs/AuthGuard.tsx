@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { usePathname, useRouter } from 'next/navigation'
+
 import { useSession } from 'next-auth/react'
 import { Role } from '@prisma/client'
 
@@ -19,29 +21,34 @@ export default function AuthGuard({ children }: ChildrenType) {
 
     if (!session) {
       setIsLoading(false)
-      return
+      
+return
     }
 
     const userRole = session.user.role
 
     if (userRole !== Role.PATIENT && pathName.includes('my-records')) {
       router.push('/home')
-      return
+      
+return
     }
 
     if (userRole !== Role.RESEARCHER && pathName.includes('download')) {
       router.push('/home')
-      return
+      
+return
     }
 
     if (userRole !== Role.CLINICIAN && pathName.includes('all-patients')) {
       router.push('/home')
-      return
+      
+return
     }
 
     if (userRole !== Role.ADMIN && pathName.includes('all-users')) {
       router.push('/home')
-      return
+      
+return
     }
 
     setIsLoading(false)

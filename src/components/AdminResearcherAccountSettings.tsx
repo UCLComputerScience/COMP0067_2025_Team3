@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useForm, Controller } from 'react-hook-form'
 
 // MUI imports
@@ -25,8 +26,13 @@ import { capitalize } from 'lodash'
 
 // Types & API calls
 import { AccountStatus, Role } from '@prisma/client'
-import { UserProfileData } from '@/actions/all-users/userAction'
+
+// types
+import type { UserProfileData } from '@/actions/all-users/userAction'
+
+// functions
 import { updateUserStatusAndRoleById } from '@/actions/all-users/userAction'
+
 import DialogsAlert from './DialogsAlert'
 
 // Define props correctly

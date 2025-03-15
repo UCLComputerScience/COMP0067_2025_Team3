@@ -3,7 +3,6 @@
 // node.js
 import { existsSync } from 'fs'
 import fs from 'fs/promises'
-import { join } from 'path'
 
 // prisma
 import { revalidatePath } from 'next/cache'
@@ -199,6 +198,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
         documents: {
           // Delete all existing documents
           deleteMany: {},
+
           // Create new document records
           create: newDocumentPaths.map(docPath => ({
             documentPath: docPath
@@ -219,6 +219,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     return true
   } catch (error) {
     console.error('Failed to update application:', error)
+
     return false
   }
 }

@@ -1,10 +1,13 @@
-import { getUserProfile, UserProfileData } from '@/actions/all-users/userAction'
+import { notFound } from 'next/navigation'
+
+import { Role } from '@prisma/client'
+
+import Grid from '@mui/material/Grid2'
+
+import { getUserProfile } from '@/actions/all-users/userAction'
 import AccountSettingsCardAdminView from '@/components/AdminResearcherAccountSettings'
 import DataAccessCard from '@/components/DataAccessCard'
 import { prisma } from '@/prisma/client'
-import { Role } from '@prisma/client'
-import { notFound } from 'next/navigation'
-import Grid from '@mui/material/Grid2'
 
 const Page = async ({ params }: { params: { userId: string } }) => {
   const user = await getUserProfile(params.userId)
