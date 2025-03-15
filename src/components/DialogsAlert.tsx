@@ -11,19 +11,27 @@ import DialogContentText from '@mui/material/DialogContentText'
 
 interface Props {
   triggerButtonLabel: string
+  triggerButtonColor?: 'primary' | 'secondary' | 'inherit' | 'success' | 'error' | 'info' | 'warning'
+  triggerButtonVariant?: 'text' | 'outlined' | 'contained'
   dialogTitle: string
   dialogText: string
   confirmButtonLabel?: string
+  confirmButtonColor?: 'primary' | 'secondary' | 'inherit' | 'success' | 'error' | 'info' | 'warning'
+  confirmButtonVariant?: 'text' | 'outlined' | 'contained'
   cancelButtonLabel?: string
   onConfirm?: () => void
 }
 
 const DialogsAlert = ({
   triggerButtonLabel: buttonText,
+  triggerButtonColor = 'primary',
+  triggerButtonVariant = 'outlined',
   dialogTitle,
   dialogText = '',
   cancelButtonLabel = 'Disagree',
   confirmButtonLabel = 'agree',
+  confirmButtonColor = 'primary',
+  confirmButtonVariant = 'contained',
   onConfirm
 }: Props) => {
   // States
@@ -37,12 +45,13 @@ const DialogsAlert = ({
     if (onConfirm) {
       onConfirm()
     }
+
     handleClose()
   }
 
   return (
     <>
-      <Button variant='outlined' onClick={handleClickOpen}>
+      <Button variant={triggerButtonVariant} color={triggerButtonColor} onClick={handleClickOpen}>
         {buttonText}
       </Button>
       <Dialog
@@ -60,7 +69,7 @@ const DialogsAlert = ({
           <Button onClick={handleClose} variant='outlined' color='secondary'>
             {cancelButtonLabel}
           </Button>
-          <Button onClick={handleConfirm} variant='contained'>
+          <Button onClick={handleConfirm} variant={confirmButtonVariant} color={confirmButtonColor}>
             {confirmButtonLabel}
           </Button>
         </DialogActions>

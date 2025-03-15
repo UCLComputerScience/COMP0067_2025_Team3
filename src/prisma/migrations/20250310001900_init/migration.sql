@@ -8,7 +8,10 @@ CREATE TYPE "AccountStatus" AS ENUM ('PENDING', 'ACTIVE', 'INACTIVE');
 CREATE TYPE "ApplicationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "DataField" AS ENUM ('AGE', 'SEX', 'GENDER', 'ISSEXMATCHINGGENDER', 'ETHNICITY', 'RESIDENCECOUNTRY', 'DIAGNOSIS', 'DIAGNOSEDBY', 'MEDICATIONS', 'OTHERCONDITIONS', 'ACTIVITYLEVEL', 'EDUCATION', 'EMPLOYMENT', 'EXERCISELEVEL', 'LONGITUDINAL');
+CREATE TYPE "DataField" AS ENUM ('AGE', 'SEX', 'GENDER', 'ISSEXMATCHINGGENDER', 'ETHNICITY', 'RESIDENCECOUNTRY', 'DIAGNOSIS', 'DIAGNOSEDBY', 'MEDICATIONS', 'OTHERCONDITIONS', 'ACTIVITYLEVEL', 'EDUCATION', 'EMPLOYMENT', 'EXERCISELEVEL', 'LONGITUDINAL', 'SINGLEEPISODE');
+
+-- CreateEnum
+CREATE TYPE "RelationshipStatus" AS ENUM ('PENDING', 'CONNECTED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -17,11 +20,14 @@ CREATE TABLE "User" (
     "hashedPassword" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
+    "phoneNumber" TEXT,
+    "address" TEXT,
     "profession" TEXT,
     "registrationNumber" TEXT,
     "institution" TEXT,
     "agreedForResearch" BOOLEAN,
     "dateOfBirth" TIMESTAMP(3),
+    "hospitalNumber" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "role" "Role" NOT NULL DEFAULT 'PATIENT',
     "status" "AccountStatus" NOT NULL DEFAULT 'ACTIVE',
@@ -57,6 +63,8 @@ CREATE TABLE "PatientInfo" (
 CREATE TABLE "ClinicianPatient" (
     "patientId" UUID NOT NULL,
     "clinicianId" UUID NOT NULL,
+    "agreedToShareData" BOOLEAN NOT NULL DEFAULT false,
+    "status" "RelationshipStatus" NOT NULL DEFAULT 'PENDING',
 
     CONSTRAINT "ClinicianPatient_pkey" PRIMARY KEY ("patientId","clinicianId")
 );
@@ -80,6 +88,7 @@ CREATE TABLE "Response" (
     "questionId" INTEGER NOT NULL,
     "score" INTEGER NOT NULL,
     "label" TEXT NOT NULL,
+    "domain" TEXT NOT NULL,
     "submissionId" TEXT NOT NULL,
 
     CONSTRAINT "Response_pkey" PRIMARY KEY ("id")
@@ -98,17 +107,27 @@ CREATE TABLE "Application" (
     "expectedStartDate" TIMESTAMP(3) NOT NULL,
     "expectedEndDate" TIMESTAMP(3) NOT NULL,
     "summary" TEXT NOT NULL,
-    "ethicalFilePath" TEXT NOT NULL,
-    "otherFilePaths" JSONB NOT NULL,
+    "demographicDataAccess" "DataField"[],
+    "questionnaireAccess" "DataField"[],
 
     CONSTRAINT "Application_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Document" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "applicationId" INTEGER NOT NULL,
+    "documentPath" TEXT NOT NULL,
+
+    CONSTRAINT "Document_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "DataAccessPermission" (
     "id" SERIAL NOT NULL,
     "researcherId" UUID NOT NULL,
-    "dataField" "DataField" NOT NULL,
+    "dataFields" "DataField"[],
     "hasAccess" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -137,6 +156,9 @@ ALTER TABLE "Response" ADD CONSTRAINT "Response_questionId_fkey" FOREIGN KEY ("q
 
 -- AddForeignKey
 ALTER TABLE "Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Document" ADD CONSTRAINT "Document_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "Application"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "DataAccessPermission" ADD CONSTRAINT "DataAccessPermission_researcherId_fkey" FOREIGN KEY ("researcherId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

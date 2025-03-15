@@ -1,3 +1,6 @@
+import { ApplicationStatus, Role } from '@prisma/client'
+import { faker } from '@faker-js/faker'
+
 import {
   ACTIVITY_LEVEL_OPTIONS,
   DIAGNOSIS_OPTIONS,
@@ -7,8 +10,6 @@ import {
   SEX_OPTIONS,
   SPECIALIST_OPTIONS
 } from '@/constants'
-import { ApplicationStatus, Role } from '@prisma/client'
-import { faker } from '@faker-js/faker'
 
 /*
   single helper functions
@@ -22,6 +23,7 @@ export const generateRandomAge = (min: number = 13, max: number = 65): number =>
 
 export const generateRandomOptions = (options: readonly string[]): string => {
   const randomIndex = Math.floor(Math.random() * options.length)
+
   return options[randomIndex]
 }
 
@@ -104,6 +106,7 @@ export const generateRandomApplicationInformation = (userId: string) => {
 
   const statuses = Object.values(ApplicationStatus)
   const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
+
   return {
     userId,
     title: `Random Research Title ${randomNumber}`,
@@ -116,11 +119,12 @@ export const generateRandomApplicationInformation = (userId: string) => {
   }
 }
 
-/* 
-  Patient Responses 
+/*
+  Patient Responses
 */
 export const getRandomResponseValue = () => {
   const randomIndex = Math.floor(Math.random() * responseValues.length)
+
   return responseValues[randomIndex]
 }
 
@@ -128,5 +132,6 @@ export const getRandomResponseValue = () => {
 export function getRandomDateWithinDays(days: number = 30): Date {
   const now = new Date()
   const pastDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000) // Days in the past
+
   return new Date(pastDate.getTime() + Math.random() * (now.getTime() - pastDate.getTime()))
 }

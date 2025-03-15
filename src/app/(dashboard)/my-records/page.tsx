@@ -1,11 +1,21 @@
-import { prisma } from '@/prisma/client'
-import { groupBy } from 'lodash'
+import { redirect } from 'next/navigation'
+
+import { getServerSession } from 'next-auth'
+
 import { Role } from '@prisma/client'
+
+import { prisma } from '@/prisma/client'
+
+// Component
 import Records from '@/views/Records'
+
+// Auth
+
+import { authOptions } from '@/libs/auth'
 
 export interface Data {
   submissionId: string
-  date: string
+  date: Date
   neuromusculoskeletal: number
   pain: number
   fatigue: number
@@ -16,23 +26,45 @@ export interface Data {
   depression: number
 }
 
-const getCurrentUserFake = async () => {
-  const userId = await prisma.user.findFirst({
+interface DomainScore {
+  averageScore: number
+}
+
+interface SubmissionResult {
+  createdAt: Date
+  domains: Record<string, DomainScore>
+}
+
+const getResponseDataByUser = async (userId: string) => {
+  const responses = await prisma.response.groupBy({
+    by: ['domain', 'submissionId'],
     where: {
-      role: Role.PATIENT
+      userId
     },
-    select: {
-      id: true
+    _avg: {
+      score: true
+    },
+    _min: {
+      createdAt: true
     }
   })
 
-  return userId?.id ?? ''
-}
+  const groupedResults: Record<string, SubmissionResult> = {}
 
-const flattenSubmissionData = (
-  data: Record<string, { createdAt: string; domains: Record<string, { averageScore: number }> }>
-): Data[] => {
-  return Object.entries(data).map(([submissionId, submissionData]) => {
+  responses.forEach(result => {
+    if (!groupedResults[result.submissionId]) {
+      groupedResults[result.submissionId] = {
+        createdAt: result._min.createdAt!,
+        domains: {}
+      }
+    }
+
+    groupedResults[result.submissionId].domains[result.domain] = {
+      averageScore: result._avg.score!
+    }
+  })
+
+  const formattedData: Data[] = Object.entries(groupedResults).map(([submissionId, submissionData]) => {
     const { createdAt, domains } = submissionData
 
     return {
@@ -48,58 +80,25 @@ const flattenSubmissionData = (
       depression: domains['Depression']?.averageScore
     }
   })
-}
 
-const getResponseDataByUser = async (userId: string) => {
-  const responses = await prisma.response.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      createdAt: true,
-      userId: true,
-      score: true,
-      label: true,
-      submissionId: true,
-      question: {
-        select: { domain: true }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
-
-  const groupedBySubmission = groupBy(responses, response => response.submissionId)
-
-  const result: Record<string, { createdAt: string; domains: Record<string, { averageScore: number }> }> = {}
-
-  for (const [submissionId, responsesInSubmission] of Object.entries(groupedBySubmission)) {
-    const createdAt = responsesInSubmission[0]?.createdAt.toISOString()
-
-    const groupedByDomain = groupBy(responsesInSubmission, response => response.question.domain)
-
-    const domainScores: Record<string, { averageScore: number }> = {}
-
-    for (const [domain, responsesInDomain] of Object.entries(groupedByDomain)) {
-      const averageScore =
-        responsesInDomain.reduce((sum, response) => sum + response.score, 0) / responsesInDomain.length
-
-      domainScores[domain] = { averageScore }
-    }
-
-    result[submissionId] = {
-      createdAt,
-      domains: domainScores
-    }
-  }
-
-  return flattenSubmissionData(result)
+  return formattedData.sort((a, b) => b.date.getTime() - a.date.getTime())
 }
 
 const Page = async () => {
-  const userId = await getCurrentUserFake()
-  const data = await getResponseDataByUser(userId)
-  console.log(data)
+  const session = await getServerSession(authOptions)
+
+  // debug, and secure the end point and remove this later.
+  console.log('session:', session)
+
+  if (!session?.user?.id) {
+    redirect('/not-found')
+  }
+
+  if (session.user.role != Role.PATIENT) {
+    // forbidden()
+  }
+
+  const data = await getResponseDataByUser(session.user.id)
 
   return <Records data={data} />
 }

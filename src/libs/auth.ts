@@ -1,10 +1,14 @@
 // Third-party Imports
 import CredentialProvider from 'next-auth/providers/credentials'
+
 // import GoogleProvider from 'next-auth/providers/google'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@/prisma/client'
+
 import type { NextAuthOptions } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
+import bcrypt from 'bcryptjs'
+
+import { prisma } from '@/prisma/client'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
@@ -22,44 +26,38 @@ export const authOptions: NextAuthOptions = {
        * As we are using our own Sign-in page, we do not need to change
        * username or password attributes manually in following credentials object.
        */
-      credentials: {},
-      async authorize(credentials) {
+      credentials: {
+        email: { label: 'Email', type: 'email', placeholder: 'Email' },
+        password: { label: 'Password', type: 'password', placeholder: 'Password' }
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      async authorize(credentials, __req) {
         /*
          * You need to provide your own logic here that takes the credentials submitted and returns either
          * an object representing a user or value that is false/null if the credentials are invalid.
          * For e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
          * You can also use the `req` object to obtain additional parameters (i.e., the request IP address)
          */
-        const { email, password } = credentials as { email: string; password: string }
+        if (!credentials?.email || !credentials.password) return null
 
-        try {
-          // ** Login API Call to match the user credentials and receive user data in response along with his role
-          const res = await fetch(`${process.env.API_URL}/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-          })
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        })
 
-          const data = await res.json()
+        if (!user) return null
 
-          if (res.status === 401) {
-            throw new Error(JSON.stringify(data))
-          }
+        const passwordsMatch = await bcrypt.compare(credentials.password, user.hashedPassword)
 
-          if (res.status === 200) {
-            /*
-             * Please unset all the sensitive information of the user either from API response or before returning
-             * user data below. Below return statement will set the user object in the token and the same is set in
-             * the session which will be accessible all over the app.
-             */
-            return data
-          }
+        if (!passwordsMatch) return null
 
-          return null
-        } catch (e: any) {
-          throw new Error(e.message)
+        console.log('auth.ts: user', user)
+
+        return {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
         }
       }
     })
@@ -108,7 +106,8 @@ export const authOptions: NextAuthOptions = {
          * For adding custom parameters to user in session, we first need to add those parameters
          * in token which then will be available in the `session()` callback
          */
-        token.name = user.name
+        token.role = user.role
+        token.id = user.id
       }
 
       return token
@@ -116,7 +115,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
-        session.user.name = token.name
+        session.user.role = token.role
+        session.user.id = token.id
       }
 
       return session

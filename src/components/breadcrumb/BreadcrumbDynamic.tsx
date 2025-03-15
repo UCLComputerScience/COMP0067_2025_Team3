@@ -1,9 +1,13 @@
 'use client'
 
-import { Breadcrumbs, Typography } from '@mui/material'
-import { usePathname } from 'next/navigation'
-import Link from '../Link'
 import { useEffect, useState } from 'react'
+
+import { usePathname } from 'next/navigation'
+
+import { Breadcrumbs, Typography } from '@mui/material'
+
+import Link from '../Link'
+
 
 const BreadcrumbDynamic = () => {
   const paths = usePathname()
@@ -19,6 +23,7 @@ const BreadcrumbDynamic = () => {
 
   useEffect(() => {
     const pathNames = paths.split('/').filter(path => path)
+
     setClientPath(pathNames)
   }, [paths])
 
@@ -37,13 +42,23 @@ const BreadcrumbDynamic = () => {
       </Typography>
 
       {clientPath.map((link, index) => {
-        let href = `/${clientPath.slice(0, index + 1).join('/')}`
-        let itemLink = formatLinkName(link)
+        const href = `/${clientPath.slice(0, index + 1).join('/')}`
+        const itemLink = formatLinkName(link)
+
+        if (link === 'study-application') {
+          return (
+            <Typography key={index} style={{ color: 'disabled ' }}>
+              {itemLink}
+            </Typography>
+          )
+        }
 
         if (paths === href) {
           return <Typography key={index}>{itemLink}</Typography>
         }
-        return (
+
+        
+return (
           <Link href={href} key={index}>
             {itemLink}
           </Link>

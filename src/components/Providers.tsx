@@ -2,6 +2,7 @@
 import type { ChildrenType, Direction } from '@core/types'
 
 // Context Imports
+import { NextAuthProvider } from '@/contexts/NextAuthProvider'
 import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
 import { SettingsProvider } from '@core/contexts/settingsContext'
 import ThemeProvider from '@components/theme'
@@ -26,14 +27,16 @@ const Providers = async (props: Props) => {
   const systemMode = await getSystemMode()
 
   return (
-    <VerticalNavProvider>
-      <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
-        <ThemeProvider direction={direction} systemMode={systemMode}>
-          {children}
-          <AppReactToastify direction={direction} hideProgressBar />
-        </ThemeProvider>
-      </SettingsProvider>
-    </VerticalNavProvider>
+    <NextAuthProvider>
+      <VerticalNavProvider>
+        <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
+          <ThemeProvider direction={direction} systemMode={systemMode}>
+            {children}
+            <AppReactToastify direction={direction} hideProgressBar />
+          </ThemeProvider>
+        </SettingsProvider>
+      </VerticalNavProvider>
+    </NextAuthProvider>
   )
 }
 

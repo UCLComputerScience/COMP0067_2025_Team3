@@ -1,13 +1,15 @@
 import { Toolbar, alpha, Typography, Button } from '@mui/material'
-import { toast } from 'react-toastify'
 
 interface EnhancedTableToolbarProps {
   numSelected: number
   handleDisplayDataOnClick: (numSelected: number) => void
 }
+
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const { numSelected, handleDisplayDataOnClick } = props
-  return (
+
+  
+return (
     <Toolbar
       sx={[
         {

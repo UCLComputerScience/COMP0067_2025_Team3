@@ -1,5 +1,6 @@
 import { prisma } from './client'
 import { initialiseUsersAndResponses } from './seeds/users'
+
 async function initialiseQuestions() {
   const NMSK1 = await prisma.question.create({
     data: {
@@ -9,6 +10,7 @@ async function initialiseQuestions() {
       code: 'NMSK1'
     }
   })
+
   const NMSK2 = await prisma.question.create({
     data: {
       question: 'Muscle weakness',
@@ -17,6 +19,7 @@ async function initialiseQuestions() {
       code: 'NMSK2'
     }
   })
+
   const NMSK3 = await prisma.question.create({
     data: {
       question: 'Muscle spasms',
@@ -25,6 +28,7 @@ async function initialiseQuestions() {
       code: 'NMSK3'
     }
   })
+
   const NMSK4 = await prisma.question.create({
     data: {
       question: 'Problems with balance and proprioception (sensing the position of your body and limbs)',
@@ -33,6 +37,7 @@ async function initialiseQuestions() {
       code: 'NMSK4'
     }
   })
+
   const NMSK5 = await prisma.question.create({
     data: {
       question: 'Tingling sensations or loss of sensation in your limbs and/or other body areas',
@@ -49,6 +54,7 @@ async function initialiseQuestions() {
       code: 'PAIN1'
     }
   })
+
   const PAIN2 = await prisma.question.create({
     data: {
       question: 'Widespread pain in other areas of your body, such as legs, back, arms, spine …',
@@ -56,6 +62,7 @@ async function initialiseQuestions() {
       code: 'PAIN2'
     }
   })
+
   const PAIN3 = await prisma.question.create({
     data: {
       question: 'Headaches or migraines',
@@ -63,6 +70,7 @@ async function initialiseQuestions() {
       code: 'PAIN3'
     }
   })
+
   const PAIN4 = await prisma.question.create({
     data: {
       question: 'Pain provoked by sensations that would not be painful to most people',
@@ -80,6 +88,7 @@ async function initialiseQuestions() {
       code: 'FATIGUE1'
     }
   })
+
   const FATIGUE2 = await prisma.question.create({
     data: {
       question: 'Feeling mentally tired after efforts that are mild or minimal for others of your age',
@@ -88,6 +97,7 @@ async function initialiseQuestions() {
       code: 'FATIGUE2'
     }
   })
+
   const FATIGUE3 = await prisma.question.create({
     data: {
       question: 'Difficulty falling asleep, or difficulty staying asleep',
@@ -103,6 +113,7 @@ async function initialiseQuestions() {
       code: 'GI1'
     }
   })
+
   const GI2 = await prisma.question.create({
     data: {
       question: 'Diarrhoea and/or constipation',
@@ -110,6 +121,7 @@ async function initialiseQuestions() {
       code: 'GI2'
     }
   })
+
   const GI3 = await prisma.question.create({
     data: {
       question: 'Nausea and/or vomiting',
@@ -117,6 +129,7 @@ async function initialiseQuestions() {
       code: 'GI3'
     }
   })
+
   const GI4 = await prisma.question.create({
     data: {
       question: 'Reflux or regurgitation or difficulty swallowing',
@@ -133,6 +146,7 @@ async function initialiseQuestions() {
       code: 'CD1'
     }
   })
+
   const CD2 = await prisma.question.create({
     data: {
       question:
@@ -141,6 +155,7 @@ async function initialiseQuestions() {
       code: 'CD2'
     }
   })
+
   const CD3 = await prisma.question.create({
     data: {
       question:
@@ -149,6 +164,7 @@ async function initialiseQuestions() {
       code: 'CD3'
     }
   })
+
   const CD4 = await prisma.question.create({
     data: {
       question:
@@ -165,6 +181,7 @@ async function initialiseQuestions() {
       code: 'UG1'
     }
   })
+
   const UG2 = await prisma.question.create({
     data: {
       question:
@@ -173,6 +190,7 @@ async function initialiseQuestions() {
       code: 'UG2'
     }
   })
+
   const UG3 = await prisma.question.create({
     data: {
       question:
@@ -181,6 +199,7 @@ async function initialiseQuestions() {
       code: 'UG3'
     }
   })
+
   const UG4 = await prisma.question.create({
     data: {
       question: 'Unexplained genital discomfort',
@@ -188,6 +207,7 @@ async function initialiseQuestions() {
       code: 'UG4'
     }
   })
+
   const UG5 = await prisma.question.create({
     data: {
       question:
@@ -205,6 +225,7 @@ async function initialiseQuestions() {
       code: 'ANX1'
     }
   })
+
   const ANX2 = await prisma.question.create({
     data: {
       question: 'Feeling worried, restless or unable to relax',
@@ -212,6 +233,7 @@ async function initialiseQuestions() {
       code: 'ANX2'
     }
   })
+
   const ANX3 = await prisma.question.create({
     data: {
       question: 'Feeling afraid as if something awful might happen',
@@ -227,6 +249,7 @@ async function initialiseQuestions() {
       code: 'DEP1'
     }
   })
+
   const DEP2 = await prisma.question.create({
     data: {
       question: 'Feeling as though there are no solutions to your health problems',
@@ -234,6 +257,7 @@ async function initialiseQuestions() {
       code: 'DEP2'
     }
   })
+
   const DEP3 = await prisma.question.create({
     data: {
       question: 'Little interest or pleasure in doing things',
@@ -241,6 +265,7 @@ async function initialiseQuestions() {
       code: 'DEP3'
     }
   })
+
   console.log(
     NMSK1,
     NMSK2,

@@ -27,3 +27,17 @@ export function mapDataAccessFields(selectedValues: string[], fieldType: 'demogr
 
   return selectedValues.map(value => fieldMap[value]).filter((value): value is DataField => value !== undefined)
 }
+
+const reverseDemographicFieldMap: Record<string, string> = Object.fromEntries(
+  Object.entries(demographicFieldMap).map(([key, value]) => [value, key])
+) as Record<string, string>
+
+const reverseQuestionnaireFieldMap: Record<string, string> = Object.fromEntries(
+  Object.entries(questionnaireFieldMap).map(([key, value]) => [value, key])
+) as Record<string, string>
+
+export function reverseMapDataAccessFields(selectedValues: string[], fieldType: 'demographic' | 'questionnaire') {
+  const reverseFieldMap = fieldType === 'demographic' ? reverseDemographicFieldMap : reverseQuestionnaireFieldMap
+
+  return selectedValues.map(value => reverseFieldMap[value]).filter((value): value is string => value !== undefined)
+}

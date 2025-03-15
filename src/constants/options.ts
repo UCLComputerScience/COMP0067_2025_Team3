@@ -75,7 +75,9 @@ const DATA_ACCESS_ATTRIBUTES = {
     'Person who Give Diagnosis',
     'Activity Levels/Exercises',
     'Education Levels',
-    'Employment Status'
+    'Employment Status',
+    'Medications',
+    'Other Conditions'
   ],
   questionnaire: ['Single episode questionnaire', 'Longitudinal data (multiple questionnaires over time)']
 } as const

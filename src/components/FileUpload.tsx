@@ -66,6 +66,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
     },
     onDrop: (acceptedFiles: File[]) => {
       const updatedFiles = [...files, ...acceptedFiles]
+
       setFiles(updatedFiles)
       if (onChange) onChange(updatedFiles) // Notify parent of file change
     }
@@ -81,6 +82,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
 
   const handleRemoveFile = (file: FileProp) => {
     const updatedFiles = files.filter(f => f.name !== file.name)
+
     setFiles(updatedFiles)
     if (onChange) onChange(updatedFiles) // Notify parent of file change
   }
@@ -120,6 +122,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
             <i className='ri-upload-2-line' />
           </CustomAvatar>
           <Typography variant='h5'>Drag and Drop Your File Here.</Typography>
+          <Typography color='text.secondary'>Max size of 10 MB overall</Typography>
           <Typography color='text.secondary'>Allowed *.jpeg, *.jpg, *.png, *.doc, *.docx, *.pdf</Typography>
           <Typography color='text.disabled'>or</Typography>
           <Button variant='outlined' size='small'>
@@ -134,7 +137,7 @@ const FileUpload = ({ files: propFiles, onChange }: Props) => {
             <Button color='error' variant='outlined' onClick={handleRemoveAllFiles}>
               Remove All
             </Button>
-            <Button variant='contained'>Upload Files</Button>
+            {/* <Button variant='contained'>Upload Files</Button> */}
           </div>
         </>
       ) : null}

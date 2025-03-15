@@ -1,12 +1,22 @@
-import { prisma } from '../client'
 import { Role } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
+
+import bcrypt from 'bcryptjs'
+
+// import {
+//   generateRandomClincianInformation,
+//   generateRandomPatientInformation,
+//   generateRandomResearcherInformation
+// } from './seedHelpers'
+import { prisma } from '../client'
+import { createRandomDataAccessForResearcher } from './researcher'
 
 const patient1SubmissionUuid1 = uuidv4()
 const responseValues = [0, 25, 50, 75, 100]
 
 const getRandomResponseValue = () => {
   const randomIndex = Math.floor(Math.random() * responseValues.length)
+
   return responseValues[randomIndex]
 }
 
@@ -14,6 +24,7 @@ const getRandomResponseValue = () => {
 function getRandomDateWithinDays(days: number = 30): Date {
   const now = new Date()
   const pastDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000) // Days in the past
+
   return new Date(pastDate.getTime() + Math.random() * (now.getTime() - pastDate.getTime()))
 }
 
@@ -23,7 +34,7 @@ async function createQuestionResponses(
   timestamp: Date = getRandomDateWithinDays() // Generate random date
 ) {
   const questions = await prisma.question.findMany({
-    select: { id: true }
+    select: { id: true, domain: true }
   })
 
   const responsesData = questions.map(question => ({
@@ -32,6 +43,7 @@ async function createQuestionResponses(
     submissionId,
     score: getRandomResponseValue(),
     label: '',
+    domain: question.domain,
     createdAt: timestamp // Assigning random timestamp
   }))
 
@@ -45,10 +57,12 @@ async function createQuestionResponses(
 }
 
 export async function initialiseUsersAndResponses() {
+  const hashedPassword = await bcrypt.hash('1234567', 10)
+
   const patient1 = await prisma.user.create({
     data: {
       email: 'patient1@mail.com',
-      hashedPassword: '',
+      hashedPassword: hashedPassword,
       firstName: 'patient1',
       lastName: 'patient1',
       agreedForResearch: true,
@@ -60,7 +74,7 @@ export async function initialiseUsersAndResponses() {
   const clinician1 = await prisma.user.create({
     data: {
       email: 'clinician1@mail.com',
-      hashedPassword: '',
+      hashedPassword: hashedPassword,
       firstName: 'clinician1',
       lastName: 'clinician1',
       profession: 'General Practitioner',
@@ -73,11 +87,21 @@ export async function initialiseUsersAndResponses() {
   const researcher1 = await prisma.user.create({
     data: {
       email: 'researcher1@mail.com',
-      hashedPassword: '',
+      hashedPassword: hashedPassword,
       firstName: 'researcher1',
       lastName: 'researcher1',
       institution: 'UCL',
       role: Role.RESEARCHER
+    }
+  })
+
+  const admin1 = await prisma.user.create({
+    data: {
+      email: 'admin1@mail.com',
+      hashedPassword: hashedPassword,
+      firstName: 'admin1',
+      lastName: 'admin1',
+      role: Role.ADMIN
     }
   })
 
@@ -99,7 +123,12 @@ export async function initialiseUsersAndResponses() {
     }
   })
 
-  console.log(patient1, clinician1, researcher1, patientInfo1)
+  // const patientAccountData = generateRandomPatientInformation(10)
+  // const clinicianAccountData = generateRandomClincianInformation(5)
+  // const researcherAccountData = generateRandomResearcherInformation(5)
+
+  console.log(patient1, clinician1, researcher1, patientInfo1, admin1)
+  await createRandomDataAccessForResearcher()
   await createQuestionResponses(patient1.id, patient1SubmissionUuid1)
   await createQuestionResponses(patient1.id)
   await createQuestionResponses(patient1.id)

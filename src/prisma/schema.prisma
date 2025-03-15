@@ -78,9 +78,9 @@ model ClinicianPatient {
   clinicianId String @db.Uuid
   patient     User   @relation(fields: [patientId], references: [id], name: "PatientToClinician")
   clinician   User   @relation(fields: [clinicianId], references: [id], name: "ClinicianToPatient")
-  agreedToShareData Boolean @default(false)
-  status RelationshipStatus @default(PENDING)
 
+  agreedToShareData Boolean            @default(false)
+  status            RelationshipStatus @default(PENDING)
 
   @@id([patientId, clinicianId])
 }
@@ -107,6 +107,7 @@ model Response {
 
   score Int
   label String
+  domain String
 
   submissionId String
 }
@@ -128,8 +129,20 @@ model Application {
   summary           String
 
   // temp, eventually stored in the cloud service, and stored the path here
-  ethicalFilePath String
-  otherFilePaths  Json
+  documents Document[]
+
+  // datafields application
+  demographicDataAccess DataField[]
+  questionnaireAccess DataField[]
+}
+
+model Document {
+  id            Int         @id @default(autoincrement())
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade) 
+  applicationId Int
+
+  documentPath String
 }
 
 model DataAccessPermission {
@@ -137,10 +150,10 @@ model DataAccessPermission {
   researcher   User   @relation(fields: [researcherId], references: [id])
   researcherId String @db.Uuid
 
-  dataField DataField
-  hasAccess Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  dataFields DataField[]
+  hasAccess Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   expiresAt DateTime
 }
 
@@ -179,6 +192,7 @@ enum DataField {
   EMPLOYMENT
   EXERCISELEVEL
   LONGITUDINAL
+  SINGLEEPISODE
 }
 
 enum RelationshipStatus {

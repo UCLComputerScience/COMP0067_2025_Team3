@@ -10,10 +10,11 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Checkbox from '@mui/material/Checkbox'
 import { Card, IconButton } from '@mui/material'
+
 import EnhancedTableToolbar from './EnhancedTableToolbar'
 import EnhancedTableHead from './EnhancedTableHead'
 import { getComparator } from './tableSortHelper'
-import { Data } from '@/app/(dashboard)/my-records/page'
+import type { Data } from '@/app/(dashboard)/my-records/page'
 
 export type Order = 'asc' | 'desc'
 
@@ -24,8 +25,13 @@ interface Props {
   handleDisplayDataOnClick: (numSelected: number) => void
 }
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
+const formatDate = (dateInput: string | Date): string => {
+  const date = dateInput instanceof Date ? dateInput : new Date(dateInput)
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date input')
+  }
+
   return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -42,10 +48,11 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
-  const [rows, _] = React.useState<Data[]>(data)
+  const [rows] = React.useState<Data[]>(data)
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === 'asc'
+
     setOrder(isAsc ? 'desc' : 'asc')
     setOrderBy(property)
   }
@@ -53,9 +60,12 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelected = rows.map(n => n.submissionId)
+
       setSelected(newSelected)
+
       return
     }
+
     setSelected([])
   }
 
@@ -72,6 +82,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
     }
+
     setSelected(newSelected)
   }
 
@@ -89,16 +100,11 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
 
   const visibleRows = React.useMemo(
     () => [...rows].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, rows]
   )
 
   return (
     <Card>
-      {/* <CardContent className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
-        <Button variant='outlined' color='secondary' startIcon={<i className='ri-upload-2-line' />}>
-          Export
-        </Button>
-      </CardContent> */}
       <EnhancedTableToolbar numSelected={selected.length} handleDisplayDataOnClick={handleDisplayDataOnClick} />
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby='tableTitle' size='medium'>

@@ -1,6 +1,7 @@
 'use server';
 
 import bcrypt from 'bcryptjs'
+
 import { prisma } from '@/prisma/client'
 
 // Save User Profile Settings
@@ -11,8 +12,9 @@ export async function saveUserProfile(formData: {
     email: string;
     phoneNumber?: string | null;
     address?: string | null;
-    hostipallNumber?: string | null;
-    dateOfBirth?: Date | null;
+    institution?: string | null;
+    registrationNumber?: string | null;
+    profession?: string | null;
 }) {
     try {
         await prisma.user.update({
@@ -23,15 +25,17 @@ export async function saveUserProfile(formData: {
                 email: formData.email,
                 phoneNumber: formData.phoneNumber === "" ? null : formData.phoneNumber,
                 address: formData.address === "" ? null : formData.address,
-                hospitalNumber: formData.hostipallNumber === "" ? null : formData.hostipallNumber,
-                dateOfBirth: formData.dateOfBirth ? null : formData.dateOfBirth,
+                institution: formData.institution === "" ? null : formData.institution,
+                registrationNumber: formData.registrationNumber === "" ? null : formData.registrationNumber,
+                profession: formData.profession === "" ? null : formData.profession,
             },
         });
 
         return { success: true };
     } catch (error) {
         console.error('Error saving user profile:', error);
-        return { success: false, message: 'Failed to update profile' };
+        
+return { success: false, message: 'Failed to update profile' };
     }
 }
 
@@ -47,65 +51,50 @@ export async function resetUserProfile(userId: string) {
                 email: true,
                 phoneNumber: true, 
                 address: true,
-                hospitalNumber: true,
-                agreedForResearch: false,
-                dateOfBirth: true,
+                institution: true,
+                registrationNumber: false,
+                profession: true,
             },
         });
 
         if (!user) throw new Error('User not found');
 
         return {
-            ...user,
-            dateOfBirth: user.dateOfBirth ?? new Date(),
+            ...user
         };
     } catch (error) {
         console.error('Error resetting user profile:', error);
-        return null;
+        
+return null;
     }
 }
 
 // Change password
 export const changeUserPassword = async (userId: string, { currentPassword, newPassword }: { currentPassword: string, newPassword: string }) => {
-    // Get the current user from the database (replace `userId` with the actual user ID)
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-  
-    if (!user) {
-      return false // User not found
-    }
-  
-    // Verify the current password with bcrypt
-    const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword)
-    
-    if (!isMatch) {
-      return false // Current password doesn't match
-    }
-  
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-  
-    // Update the password in the database
-    await prisma.user.update({
-      where: { id: 'userId' },
-      data: { hashedPassword: hashedPassword }
-    })
-  
-    return true // Password updated successfully
-  }
-
-
-// Save User Profile Settings
-export async function saveResearch(agreedForResearch: {agreedForResearch: boolean}, formData: {id: string}) {
     try {
+    // Get the current user from the database (replace `userId` with the actual user ID)
+        const user = await prisma.user.findUnique({ where: { id: userId } })
+    
+        if (!user) throw new Error('User not found');
+    
+        // Verify the current password with bcrypt
+        const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword)
+        
+        if (!isMatch) return { success: false, message: "Current password is incorrect" };
+    
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+    
+        // Update the password in the database
         await prisma.user.update({
-            where: { id: formData.id },
-            data: {
-                agreedForResearch: agreedForResearch.agreedForResearch
-            },
-        });
-        return { success: true, value : agreedForResearch };
+        where: { id: userId },
+        data: { hashedPassword: hashedPassword }
+        })
+    
+        return { success: true, message: "Password changed successfully." }
     } catch (error) {
-        console.error('Error saving user profile:', error);
-        return { success: false, message: 'Failed to update profile' };
+        // console.error('Error changing password:', error)
+        return {success: false, message: 'Failed to change password'}
     }
-}
+    }
+
