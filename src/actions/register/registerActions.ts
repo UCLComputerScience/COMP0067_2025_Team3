@@ -1,8 +1,10 @@
 'use server';
 
-import { hash } from 'bcryptjs';
-import { prisma } from '@/prisma/client';
 import { revalidatePath } from 'next/cache';
+
+import { hash } from 'bcryptjs';
+
+import { prisma } from '@/prisma/client';
 
 
 export interface Clinician { id: string;firstName: string;lastName: string;institution: string;email: string;}
@@ -23,6 +25,7 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterResu
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({ where: { email: data.email }});
+
     if (existingUser) {
       return { success: false, error: 'Email already in use'
       };
@@ -41,10 +44,13 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterResu
 
     // Create the user with all provided fields
     const user = await prisma.user.create({ data: { email: data.email, hashedPassword, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined, address: data.address,   phoneNumber: data.phoneNumber,      profession: data.profession,  registrationNumber: data.registrationNumber,  institution: data.institution,       role, status: 'PENDING',  }});
-    return { success: true, userId: user.id};
+
+    
+return { success: true, userId: user.id};
   } catch (error) {
     console.error('Error registering user:', error);
-    return { success: false, error: 'Failed to register user. Please try again.'
+    
+return { success: false, error: 'Failed to register user. Please try again.'
     };
   }
 }
@@ -86,7 +92,8 @@ export async function saveDataPrivacyPreferences(
     };
   } catch (error) {
     console.error('Failed to save data privacy preferences:', error);
-    return { success: false, error: 'Failed to save data privacy preferences. Please try again.',};
+    
+return { success: false, error: 'Failed to save data privacy preferences. Please try again.',};
   }
 }
 
@@ -112,7 +119,8 @@ export async function completeRegistration( userId: string, data: DataPrivacyFor
 
   } catch (error) {
     console.error('Error completing registration:', error);
-    return {
+    
+return {
       success: false,
       error: error instanceof Error 
         ? error.message 
@@ -145,7 +153,8 @@ export async function searchClinicians(searchParams: Record<string, string>) {
     return { success: true, clinicians,};
   } catch (error) {
     console.error('Error searching for clinicians:', error);
-    return { success: false, error: 'Failed to search for clinicians. Please try again.', clinicians: []};
+    
+return { success: false, error: 'Failed to search for clinicians. Please try again.', clinicians: []};
   }
 }
 
@@ -163,6 +172,7 @@ export async function checkUserDuplicates(email: string, phoneNumber?: string, r
     return { emailExists, phoneExists, registrationNumberExists };
   } catch (error) {
     console.error("Error checking duplicates:", error);
-    return { emailExists: false, phoneExists: false, registrationNumberExists: false };
+    
+return { emailExists: false, phoneExists: false, registrationNumberExists: false };
   }
 }

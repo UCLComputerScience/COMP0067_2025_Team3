@@ -1,19 +1,21 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
-import { AccountDetailsForm } from './RegisterUser'
 import React, { useState, useEffect } from 'react'
+
+import { useRouter } from 'next/navigation'
+
+import { useForm } from 'react-hook-form'
+
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { registerUser, completeRegistration } from '@/actions/register/registerActions'
-import { createApplication } from '@/actions/researcher/applicationAction'
-import DataAccessApplicationContent from '@/components/DataAccessApplicationContent'
-import { object, minLength, string, pipe, nonEmpty, array, file, date, InferInput } from 'valibot'
+
+import type { InferInput } from 'valibot'
+
+import { object, minLength, string, pipe, nonEmpty, array, file, date } from 'valibot'
+
 import {
   Box,
   Typography,
   Button,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -22,6 +24,12 @@ import {
   CardContent,
   CircularProgress
 } from '@mui/material'
+
+import type { AccountDetailsForm } from './RegisterUser'
+
+import { registerUser, completeRegistration } from '@/actions/register/registerActions'
+import { createApplication } from '@/actions/researcher/applicationAction'
+import DataAccessApplicationContent from '@/components/DataAccessApplicationContent'
 
 interface RegisterResearcherProps {
   onBack: () => void
@@ -70,6 +78,7 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
   // Effect to control success message visibility
   useEffect(() => {
     setSuccess(null)
+
     return () => {
       setSuccess(null)
     }
@@ -101,11 +110,13 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
       setIsLoading(true)
       setError(null)
       let newUserId: string
+
       if (userId) {
         newUserId = userId
         console.log('Using existing userId:', userId)
       } else {
         const fullPhoneNumber = formData.phoneNumber || ''
+
         const registerResult = await registerUser({
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -119,12 +130,15 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
           institution: formData.institution,
           accountType: 'researcher'
         })
+
         if (!registerResult.success) {
           throw new Error(registerResult.error || 'Failed to register user')
         }
+
         if (!registerResult.userId) {
           throw new Error('User ID is missing after successful registration')
         }
+
         newUserId = registerResult.userId
       }
 
@@ -140,9 +154,11 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
 
       const formDataApp = new FormData()
       const { dateRange, ...rest } = data
+
       if (dateRange.expectedStartDate) {
         formDataApp.append('expectedStartDate', dateRange.expectedStartDate.toISOString())
       }
+
       if (dateRange.expectedEndDate) {
         formDataApp.append('expectedEndDate', dateRange.expectedEndDate.toISOString())
       }
@@ -168,9 +184,11 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
       })
 
       const applicationSuccess = await createApplication(formDataApp, newUserId)
+
       if (!applicationSuccess) {
         throw new Error('Application creation failed')
       }
+
       setSuccess('Congratulations! Your account has been created successfully!')
       setOpenSuccessDialog(true)
     } catch (err) {
