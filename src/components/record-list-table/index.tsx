@@ -14,7 +14,7 @@ import { Card, IconButton } from '@mui/material'
 import EnhancedTableToolbar from './EnhancedTableToolbar'
 import EnhancedTableHead from './EnhancedTableHead'
 import { getComparator } from './tableSortHelper'
-import type { Data } from '@/app/(dashboard)/my-records/page'
+import type { Data } from '@/app/(private)/my-records/page'
 
 export type Order = 'asc' | 'desc'
 

@@ -1,291 +1,383 @@
-// select clinician - theme colors not working 
+// select clinician - theme colors not working
 // --> send email
 
 // *Could have* personalised invitation message + personalised link
 // *Could have* dont display already linked clinicians
 
-'use client';
+'use client'
 
-import { useState, useEffect, useRef} from 'react';
+import { useState, useEffect, useRef } from 'react'
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'
 
-import { Box, Button, Card, CardContent, Typography, TextField, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Alert} from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  List,
+  ListItem,
+  ListItemText,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Alert
+} from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions';
-import type { AllClinicians, PatientId } from '@/app/(dashboard)/my-profile/patient-settings/add-clinician/page'
+import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions'
+import type { AllClinicians, PatientId } from '@/app/(private)/my-profile/patient-settings/add-clinician/page'
 
 interface Props {
-    id: PatientId;
-    cliniciansList: AllClinicians [];
+  id: PatientId
+  cliniciansList: AllClinicians[]
 }
 
 const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
-  const router = useRouter();
-  const [selectedClinician, setSelectedClinician] = useState<AllClinicians | null>(null);
-  const [filteredClinicians, setFilteredClinicians] = useState(cliniciansList);
-  const [hasSearched, setHasSearched] = useState(false);
+  const router = useRouter()
+  const [selectedClinician, setSelectedClinician] = useState<AllClinicians | null>(null)
+  const [filteredClinicians, setFilteredClinicians] = useState(cliniciansList)
+  const [hasSearched, setHasSearched] = useState(false)
 
-  const clinicianListRef = useRef<HTMLDivElement>(null); // Ref to detect clicks outside the clinician list
-  const saveButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [openModal, setOpenModal] = useState(false);
+  const clinicianListRef = useRef<HTMLDivElement>(null) // Ref to detect clicks outside the clinician list
+  const saveButtonRef = useRef<HTMLButtonElement | null>(null)
+  const [openModal, setOpenModal] = useState(false)
   const [clinicianError, setClinicianError] = useState<string | null>(null)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value });
-  };
+    setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value })
+  }
 
   const handleSearch = () => {
-    setHasSearched(true);
+    setHasSearched(true)
 
     // Trigger the search/filter logic manually
     setFilteredClinicians(
-        cliniciansList.filter(clinician => {
-            return (
-                clinician.firstName.toLowerCase().includes(searchCriteria.firstName.toLowerCase()) &&
-                clinician.lastName.toLowerCase().includes(searchCriteria.lastName.toLowerCase()) &&
-                clinician.institution?.toLowerCase().includes(searchCriteria.organization.toLowerCase()) &&
-                clinician.email.toLowerCase().includes(searchCriteria.email.toLowerCase())
-            );
-        })
-    );
-};
+      cliniciansList.filter(clinician => {
+        return (
+          clinician.firstName.toLowerCase().includes(searchCriteria.firstName.toLowerCase()) &&
+          clinician.lastName.toLowerCase().includes(searchCriteria.lastName.toLowerCase()) &&
+          clinician.institution?.toLowerCase().includes(searchCriteria.organization.toLowerCase()) &&
+          clinician.email.toLowerCase().includes(searchCriteria.email.toLowerCase())
+        )
+      })
+    )
+  }
 
-    const handleReset = () => {
-        setSearchCriteria({
-        firstName: '',
-        lastName: '',
-        organization: '',
-        email: ''
-        });
-        setFilteredClinicians(cliniciansList); // Reset the filtered list to the original list
-        setHasSearched(false); // Reset search state
-    };
+  const handleReset = () => {
+    setSearchCriteria({
+      firstName: '',
+      lastName: '',
+      organization: '',
+      email: ''
+    })
+    setFilteredClinicians(cliniciansList) // Reset the filtered list to the original list
+    setHasSearched(false) // Reset search state
+  }
 
-    const handleClinicianSelect = (clinician: AllClinicians) => {
-        setSelectedClinician(clinician);
-        console.log ('Selected clinicians id:', clinician.id)
-        };
+  const handleClinicianSelect = (clinician: AllClinicians) => {
+    setSelectedClinician(clinician)
+    console.log('Selected clinicians id:', clinician.id)
+  }
 
-      // Handle unselecting clinician when clicking outside of the list
-    const handleClickOutside = (event: MouseEvent) => {
-        if (clinicianListRef.current && !clinicianListRef.current.contains(event.target as Node)) {
+  // Handle unselecting clinician when clicking outside of the list
+  const handleClickOutside = (event: MouseEvent) => {
+    if (clinicianListRef.current && !clinicianListRef.current.contains(event.target as Node)) {
       // Prevent unselecting if the "Save" button is clicked
-        if (event.target !== saveButtonRef.current) {
-        setSelectedClinician(null);
+      if (event.target !== saveButtonRef.current) {
+        setSelectedClinician(null)
       }
     }
-  };
+  }
 
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        
-return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
- 
-    const handleClinicianSave = async () => {
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleClinicianSave = async () => {
     if (selectedClinician) {
-        try{
-        const save = await saveNewClinician(selectedClinician.id, id.id);
+      try {
+        const save = await saveNewClinician(selectedClinician.id, id.id)
 
         if (save.success) {
-            alert ('Clinician added successfully');
-            router.push('/my-profile/patient-settings')
-
+          alert('Clinician added successfully')
+          router.push('/my-profile/patient-settings')
         } else {
-            // console.error("Error changing password.");
-            setClinicianError(save.message);
+          // console.error("Error changing password.");
+          setClinicianError(save.message)
         }
 
         // console.log("Selected Clinician:", selectedClinician);
-        } catch (error) {
+      } catch (error) {
         // console.error('Failed to save changes:', error);
-        alert('Error saving changes.');
-        }
+        alert('Error saving changes.')
+      }
     } else {
-        console.log("No clinician selected");
+      console.log('No clinician selected')
     }
-    };
- 
-    // New state for search
-    const [searchCriteria, setSearchCriteria] = useState({
-       firstName: '',
-       lastName: '',
-       organization: '',
-       email: ''
-   });
+  }
 
-   const showSearchButtons = Object.values(searchCriteria).some(term => term.trim() !== '');
+  // New state for search
+  const [searchCriteria, setSearchCriteria] = useState({
+    firstName: '',
+    lastName: '',
+    organization: '',
+    email: ''
+  })
 
-    // Open the modal
-    const handleOpenModal = () => {
-    setOpenModal(true);
-    };
+  const showSearchButtons = Object.values(searchCriteria).some(term => term.trim() !== '')
 
-    // Close the modal
-    const handleCloseModal = () => {
-    setOpenModal(false);
-    setSelectedClinician(null);
-    };
+  // Open the modal
+  const handleOpenModal = () => {
+    setOpenModal(true)
+  }
 
-    const [message, setMessage] = useState({
-        email: '',
-        message: 'Dear clinician,\n\nYour patient would like to share their symptom data with you on our platform.\nRegister your account to view their spider-grams track their data.\n\nKind regards,\nThe Spider team'
-    });
- 
-    const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMessage({ ...message, [e.target.name]: e.target.value });
-        console.log("Invitation:", message);
-      };
+  // Close the modal
+  const handleCloseModal = () => {
+    setOpenModal(false)
+    setSelectedClinician(null)
+  }
 
-    const handleSendInvitation = async () => {
+  const [message, setMessage] = useState({
+    email: '',
+    message:
+      'Dear clinician,\n\nYour patient would like to share their symptom data with you on our platform.\nRegister your account to view their spider-grams track their data.\n\nKind regards,\nThe Spider team'
+  })
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage({ ...message, [e.target.name]: e.target.value })
+    console.log('Invitation:', message)
+  }
+
+  const handleSendInvitation = async () => {
     if (message.email) {
-        try{
-        const invite = await sendInvitation(message.email, message.message);
+      try {
+        const invite = await sendInvitation(message.email, message.message)
 
         if (!invite.success) {
-            throw new Error ('Failed to send the invitation');
+          throw new Error('Failed to send the invitation')
         }
 
-        alert ('Invitation sent successfully')
+        alert('Invitation sent successfully')
         handleCloseModal()
-        console.log("Invitation:", message);
-        } catch (error) {
-        console.error('Failed to send invitation:', error);
-        alert('Failed to send the invitation.');
-        }
+        console.log('Invitation:', message)
+      } catch (error) {
+        console.error('Failed to send invitation:', error)
+        alert('Failed to send the invitation.')
+      }
     } else {
-        console.log("Please enter you clinician's email before sending the message.");
+      console.log("Please enter you clinician's email before sending the message.")
     }
-    };
+  }
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
       <Card sx={{ width: 1132, p: 3 }}>
         {/* Password Error */}
-        {clinicianError && <Alert severity="error">{clinicianError}</Alert>}
-        
-      <Typography variant="h5" gutterBottom>Link a Clinician</Typography>
-      <Typography color = 'secondary' variant="body2" sx={{alignItems: "center"}}>
-         Link your clinicians to share your data with them
-      </Typography>
+        {clinicianError && <Alert severity='error'>{clinicianError}</Alert>}
 
-      {/* Search Grid */}
-      <CardContent>
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6 }}>
-          <TextField label="First Name" name="firstName" fullWidth value={searchCriteria.firstName} onChange={handleSearchChange} />
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <TextField label="Last Name" name="lastName" fullWidth value={searchCriteria.lastName} onChange={handleSearchChange} />
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>Organization</InputLabel>
-            <Select name="organization" value={searchCriteria.organization} onChange={e => setSearchCriteria({ ...searchCriteria, organization: e.target.value })}>
-              <MenuItem value="">Select Organization</MenuItem>
-              {Array.from(new Set(cliniciansList.map(c => c.institution).filter(Boolean))).map((org, index) => (
-                <MenuItem key={index} value={String(org)}>{org}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <TextField label="Email" name="email" fullWidth value={searchCriteria.email} onChange={handleSearchChange} />
-        </Grid>
+        <Typography variant='h5' gutterBottom>
+          Link a Clinician
+        </Typography>
+        <Typography color='secondary' variant='body2' sx={{ alignItems: 'center' }}>
+          Link your clinicians to share your data with them
+        </Typography>
 
-      {/* Search Button */}
-      {showSearchButtons && (
-        <Grid size={{ xs: 6 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-           <Button variant="contained" onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
-             Search
-           </Button>
-           <Button variant="outlined" color="secondary"  onClick={handleReset}>
-             Reset
-           </Button>
-           </Box>
-        </Grid>
-        )}
-      </Grid>
-
-      {/* Clinician List */}
-      {hasSearched && (
-        <>
-      <Typography variant="h6" sx={{ mt: 3 }}>{filteredClinicians.length} Results</Typography>
-      <List sx={{ maxHeight: 300, overflowY: "auto", border: '1px solid #ccc', borderRadius: 1, p: 1 }} ref={clinicianListRef} component="div">
-        {filteredClinicians.map(clinician => (
-          <ListItem key={clinician.id} onClick={() => handleClinicianSelect(clinician)} 
-            sx={{ cursor: "pointer", backgroundColor: selectedClinician?.id === clinician.id ? "#A379FF" : "transparent", borderRadius: 1, "&:hover": { backgroundColor: "#A379FF" } }}>
-            <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
-            <ListItemText primary={`${clinician.firstName} ${clinician.lastName}`} secondary={`${clinician.institution} - ${clinician.email}`} />
-          </ListItem>
-        ))}
-      </List>
-
-      {/* Invite */}
-      <Grid size={{ xs: 6 }}>
-            <Typography sx={{ flexGrow: 1, textAlign: "center" }}>
-                Cannot find your clinician?{" "}
-                <Button
-                variant="text"
-                color="primary"
-                sx={{ textTransform: "none", fontWeight: 600, p: 0, minWidth: "auto" }}
-                onClick={handleOpenModal}
+        {/* Search Grid */}
+        <CardContent>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid size={{ xs: 6 }}>
+              <TextField
+                label='First Name'
+                name='firstName'
+                fullWidth
+                value={searchCriteria.firstName}
+                onChange={handleSearchChange}
+              />
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <TextField
+                label='Last Name'
+                name='lastName'
+                fullWidth
+                value={searchCriteria.lastName}
+                onChange={handleSearchChange}
+              />
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <FormControl fullWidth>
+                <InputLabel>Organization</InputLabel>
+                <Select
+                  name='organization'
+                  value={searchCriteria.organization}
+                  onChange={e => setSearchCriteria({ ...searchCriteria, organization: e.target.value })}
                 >
-                Invite them to create an account
-                </Button>
-                <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
-                <DialogTitle>
-                    Invite Clinician
-                   <IconButton 
-                        color="secondary"
+                  <MenuItem value=''>Select Organization</MenuItem>
+                  {Array.from(new Set(cliniciansList.map(c => c.institution).filter(Boolean))).map((org, index) => (
+                    <MenuItem key={index} value={String(org)}>
+                      {org}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <TextField
+                label='Email'
+                name='email'
+                fullWidth
+                value={searchCriteria.email}
+                onChange={handleSearchChange}
+              />
+            </Grid>
+
+            {/* Search Button */}
+            {showSearchButtons && (
+              <Grid size={{ xs: 6 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+                  <Button variant='contained' onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
+                    Search
+                  </Button>
+                  <Button variant='outlined' color='secondary' onClick={handleReset}>
+                    Reset
+                  </Button>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+
+          {/* Clinician List */}
+          {hasSearched && (
+            <>
+              <Typography variant='h6' sx={{ mt: 3 }}>
+                {filteredClinicians.length} Results
+              </Typography>
+              <List
+                sx={{ maxHeight: 300, overflowY: 'auto', border: '1px solid #ccc', borderRadius: 1, p: 1 }}
+                ref={clinicianListRef}
+                component='div'
+              >
+                {filteredClinicians.map(clinician => (
+                  <ListItem
+                    key={clinician.id}
+                    onClick={() => handleClinicianSelect(clinician)}
+                    sx={{
+                      cursor: 'pointer',
+                      backgroundColor: selectedClinician?.id === clinician.id ? '#A379FF' : 'transparent',
+                      borderRadius: 1,
+                      '&:hover': { backgroundColor: '#A379FF' }
+                    }}
+                  >
+                    <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
+                    <ListItemText
+                      primary={`${clinician.firstName} ${clinician.lastName}`}
+                      secondary={`${clinician.institution} - ${clinician.email}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+
+              {/* Invite */}
+              <Grid size={{ xs: 6 }}>
+                <Typography sx={{ flexGrow: 1, textAlign: 'center' }}>
+                  Cannot find your clinician?{' '}
+                  <Button
+                    variant='text'
+                    color='primary'
+                    sx={{ textTransform: 'none', fontWeight: 600, p: 0, minWidth: 'auto' }}
+                    onClick={handleOpenModal}
+                  >
+                    Invite them to create an account
+                  </Button>
+                  <Dialog open={openModal} onClose={handleCloseModal} maxWidth='md' fullWidth>
+                    <DialogTitle>
+                      Invite Clinician
+                      <IconButton
+                        color='secondary'
                         onClick={handleCloseModal}
                         sx={{ position: 'absolute', right: 8, top: 8 }}
-                        >
-                        <i className="ri-close-line" />
-                    </IconButton>
-                    <Typography color = 'secondary' variant="body2" sx={{alignItems: "center"}}>
+                      >
+                        <i className='ri-close-line' />
+                      </IconButton>
+                      <Typography color='secondary' variant='body2' sx={{ alignItems: 'center' }}>
                         Invite your clinician to the platform to share your data with them.
-                    </Typography>
-                </DialogTitle>
-                <DialogContent>
-                {/* Text Fields */}
-                    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} sx={{ mt: 3 }}>
-                    <TextField label="First Name" name="firstName" fullWidth value={searchCriteria.firstName} onChange={handleSearchChange} />
-                    <TextField label="Last Name" name="lastName" fullWidth value={searchCriteria.lastName} onChange={handleSearchChange}/>
-                    </Box>
-                    <Box display="grid" gridTemplateColumns="repeat(1, 1fr)" gap={2} sx={{ mt: 3 }} >
-                    <TextField label="Email" name="email" fullWidth value={message.email} onChange={handleMessageChange}/>
-                    <TextField label="Message" name="message" fullWidth multiline maxRows={10} value={message.message} onChange={handleMessageChange}/>
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: "flex-start", px: 3, pb: 3, mt: 3 }}>
-                    {/* Save and Cancel Buttons */}
-                    <Button variant="contained" color="primary" onClick={handleSendInvitation}>Send Invitation</Button>
-                    <Button variant="outlined" color="secondary" onClick={handleCloseModal}>Cancel</Button>
-                </DialogActions>
-                </Dialog>
-            </Typography>
-        </Grid>
+                      </Typography>
+                    </DialogTitle>
+                    <DialogContent>
+                      {/* Text Fields */}
+                      <Box display='grid' gridTemplateColumns='repeat(2, 1fr)' gap={2} sx={{ mt: 3 }}>
+                        <TextField
+                          label='First Name'
+                          name='firstName'
+                          fullWidth
+                          value={searchCriteria.firstName}
+                          onChange={handleSearchChange}
+                        />
+                        <TextField
+                          label='Last Name'
+                          name='lastName'
+                          fullWidth
+                          value={searchCriteria.lastName}
+                          onChange={handleSearchChange}
+                        />
+                      </Box>
+                      <Box display='grid' gridTemplateColumns='repeat(1, 1fr)' gap={2} sx={{ mt: 3 }}>
+                        <TextField
+                          label='Email'
+                          name='email'
+                          fullWidth
+                          value={message.email}
+                          onChange={handleMessageChange}
+                        />
+                        <TextField
+                          label='Message'
+                          name='message'
+                          fullWidth
+                          multiline
+                          maxRows={10}
+                          value={message.message}
+                          onChange={handleMessageChange}
+                        />
+                      </Box>
+                    </DialogContent>
+                    <DialogActions sx={{ justifyContent: 'flex-start', px: 3, pb: 3, mt: 3 }}>
+                      {/* Save and Cancel Buttons */}
+                      <Button variant='contained' color='primary' onClick={handleSendInvitation}>
+                        Send Invitation
+                      </Button>
+                      <Button variant='outlined' color='secondary' onClick={handleCloseModal}>
+                        Cancel
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </Typography>
+              </Grid>
+            </>
+          )}
 
-      </>
-      )}
-
-
-      {/* Save and Cancel Buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-        <Button variant="contained" color="primary" onClick={handleClinicianSave} ref={saveButtonRef}>Save</Button>
-        <Button variant="outlined" color="secondary" onClick={() => router.push('/my-profile/patient-settings')}>Cancel</Button>
-      </Box>
-      </CardContent>
+          {/* Save and Cancel Buttons */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+            <Button variant='contained' color='primary' onClick={handleClinicianSave} ref={saveButtonRef}>
+              Save
+            </Button>
+            <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')}>
+              Cancel
+            </Button>
+          </Box>
+        </CardContent>
       </Card>
     </Box>
+  )
+}
 
-  );
-};
-
-export default ClinicianLinkPage;
-
-
+export default ClinicianLinkPage

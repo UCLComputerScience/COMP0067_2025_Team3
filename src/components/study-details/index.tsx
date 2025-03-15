@@ -16,6 +16,7 @@ import { getApplicationById } from '@/actions/researcher/applicationAction'
 
 // Utility Functions
 import type { FormValues } from '@/components/DataAccessApplicationForm'
+import { extractFileName } from '@/utils/DocumentUtils'
 
 // Component Imports
 import DataAccessApplicationForm from '@/components/DataAccessApplicationForm'
@@ -65,12 +66,6 @@ const studyDetailsTypeToFormType = (studyDetails: StudyDetailsType): FormValues 
       expectedEndDate: studyDetails.expectedEndDate
     }
   }
-}
-
-// temp open file helper functions
-// Extract file name from path
-export const extractFileName = (filePath: string) => {
-  return filePath.split('\\').pop() || '' // Extracts the last part of the path
 }
 
 const StudyDetails = () => {
