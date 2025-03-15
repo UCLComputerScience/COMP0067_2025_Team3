@@ -1,16 +1,14 @@
+/* eslint-disable */
+
 'use client'
+
+import React, { useState, useEffect, useCallback } from 'react'
 
 import debounce from 'lodash/debounce'
 import Stack from '@mui/material/Stack'
-import { useRouter } from 'next/navigation'
-import { PatientRegister } from './RegisterPatient'
-import { DateOfBirthPicker } from './DateOfBirthPicker'
-import { ClinicianRegister } from './RegisterClinician'
-import { ResearcherRegister } from './RegisterResearcher'
-import { PrivacyPolicyTerms } from './PrivacyPolicyTerms'
-import { SelectChangeEvent } from '@mui/material/Select'
-import React, { useState, useEffect, useCallback } from 'react'
-import { registerUser, checkUserDuplicates } from '@/actions/register/registerActions'
+
+import type { SelectChangeEvent } from '@mui/material/Select'
+
 import {
   Grid,
   Box,
@@ -25,16 +23,18 @@ import {
   TextField,
   Checkbox,
   Link,
-  InputAdornment,
-  IconButton,
   Snackbar,
   Alert,
-  CircularProgress,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl
+  CircularProgress
 } from '@mui/material'
+
+import { PatientRegister } from './RegisterPatient'
+import { DateOfBirthPicker } from './DateOfBirthPicker'
+import { ClinicianRegister } from './RegisterClinician'
+import { ResearcherRegister } from './RegisterResearcher'
+import { PrivacyPolicyTerms } from './PrivacyPolicyTerms'
+
+import { checkUserDuplicates } from '@/actions/register/registerActions'
 
 // Define form interfaces
 export interface AccountDetailsForm {
@@ -70,8 +70,6 @@ interface DuplicateCheckResult {
 }
 
 export const Register = () => {
-  const router = useRouter()
-
   // Hooks must be called at the top level in a consistent order
   const [step, setStep] = useState(0)
   const [mounted, setMounted] = useState(false)
@@ -80,12 +78,12 @@ export const Register = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [accountType, setAccountType] = useState('patient')
-  const [userId, setUserId] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [completedSteps, setCompletedSteps] = useState<boolean[]>([])
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isPhoneFocused, setIsPhoneFocused] = useState(false)
   const [openPrivacyTerms, setOpenPrivacyTerms] = useState<boolean>(false)
+
   const [formData, setFormData] = useState<AccountDetailsForm>({
     firstName: '',
     lastName: '',
@@ -99,6 +97,7 @@ export const Register = () => {
     institution: '',
     profession: ''
   })
+
   const [formErrors, setFormErrors] = useState<FormErrors>({
     firstName: '',
     lastName: '',
@@ -118,6 +117,7 @@ export const Register = () => {
     debounce(async (email: string, phoneNumber: string, registrationNumber: string) => {
       if (email.trim() || phoneNumber.trim() || registrationNumber.trim()) {
         const result: DuplicateCheckResult = await checkUserDuplicates(email, phoneNumber, registrationNumber)
+
         setFormErrors(prev => ({
           ...prev,
           email: result.emailExists ? 'This email already exists' : prev.email,
@@ -161,18 +161,22 @@ export const Register = () => {
       errors.firstName = !formData.firstName.trim() ? 'First name is required' : ''
       isValid = isValid && !errors.firstName
     }
+
     if (!fieldName || fieldName === 'lastName') {
       errors.lastName = !formData.lastName.trim() ? 'Last name is required' : ''
       isValid = isValid && !errors.lastName
     }
+
     if (!fieldName || fieldName === 'email') {
       if (!formData.email.trim()) {
         errors.email = ''
       } else {
         errors.email = !/^\S+@\S+\.\S+$/.test(formData.email) ? 'Please enter a valid email address' : ''
       }
+
       isValid = isValid && !errors.email
     }
+
     if (!fieldName || fieldName === 'password') {
       if (!fieldName && !formData.password) {
         errors.password = 'Password is required'
@@ -181,8 +185,10 @@ export const Register = () => {
       } else {
         errors.password = ''
       }
+
       isValid = isValid && !errors.password
     }
+
     if (!fieldName || fieldName === 'confirmPassword') {
       if (formData.password && formData.password !== formData.confirmPassword) {
         console.log('Password:', formData.password)
@@ -191,43 +197,53 @@ export const Register = () => {
       } else {
         errors.confirmPassword = ''
       }
+
       isValid = isValid && !errors.confirmPassword
     }
+
     if (!fieldName || fieldName === 'phoneNumber') {
       if (formData.phoneNumber) {
         // const cleanedPhoneNumber = formData.phoneNumber.replace(/\D/g, '')
         const isValidDigits = /^\d+$/.test(formData.phoneNumber)
+
         // const isValidLength = cleanedPhoneNumber.length === 10
         errors.phoneNumber = !isValidDigits ? 'Phone numbers can only contain digits' : ''
       } else {
         errors.phoneNumber = ''
       }
+
       isValid = isValid && !errors.phoneNumber
     }
+
     if ((!fieldName || fieldName === 'dateOfBirth') && accountType === 'patient') {
       errors.dateOfBirth = !fieldName && !formData.dateOfBirth ? 'Date of birth is required' : ''
       isValid = isValid && !errors.dateOfBirth
     }
+
     if ((!fieldName || fieldName === 'registrationNumber') && accountType === 'clinician') {
       errors.registrationNumber =
         !fieldName && !formData.registrationNumber?.trim() ? 'Registration number is required' : ''
       isValid = isValid && !errors.registrationNumber
     }
+
     if ((!fieldName || fieldName === 'institution') && (accountType === 'clinician' || accountType === 'researcher')) {
       errors.institution = !fieldName && !formData.institution?.trim() ? 'Institution is required' : ''
       isValid = isValid && !errors.institution
     }
+
     if ((!fieldName || fieldName === 'profession') && accountType === 'clinician') {
       errors.profession = !fieldName && !formData.profession?.trim() ? 'Profession is required' : ''
       isValid = isValid && !errors.profession
     }
 
     setFormErrors(errors)
+
     return isValid
   }
 
   useEffect(() => {
     setMounted(true)
+
     return () => {
       setSuccess(null)
       setError(null)
@@ -246,6 +262,7 @@ export const Register = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+
     console.log(`Input ${name}:`, value)
     setFormData(prev => ({ ...prev, [name]: value }))
 
@@ -287,6 +304,7 @@ export const Register = () => {
   ) => {
     const name = event.target.name as keyof AccountDetailsForm
     const value = event.target.value as string
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -295,33 +313,42 @@ export const Register = () => {
       validateForm(name as string)
     }, 0)
   }
+
   const handleTogglePasswordVisibility = () => {
     setShowPassword(prev => !prev)
   }
+
   const handleToggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(prev => !prev)
   }
+
   const handleNext = async () => {
     setSuccess(null)
+
     if (step === 1) {
       if (!validateForm() || !agreeTerms) {
         return
       }
     }
+
     if (step < maxStep) {
       setCompletedSteps(prev => {
         const newCompleted = [...prev]
+
         newCompleted[step] = true
+
         return newCompleted
       })
       setStep(prevStep => prevStep + 1)
     }
   }
+
   const handlePrevious = () => {
     if (step > 0) {
       setStep(prevStep => prevStep - 1)
     }
   }
+
   const renderAccountTypeStep = () => (
     <Box sx={{ marginLeft: 15 }}>
       <Typography variant='h3' fontWeight='bold'>
@@ -682,13 +709,13 @@ export const Register = () => {
           item
           xs={4}
           sx={{
-            backgroundColor: '#f8f9fc',
+            backgroundColor: 'var(--mui-palette-customColors-bodyBg)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
         >
-          <Box sx={{ textAlign: 'center', backgroundColor: '#f8f9fc' }}>
+          <Box sx={{ textAlign: 'center', backgroundColor: 'var(--mui-palette-customColors-bodyBg)' }}>
             {' '}
             <img src='/images/pages/Frame_16.png' alt='Logo' width='320px' />
           </Box>
