@@ -2,6 +2,8 @@
 
 import bcrypt from 'bcryptjs'
 
+import type { AccountStatus, Role } from '@prisma/client'
+
 import { prisma } from '@/prisma/client'
 
 export const updateUserPassword = async (
@@ -27,13 +29,13 @@ export const updateUserPassword = async (
     return { success: true, message: 'Password updated successfully.' }
   } catch (error) {
     console.error('Error updating password:', error)
-    
-return { success: false, message: 'Failed to update password' }
+
+    return { success: false, message: 'Failed to update password' }
   }
 }
 
 // Define types for user profile data
-interface UserProfileData {
+export interface UserProfileData {
   id: string
   firstName: string
   lastName: string
@@ -45,7 +47,8 @@ interface UserProfileData {
   profession?: string | null
   hospitalNumber?: string | null
   dateOfBirth?: Date | null
-  role?: string
+  role?: Role | string
+  status?: AccountStatus | string
 }
 
 // Get User Profile
@@ -65,21 +68,22 @@ export const getUserProfile = async (userId: string): Promise<UserProfileData | 
         profession: true,
         hospitalNumber: true,
         dateOfBirth: true,
-        role: true
+        role: true,
+        status: true
       }
     })
 
     if (!user) {
       console.error('User not found:', userId)
-      
-return null
+
+      return null
     }
 
     return user
   } catch (error) {
     console.error('Error fetching user profile:', error)
-    
-return null
+
+    return null
   }
 }
 
@@ -128,10 +132,65 @@ export const updateUserProfile = async (formData: UserProfileData): Promise<{ su
     return { success: true }
   } catch (error) {
     console.error('Error updating user profile:', error)
-    
-return {
+
+    return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to update profile'
+    }
+  }
+}
+
+export const updateUserStatusAndRoleById = async (
+  userId: string,
+  { role, status }: { role: string; status: string }
+) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    if (!user) {
+      return { success: false, message: 'User not found' }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        role: role as Role,
+        status: status as AccountStatus
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        status: true
+      }
+    })
+
+    return {
+      success: true,
+      message: 'User status and role updated successfully',
+      user: updatedUser
+    }
+  } catch (error) {
+    console.error('Error updating user status and role:', error)
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        message: `Error updating user: ${error.message}`
+      }
+    }
+
+    return {
+      success: false,
+      message: 'An unexpected error occurred while updating user status and role'
     }
   }
 }

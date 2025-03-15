@@ -1,16 +1,15 @@
 import { Typography, IconButton } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import type { DocumentType } from '.';
-import { extractFileName  } from '.'
-
+import type { DocumentType } from '.'
+import { extractFileName } from '@/utils/DocumentUtils'
 
 const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
   // Function to check if the file is an image
   const isImageFile = (filePath: string) => {
     console.log(filePath, /\.(jpeg|jpg|png)$/i.test(filePath))
-    
-return /\.(jpeg|jpg|png)$/i.test(filePath) // Check if the file has a .jpeg, .jpg, or .png extension
+
+    return /\.(jpeg|jpg|png)$/i.test(filePath) // Check if the file has a .jpeg, .jpg, or .png extension
   }
 
   // Function to determine the correct icon for non-image files
@@ -57,7 +56,7 @@ return /\.(jpeg|jpg|png)$/i.test(filePath) // Check if the file has a .jpeg, .jp
               {extractFileName(document.documentPath)}
             </Typography>
 
-            <IconButton size='small' edge='end' onClick={() => console.log('open documents')}>
+            <IconButton size='small' edge='end' onClick={() => console.log(document.documentPath)}>
               <i className='ri-eye-line' />
             </IconButton>
           </div>

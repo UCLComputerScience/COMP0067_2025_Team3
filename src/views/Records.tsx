@@ -6,11 +6,10 @@ import { Box } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
-import type { Data } from '@/app/(dashboard)/my-records/page'
+import type { Data } from '@/app/(private)/my-records/page'
 import TrendCharts from '@/components/charts/TrendCharts'
 import RecordListTable from '@/components/record-list-table'
 import { formatDate } from '@/utils/dateUtils'
-
 
 interface Props {
   data: Data[]

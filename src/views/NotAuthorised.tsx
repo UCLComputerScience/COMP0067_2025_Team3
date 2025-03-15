@@ -34,11 +34,6 @@ const NotAuthorised = ({ mode }: { mode: Mode }) => {
           <Typography variant='h4'>You are not authorized! 🔐</Typography>
           <Typography>You don&#39;t have permission to access this page. Go Home!</Typography>
         </div>
-        <img
-          alt='error-illustration'
-          src='/images/illustrations/characters/8.png'
-          className='object-cover bs-[400px] md:bs-[450px] lg:bs-[500px]'
-        />
         <Button href={'/home'} component={Link} variant='contained'>
           Back to Home
         </Button>

@@ -47,7 +47,9 @@ import {
   saveShareData,
   deleteClinician
 } from '@/actions/patientSettings/userActions'
-import type { ClinicianData, UserData } from '@/app/(dashboard)/my-profile/patient-settings/page'
+
+// import type { ClinicianData, UserData } from '@/app/(dashboard)/(private)/my-profile/patient-settings/page'
+import type { ClinicianData, UserData } from '@/app/(private)/my-profile/patient-settings/page'
 
 import { userProfileSchema, passwordSchema } from '@/actions/formValidation'
 
