@@ -1,11 +1,9 @@
 'use client'
-import { useRouter } from 'next/navigation'
-import { ClinicianSearch } from './ClinicianSearch'
-import { SavedClinicians } from './SavedClinicians'
-import { AccountDetailsForm } from './RegisterUser'
+
 import React, { useState, useEffect } from 'react'
-import { Clinician, RegisterResult } from '@/actions/register/registerActions'
-import { registerUser, completeRegistration } from '@/actions/register/registerActions'
+
+import { useRouter } from 'next/navigation'
+
 import {
   Box,
   Typography,
@@ -20,6 +18,13 @@ import {
   DialogContent,
   DialogActions
 } from '@mui/material'
+
+import { ClinicianSearch } from './ClinicianSearch'
+import { SavedClinicians } from './SavedClinicians'
+import type { AccountDetailsForm } from './RegisterUser'
+
+import type { Clinician, RegisterResult } from '@/actions/register/registerActions'
+import { registerUser, completeRegistration } from '@/actions/register/registerActions'
 
 interface RegisterPatientProps {
   onBack: () => void
@@ -48,6 +53,7 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
       setSavedClinicians(prev => [...prev, clinician])
     }
   }
+
   // Remove clinician from saved list
   const handleRemoveClinician = (clinicianId: string) => {
     setSavedClinicians(prev => prev.filter(clinician => clinician.id !== clinicianId))
@@ -59,9 +65,11 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
       setIsLoading(true)
       setError(null)
       let finalUserId = userId
+
       if (!userId) {
         console.log('Form Data being sent to registerUser:', formData)
         const fullPhoneNumber = formData.phoneNumber || ''
+
         const registerResult: RegisterResult = await registerUser({
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -75,13 +83,17 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
           institution: '',
           accountType
         })
+
         console.log('Register Result:', registerResult)
+
         if (!registerResult.success) {
           throw new Error(registerResult.error || 'Failed to register user')
         }
+
         if (!registerResult.userId) {
           throw new Error('User ID is missing after successful registration')
         }
+
         finalUserId = registerResult.userId
       }
 
@@ -95,9 +107,11 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
         },
         accountType
       )
+
       if (!completionResult.success) {
         throw new Error(completionResult.error || 'Failed to complete registration')
       }
+
       setSuccess('Congratulations! Your account has been created successfully!')
       setOpenSuccessDialog(true)
     } catch (err) {

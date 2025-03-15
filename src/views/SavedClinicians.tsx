@@ -1,10 +1,13 @@
 'use client'
 
 import React from 'react'
+
 import Image from 'next/image'
-import { Clinician } from './ClinicianSearch'
+
 import { Box, Typography, IconButton, Card, CardContent } from '@mui/material'
 import { alpha } from '@mui/material/styles'
+
+import type { Clinician } from './ClinicianSearch'
 
 interface SavedCliniciansProps {
   clinicians: Clinician[]

@@ -1,10 +1,9 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { AccountDetailsForm } from './RegisterUser'
 import React, { useState, useEffect } from 'react'
-import { RegisterResult } from '@/actions/register/registerActions'
-import { registerUser, completeRegistration } from '@/actions/register/registerActions'
+
+import { useRouter } from 'next/navigation'
+
 import {
   Box,
   Typography,
@@ -18,6 +17,10 @@ import {
   DialogActions
 } from '@mui/material'
 
+import type { AccountDetailsForm } from './RegisterUser'
+import type { RegisterResult , registerUser, completeRegistration } from '@/actions/register/registerActions'
+
+
 // Define the props interface
 interface RegisterClinicianProps {
   onBack: () => void
@@ -25,6 +28,7 @@ interface RegisterClinicianProps {
   userId: string | null
   formData: AccountDetailsForm
 }
+
 export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, accountType, userId, formData }) => {
   const router = useRouter()
 
@@ -38,7 +42,9 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
   // Effect to clean up on unmount
   useEffect(() => {
     setSuccess(null)
-    return () => {
+
+    
+return () => {
       setSuccess(null)
       setError(null)
     }
@@ -49,8 +55,10 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
     try {
       setIsLoading(true)
       setError(null)
+
       if (!userId) {
         const fullPhoneNumber = formData.phoneNumber || ''
+
         const registerResult: RegisterResult = await registerUser({
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -68,11 +76,13 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
         if (!registerResult.success) {
           throw new Error(registerResult.error || 'Failed to register user')
         }
+
         if (!registerResult.userId) {
           throw new Error('User ID is missing after successful registration')
         }
 
         const newUserId: string = registerResult.userId
+
         const completionResult = await completeRegistration(
           newUserId,
           { researchConsent: false, clinicianAccess: false, selectedClinicians: [] },
@@ -88,6 +98,7 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
           { researchConsent: false, clinicianAccess: false, selectedClinicians: [] },
           accountType
         )
+
         if (!completionResult.success) {
           throw new Error(completionResult.error || 'Failed to complete registration')
         }

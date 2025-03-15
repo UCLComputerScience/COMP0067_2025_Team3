@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Box, TextField, Typography } from '@mui/material'
+
+import { Box, Typography } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -22,9 +23,11 @@ export const DateOfBirthPicker = ({
   helperText
 }: DateOfBirthPickerProps) => {
   const minDate = new Date()
+
   minDate.setFullYear(minDate.getFullYear() - 120)
 
   const maxDate = new Date()
+
   // Set max date to today
 
   return (
