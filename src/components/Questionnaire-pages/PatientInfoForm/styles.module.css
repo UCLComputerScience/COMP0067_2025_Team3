@@ -1,0 +1,10 @@
+.info_questions {
+  font-feature-settings:
+    'liga' off,
+    'clig' off;
+  font-family: 'Outfit Variable', sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 40px; /* 166.667% */
+}

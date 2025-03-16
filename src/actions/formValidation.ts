@@ -1,4 +1,4 @@
-import { object, string, minLength, email, pipe, nonEmpty, regex } from 'valibot'
+import { object, string, minLength, email, pipe, nonEmpty, regex, optional } from 'valibot'
 
 // User Profile Validation
 export const userProfileSchema = object({
@@ -19,4 +19,59 @@ export const passwordSchema = object({
     regex(/[0-9!@#$%^&*]/, 'Must contain at least one number or symbol')
   ),
   confirmPassword: pipe(string(), nonEmpty('Please confirm your new password.'))
+})
+
+// Patient Info Validation
+export const InfoSchema = object({
+  age: pipe(string('Your age must be a number')),
+  sex_at_birth: pipe(string(), nonEmpty('Please Select')),
+  gender: pipe(string(), nonEmpty('Please Select')),
+  gender_same_as_sex: pipe(string(), nonEmpty('Please Select')),
+  ethnicity: pipe(string(), nonEmpty('Please Select')),
+  country: pipe(string(), nonEmpty('Please Select Country')),
+  employment_status: pipe(string(), nonEmpty('Please Select')),
+  education_level: pipe(string(), nonEmpty('Please Select')),
+  activity_level: pipe(string(), nonEmpty('Please Select')),
+  minutes_of_exercise: pipe(string(), nonEmpty('Please Select')),
+  diagnosis_confirmed: pipe(string(), nonEmpty('Please Select if confirmed')),
+  healthcare_professional: pipe(string(), nonEmpty('Please Select Healthcare Professional')),
+  receiving_treatment: pipe(string(), nonEmpty('Please Select Yes or No')),
+  treatment: optional(pipe(string(), nonEmpty('Please Input Treatment'))), // Optional in case user is not receiving treatment
+  taking_medications: pipe(string(), nonEmpty('Please Select Yes or No')),
+  medications: optional(pipe(string())), // Optional if user is not taking medications
+  other_conditions: optional(pipe(string(), nonEmpty('Please Enter If you have other conditions'))) // Optional field
+})
+
+export const QuestionnaireSchema = object({
+  1: pipe(string(), nonEmpty('Please Select')),
+  2: pipe(string(), nonEmpty('Please Select')),
+  3: pipe(string(), nonEmpty('Please Select')),
+  4: pipe(string(), nonEmpty('Please Select')),
+  5: pipe(string(), nonEmpty('Please Select')),
+  6: pipe(string(), nonEmpty('Please Select')),
+  7: pipe(string(), nonEmpty('Please Select')),
+  8: pipe(string(), nonEmpty('Please Select')),
+  9: pipe(string(), nonEmpty('Please Select')),
+  10: pipe(string(), nonEmpty('Please Select')),
+  11: pipe(string(), nonEmpty('Please Select')),
+  12: pipe(string(), nonEmpty('Please Select')),
+  13: pipe(string(), nonEmpty('Please Select')),
+  14: pipe(string(), nonEmpty('Please Select')),
+  15: pipe(string(), nonEmpty('Please Select')),
+  16: pipe(string(), nonEmpty('Please Select')),
+  17: pipe(string(), nonEmpty('Please Select')),
+  18: pipe(string(), nonEmpty('Please Select')),
+  19: pipe(string(), nonEmpty('Please Select')),
+  20: pipe(string(), nonEmpty('Please Select')),
+  21: pipe(string(), nonEmpty('Please Select')),
+  22: pipe(string(), nonEmpty('Please Select')),
+  23: pipe(string(), nonEmpty('Please Select')),
+  24: pipe(string(), nonEmpty('Please Select')),
+  25: pipe(string(), nonEmpty('Please Select')),
+  26: pipe(string(), nonEmpty('Please Select')),
+  27: pipe(string(), nonEmpty('Please Select')),
+  28: pipe(string(), nonEmpty('Please Select')),
+  29: pipe(string(), nonEmpty('Please Select')),
+  30: pipe(string(), nonEmpty('Please Select')),
+  31: pipe(string(), nonEmpty('Please Select'))
 })

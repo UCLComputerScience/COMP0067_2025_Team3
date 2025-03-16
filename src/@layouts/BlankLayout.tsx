@@ -13,6 +13,8 @@ import useLayoutInit from '@core/hooks/useLayoutInit'
 // Util Imports
 import { blankLayoutClasses } from './utils/layoutClasses'
 
+import '@fontsource-variable/outfit'
+
 type Props = ChildrenType & {
   systemMode: SystemMode
 }

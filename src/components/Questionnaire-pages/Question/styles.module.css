@@ -1,0 +1,17 @@
+.questions {
+  color: var(--Light-Text-Primary, text-primary);
+  font-feature-settings:
+    'liga' off,
+    'clig' off;
+  font-family: Outfit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 25px; /* 104.167% */
+}
+
+.question_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
