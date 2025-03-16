@@ -42,4 +42,36 @@ export const InfoSchema = object({
   other_conditions: optional(pipe(string(), nonEmpty('Please Enter If you have other conditions'))) // Optional field
 })
 
-export const QuestionnaireSchema = object({})
+export const QuestionnaireSchema = object({
+  1: pipe(string(), nonEmpty('Please Select')),
+  2: pipe(string(), nonEmpty('Please Select')),
+  3: pipe(string(), nonEmpty('Please Select')),
+  4: pipe(string(), nonEmpty('Please Select')),
+  5: pipe(string(), nonEmpty('Please Select')),
+  6: pipe(string(), nonEmpty('Please Select')),
+  7: pipe(string(), nonEmpty('Please Select')),
+  8: pipe(string(), nonEmpty('Please Select')),
+  9: pipe(string(), nonEmpty('Please Select')),
+  10: pipe(string(), nonEmpty('Please Select')),
+  11: pipe(string(), nonEmpty('Please Select')),
+  12: pipe(string(), nonEmpty('Please Select')),
+  13: pipe(string(), nonEmpty('Please Select')),
+  14: pipe(string(), nonEmpty('Please Select')),
+  15: pipe(string(), nonEmpty('Please Select')),
+  16: pipe(string(), nonEmpty('Please Select')),
+  17: pipe(string(), nonEmpty('Please Select')),
+  18: pipe(string(), nonEmpty('Please Select')),
+  19: pipe(string(), nonEmpty('Please Select')),
+  20: pipe(string(), nonEmpty('Please Select')),
+  21: pipe(string(), nonEmpty('Please Select')),
+  22: pipe(string(), nonEmpty('Please Select')),
+  23: pipe(string(), nonEmpty('Please Select')),
+  24: pipe(string(), nonEmpty('Please Select')),
+  25: pipe(string(), nonEmpty('Please Select')),
+  26: pipe(string(), nonEmpty('Please Select')),
+  27: pipe(string(), nonEmpty('Please Select')),
+  28: pipe(string(), nonEmpty('Please Select')),
+  29: pipe(string(), nonEmpty('Please Select')),
+  30: pipe(string(), nonEmpty('Please Select')),
+  31: pipe(string(), nonEmpty('Please Select'))
+})

@@ -6,35 +6,62 @@ import * as React from 'react'
 
 import { Button, Grid2, Typography, Box } from '@mui/material'
 
+import { safeParse } from 'valibot'
+
 import styles from './styles.module.css'
 
 import Question from '@/components/Questionnaire-pages/Question/Question'
 
-// Define Props for the Quesiton Page
+import { QuestionnaireSchema } from '@/actions/formValidation'
+
+// Define Props for the Quesiton Page TODO - Correctly type props for the rest of the functions
 interface QuestionPageProps {
   domain: string
   handleNext: () => void
   handlePrev: () => void
 }
 
+// Define props for the Question Type
+interface QuestionType {
+  id: string
+  domain: string
+  question: string
+  note: string
+}
+
 export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
-  const [questions, setQuestions] = useState([])
+  const [questions, setQuestions] = useState<QuestionType[]>([])
   const [answers, setAnswers] = useState({})
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const result = safeParse(QuestionnaireSchema, answers)
+
+    if (result.success) {
+      console.log('Success!', result.output)
+      console.log(answers)
+      alert('Success! Your answers have been submitted')
+      handleNext()
+    } else {
+      console.log('Error!', result.issues)
+      alert('Please fill out all Questions')
+    }
+  }
 
   useEffect(() => {
     fetch('/api/questions')
       .then(res => res.json())
       .then(data => {
-        const filteredQuestions = data.filter(q => q.domain.includes(domain))
+        const filteredQuestions = data.filter((q: QuestionType) => q.domain.includes(domain))
 
         setQuestions(filteredQuestions)
       })
   }, [domain])
 
-  const handleRadioChange = ({ questionId, value }) => {
+  const handleRadioChange = (questionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers(prevAnswers => ({
       ...prevAnswers,
-      [questionId]: value
+      [questionId]: event.target.value
     }))
   }
 
@@ -96,7 +123,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
         </Grid2>
         <Box display='flex' justifyContent='flex-end'>
           {domain === 'Depression' ? (
-            <Button variant='contained' onClick={() => console.log(answers)}>
+            <Button variant='contained' onClick={handleSubmit}>
               Submit
             </Button>
           ) : (

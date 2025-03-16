@@ -56,8 +56,12 @@ type FormDataType = {
   other_conditions: string
 }
 
+interface PatientInfoFormProps {
+  handleNext: () => void
+}
+
 // Give the Info form the handleNext prop defined in the stepper
-const PatientInfoForm = ({ handleNext }) => {
+const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   // States
   const [formData, setFormData] = useState<FormDataType>({
     age: '',
