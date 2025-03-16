@@ -10,7 +10,14 @@ import styles from './styles.module.css'
 
 import Question from '@/components/Questionnaire-pages/Question/Question'
 
-export default function QuestionPage({ domain, handleNext, handlePrev }) {
+// Define Props for the Quesiton Page
+interface QuestionPageProps {
+  domain: string
+  handleNext: () => void
+  handlePrev: () => void
+}
+
+export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState({})
 
@@ -24,7 +31,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }) {
       })
   }, [domain])
 
-  const handleRadioChange = (questionId, value) => {
+  const handleRadioChange = ({ questionId, value }) => {
     setAnswers(prevAnswers => ({
       ...prevAnswers,
       [questionId]: value

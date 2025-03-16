@@ -1,14 +1,16 @@
 'use client'
 
 // MUI Imports
+import React from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import { Button, CardActions } from '@mui/material'
-import React from 'react'
-import { useRouter } from 'next/navigation'
 
 interface StudyListType {
   title: string
@@ -89,7 +91,9 @@ const StudyItem = (item: StudyListType) => {
 
 const StudyList = () => {
   const router = useRouter()
-  return (
+
+  
+return (
     <Card>
       <CardHeader title='My Studies' className='pbe-4' />
       <CardContent className='flex flex-col gap-6'>

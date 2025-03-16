@@ -3,6 +3,8 @@
 // React Imports
 import { useState } from 'react'
 
+import { safeParse } from 'valibot'
+
 // MUI Imports
 
 import Box from '@mui/material/Box'
@@ -18,58 +20,104 @@ import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 
+import { InfoSchema } from '@/actions/formValidation'
+
+import {
+  ACTIVITY_LEVEL_OPTIONS,
+  EDUCATION_LEVEL_OPTIONS,
+  EMPLOYMENT_STATUS_OPTIONS,
+  ETHNICITY_OPTIONS,
+  GENDER_OPTIONS,
+  GENDER_SAME_AS_SEX_OPTIONS,
+  SEX_OPTIONS,
+  SPECIALIST_OPTIONS
+} from '@/constants'
+
 import Styles from './styles.module.css'
 
+// Set up the form data
 type FormDataType = {
-  username: string
-  email: string
-  password: string
-  isPasswordShown: boolean
-  confirmPassword: string
-  isConfirmPasswordShown: boolean
-  firstName: string
-  lastName: string
+  age: string
+  sex_at_birth: string
+  gender: string
+  gender_same_as_sex: string
+  ethnicity: string
   country: string
-  language: string[]
-  date: Date | null
-  phoneNumber: string
+  employment_status: string
+  education_level: string
+  activity_level: string
+  minutes_of_exercise: string
+  diagnosis_confirmed: string
+  healthcare_professional: string
+  receiving_treatment: string
+  treatment: string
+  taking_medications: string
+  medications: string
+  other_conditions: string
 }
 
+// Give the Info form the handleNext prop defined in the stepper
 const PatientInfoForm = ({ handleNext }) => {
   // States
   const [formData, setFormData] = useState<FormDataType>({
-    username: '',
-    email: '',
-    password: '',
-    isPasswordShown: false,
-    confirmPassword: '',
-    isConfirmPasswordShown: false,
-    firstName: '',
-    lastName: '',
+    age: '',
+    sex_at_birth: '',
+    gender: '',
+    gender_same_as_sex: '',
     country: '',
-    language: [],
-    date: null,
-    phoneNumber: ''
+    ethnicity: '',
+    employment_status: '',
+    education_level: '',
+    activity_level: '',
+    minutes_of_exercise: '',
+    diagnosis_confirmed: '',
+    healthcare_professional: '',
+    receiving_treatment: '',
+    treatment: '',
+    taking_medications: '',
+    medications: '',
+    other_conditions: ''
   })
 
   const handleReset = () => {
     setFormData({
-      username: '',
-      email: '',
-      password: '',
-      isPasswordShown: false,
-      confirmPassword: '',
-      isConfirmPasswordShown: false,
-      firstName: '',
-      lastName: '',
+      age: '',
+      sex_at_birth: '',
+      gender: '',
+      gender_same_as_sex: '',
+      ethnicity: '',
       country: '',
-      language: [],
-      date: null,
-      phoneNumber: ''
+      employment_status: '',
+      education_level: '',
+      activity_level: '',
+      minutes_of_exercise: '',
+      diagnosis_confirmed: '',
+      healthcare_professional: '',
+      receiving_treatment: '',
+      treatment: '',
+      taking_medications: '',
+      medications: '',
+      other_conditions: ''
     })
   }
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const result = safeParse(InfoSchema, formData)
+
+    if (result.success) {
+      console.log('Success!', result.output)
+      console.log(formData)
+      handleNext()
+    } else {
+      console.log('Error!', result.issues)
+      alert('Please fill out all fields correctly')
+    }
+  }
+
   return (
+
+    // Return the Information form
     <Box>
       <form onSubmit={e => e.preventDefault()}>
         <CardContent>
@@ -81,7 +129,12 @@ const PatientInfoForm = ({ handleNext }) => {
               <Typography className={Styles.info_questions}>What is your age?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label='Age' />
+              <TextField
+                fullWidth
+                label='Age'
+                value={formData.age}
+                onChange={e => setFormData({ ...formData, age: e.target.value })}
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>{'What sex were you assigned at birth? '}</Typography>
@@ -89,7 +142,17 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select Sex</InputLabel>
-                <Select multiple label='Select Sex'></Select>
+                <Select
+                  label='Select Sex'
+                  value={formData.sex_at_birth}
+                  onChange={e => setFormData({ ...formData, sex_at_birth: e.target.value })}
+                >
+                  {SEX_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -98,7 +161,17 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select Gender</InputLabel>
-                <Select multiple label='Select Gender'></Select>
+                <Select
+                  label='Select Gender'
+                  value={formData.gender}
+                  onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                >
+                  {GENDER_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -110,7 +183,17 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select</InputLabel>
-                <Select multiple label='Select'></Select>
+                <Select
+                  label='Select'
+                  value={formData.gender_same_as_sex}
+                  onChange={e => setFormData({ ...formData, gender_same_as_sex: e.target.value })}
+                >
+                  {GENDER_SAME_AS_SEX_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -119,7 +202,22 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select Ethnicity</InputLabel>
-                <Select multiple label='Select Ethnicity'></Select>
+                <Select
+                  label='Select Ethnicity'
+                  value={formData.ethnicity}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      ethnicity: e.target.value
+                    })
+                  }
+                >
+                  {ETHNICITY_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -128,7 +226,15 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select Country</InputLabel>
-                <Select multiple label='Select Country'></Select>
+                <Select
+                  label='Select Country'
+                  value={formData.country}
+                  onChange={e => setFormData({ ...formData, country: e.target.value })}
+                >
+                  <MenuItem value='PLACEHOLDER UNTIL COUNTRIES ARE ESTABLISHED'>
+                    PLACEHOLDER UNTIL COUNTRIES ARE ESTABLISHED
+                  </MenuItem>
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -137,7 +243,17 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select employment status</InputLabel>
-                <Select multiple label='Select Employment'></Select>
+                <Select
+                  label='Select Employment'
+                  value={formData.employment_status}
+                  onChange={e => setFormData({ ...formData, employment_status: e.target.value })}
+                >
+                  {EMPLOYMENT_STATUS_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -148,7 +264,17 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select Education</InputLabel>
-                <Select multiple label='Select Education'></Select>
+                <Select
+                  label='Select Education'
+                  value={formData.education_level}
+                  onChange={e => setFormData({ ...formData, education_level: e.target.value })}
+                >
+                  {EDUCATION_LEVEL_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -157,7 +283,17 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select</InputLabel>
-                <Select multiple label='Select Activity Level'></Select>
+                <Select
+                  label='Select Activity Level'
+                  value={formData.activity_level}
+                  onChange={e => setFormData({ ...formData, activity_level: e.target.value })}
+                >
+                  {ACTIVITY_LEVEL_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -168,7 +304,12 @@ const PatientInfoForm = ({ handleNext }) => {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label='Enter your input here' />
+              <TextField
+                fullWidth
+                label='Enter your input here'
+                value={formData.minutes_of_exercise}
+                onChange={e => setFormData({ ...formData, minutes_of_exercise: e.target.value })}
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}></Grid>
             <Grid size={{ xs: 12 }}>
@@ -184,7 +325,20 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select</InputLabel>
-                <Select multiple label='Select Diagnosis State'></Select>
+                <Select
+                  label='Select Diagnosis State'
+                  value={formData.diagnosis_confirmed}
+                  onChange={e => {
+                    if (e.target.value === 'No') {
+                      setFormData({ ...formData, diagnosis_confirmed: e.target.value, healthcare_professional: 'n/a' })
+                    } else {
+                      setFormData({ ...formData, diagnosis_confirmed: e.target.value })
+                    }
+                  }}
+                >
+                  <MenuItem value='Yes'>Yes</MenuItem>
+                  <MenuItem value='No'>No</MenuItem>
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -197,7 +351,24 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select</InputLabel>
-                <Select multiple label='Select Healthcare Professional'></Select>
+                <Select
+                  label='Select Healthcare Professional'
+                  disabled={formData.diagnosis_confirmed === 'No'}
+                  value={formData.healthcare_professional}
+                  onChange={e => {
+                    if (formData.diagnosis_confirmed === 'No') {
+                      setFormData({ ...formData, healthcare_professional: 'n/a' })
+                    } else {
+                      setFormData({ ...formData, healthcare_professional: e.target.value })
+                    }
+                  }}
+                >
+                  {SPECIALIST_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -206,8 +377,39 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select</InputLabel>
-                <Select multiple label='Select Treatment'></Select>
+                <Select
+                  label='Select Treatment'
+                  value={formData.receiving_treatment}
+                  onChange={e => {
+                    if (e.target.value === 'No') {
+                      setFormData({ ...formData, receiving_treatment: e.target.value, treatment: 'n/a' })
+                    } else {
+                      setFormData({ ...formData, receiving_treatment: e.target.value })
+                    }
+                  }}
+                >
+                  <MenuItem value='Yes'>Yes</MenuItem>
+                  <MenuItem value='No'>No</MenuItem>
+                </Select>
               </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography className={Styles.info_questions}>What treatment are you receiving?</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                disabled={formData.receiving_treatment === 'No'}
+                label='List your treatments'
+                value={formData.treatment}
+                onChange={e => {
+                  if (formData.receiving_treatment === 'No') {
+                    setFormData({ ...formData, treatment: 'n/a' })
+                  } else {
+                    setFormData({ ...formData, treatment: e.target.value })
+                  }
+                }}
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>Are you taking medications?</Typography>
@@ -215,26 +417,56 @@ const PatientInfoForm = ({ handleNext }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Select</InputLabel>
-                <Select multiple label='Select Medication'></Select>
+                <Select
+                  label='Select Medication'
+                  value={formData.taking_medications}
+                  onChange={e => {
+                    if (e.target.value === 'No') {
+                      setFormData({ ...formData, taking_medications: e.target.value, medications: 'n/a' })
+                    } else {
+                      setFormData({ ...formData, taking_medications: e.target.value })
+                    }
+                  }}
+                >
+                  <MenuItem value='Yes'>Yes</MenuItem>
+                  <MenuItem value='No'>No</MenuItem>
+                </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>What medication do you take?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label='List your medications' />
+              <TextField
+                fullWidth
+                disabled={formData.taking_medications === 'No'}
+                label='List your medications'
+                value={formData.medications}
+                onChange={e => {
+                  if (formData.taking_medications === 'No') {
+                    setFormData({ ...formData, medications: 'n/a' })
+                  } else {
+                    setFormData({ ...formData, medications: e.target.value })
+                  }
+                }}
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>Do you have other medical conditions?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label='Enter your input here' />
+              <TextField
+                fullWidth
+                label='Enter your input here'
+                value={formData.other_conditions}
+                onChange={e => setFormData({ ...formData, other_conditions: e.target.value })}
+              />
             </Grid>
           </Grid>
         </CardContent>
         <Divider />
         <CardActions>
-          <Button type='submit' variant='contained' className='mie-2' onClick={handleNext}>
+          <Button type='submit' variant='contained' className='mie-2' onClick={handleSubmit}>
             Next
           </Button>
           <Button
