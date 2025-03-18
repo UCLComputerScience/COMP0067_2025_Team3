@@ -5,7 +5,7 @@ import { Role } from '@prisma/client'
 import Grid from '@mui/material/Grid2'
 
 import { getUserProfile } from '@/actions/all-users/userAction'
-import AccountSettingsCardAdminView from '@/components/AdminResearcherAccountSettings'
+import AccountSettingsCardAdminView from '@/components/AccountSettingsCardAdminView'
 import DataAccessCard from '@/components/DataAccessCard'
 import { prisma } from '@/prisma/client'
 
