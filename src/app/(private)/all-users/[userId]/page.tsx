@@ -9,8 +9,15 @@ import AccountSettingsCardAdminView from '@/components/AdminResearcherAccountSet
 import DataAccessCard from '@/components/DataAccessCard'
 import { prisma } from '@/prisma/client'
 
-const Page = async ({ params }: { params: { userId: string } }) => {
-  const user = await getUserProfile(params.userId)
+interface PageProps {
+  params: Promise<{
+    userId: string
+  }>
+}
+
+const Page = async ({ params }: PageProps) => {
+  const { userId } = await params
+  const user = await getUserProfile(userId)
 
   if (!user) {
     notFound()
