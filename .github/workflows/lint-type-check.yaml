@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{secret.PAT}}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -36,7 +38,7 @@ jobs:
         if: env.failed == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           script: |
             const fs = require('fs');
             const errorLog = fs.readFileSync('build-error.txt', 'utf8');
