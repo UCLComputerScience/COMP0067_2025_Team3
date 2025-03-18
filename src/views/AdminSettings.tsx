@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid2'
 
-import AccountSettingForm from '@/components/AccountSettingForm'
+import AccountSettingForm from '@/components/account-setting-form'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 
 const AdminSettings = () => {

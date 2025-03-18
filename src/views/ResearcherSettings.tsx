@@ -8,7 +8,7 @@ import { getServerSession } from 'next-auth'
 
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 import StudyList from '@/components/study-list'
-import AccountSettingForm from '@/components/AccountSettingForm'
+import AccountSettingForm from '@/components/account-setting-form'
 import DataAccessCard from '@/components/DataAccessCard'
 
 // auth
