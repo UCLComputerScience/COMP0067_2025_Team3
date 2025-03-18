@@ -4,10 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize]
     branches:
-      - main
+      - main # Change this to your actual branch
 
 permissions:
-  pull-requests: write
+  pull-requests: write # Allow commenting on PRs
 
 jobs:
   build-check:
@@ -45,7 +45,7 @@ jobs:
               errorLog;
 
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
+              issue_number: context.payload.pull_request.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `## ❌ npm build failed\n\n\`\`\`\n${limitedError}\n\`\`\``
