@@ -31,7 +31,7 @@ interface QuestionType {
 
 export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
   const [questions, setQuestions] = useState<QuestionType[]>([])
-  const [answers, setAnswers] = useState({})
+  const [answers, setAnswers] = useState<Record<number | string, string>>({})
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
