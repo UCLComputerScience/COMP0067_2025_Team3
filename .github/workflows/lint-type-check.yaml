@@ -4,7 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize]
     branches:
-      - branchname
+      - main
+
+permissions:
+  pull-requests: write
 
 jobs:
   build-check:
@@ -27,10 +30,10 @@ jobs:
       - name: Run build check
         id: build
         run: |
-          npm run build 2> build-error.txt || echo "::set-output name=failed::true"
+          npm run build 2> build-error.txt || echo "failed=true" >> $GITHUB_ENV
 
       - name: Comment on PR if build fails
-        if: steps.build.outputs.failed == 'true'
+        if: env.failed == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
