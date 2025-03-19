@@ -3,6 +3,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 import debounce from 'lodash/debounce'
 import Stack from '@mui/material/Stack'
@@ -112,6 +113,9 @@ export const Register = () => {
     profession: ''
   })
 
+  const [isTouched, setIsTouched] = useState(false) 
+  const router = useRouter();
+
   // Define debouncedCheckDuplicates
   const debouncedCheckDuplicates = useCallback(
     debounce(async (email: string, phoneNumber: string, registrationNumber: string) => {
@@ -154,6 +158,8 @@ export const Register = () => {
   }
 
   const validateForm = (fieldName?: string) => {
+    if (!isTouched) return 
+    
     const errors: FormErrors = { ...formErrors }
     let isValid = true
 
@@ -181,7 +187,7 @@ export const Register = () => {
       if (!fieldName && !formData.password) {
         errors.password = 'Password is required'
       } else if (formData.password && formData.password.length < 8) {
-        errors.password = 'Password must be at least 8 characters'
+        errors.password = 'Password must be at least 9 characters'
       } else {
         errors.password = ''
       }
@@ -240,6 +246,7 @@ export const Register = () => {
 
     return isValid
   }
+  
 
   useEffect(() => {
     setMounted(true)
@@ -249,6 +256,18 @@ export const Register = () => {
       setError(null)
     }
   }, [])
+
+  useEffect(() => {
+    if (isTouched) {
+      validateForm() 
+    }
+  }, [formData, isTouched])
+  
+  useEffect(() => {
+    if (formData.dateOfBirth) {
+      validateForm('dateOfBirth') 
+    }
+  }, [formData.dateOfBirth])
 
   useEffect(() => {
     setSuccess(null)
@@ -262,9 +281,15 @@ export const Register = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
+  
     console.log(`Input ${name}:`, value)
     setFormData(prev => ({ ...prev, [name]: value }))
+  
+    if (!isTouched) setIsTouched(true) 
+  
+    setTimeout(() => {
+      validateForm(name)
+    }, 0)
 
     if (name === 'confirmPassword') {
       setTimeout(() => {
@@ -296,30 +321,6 @@ export const Register = () => {
         ...(name === 'registrationNumber' && { registrationNumber: '' })
       }))
     }
-  }
-
-  const handleSelectChange = (
-    event: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
-    child?: React.ReactNode
-  ) => {
-    const name = event.target.name as keyof AccountDetailsForm
-    const value = event.target.value as string
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-    setTimeout(() => {
-      validateForm(name as string)
-    }, 0)
-  }
-
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(prev => !prev)
-  }
-
-  const handleToggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(prev => !prev)
   }
 
   const handleNext = async () => {
@@ -380,33 +381,31 @@ export const Register = () => {
       </RadioGroup>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-        <Button
-          variant='outlined'
-          onClick={handlePrevious}
-          sx={{
-            borderRadius: '8px',
-            borderColor: 'primary',
-            color: 'primary',
-            '&:hover': { borderColor: '#5835b5', backgroundColor: 'rgba(110, 65, 226, 0.04)' }
-          }}
-        >
-          {' '}
-          ← Previous
-        </Button>
-        <Button
-          variant='contained'
-          onClick={handleNext}
-          sx={{
-            borderRadius: '8px',
-            borderColor: 'primary',
-            '&:hover': { borderColor: '#5835b5' },
-            '&.Mui-disabled': { backgroundColor: '#ded5f7', color: '#ffffff' }
-          }}
-        >
-          {' '}
-          Next →
-        </Button>
-      </Box>
+      <Button
+                variant="outlined"
+                onClick={() => (step === 0 ? router.push('/login') : handlePrevious())} 
+                sx={{
+                  borderRadius: '8px',
+                  borderColor: 'primary',
+                  color: 'primary',
+                  '&:hover': { borderColor: '#5835b5', backgroundColor: 'rgba(110, 65, 226, 0.04)' }
+                }}
+              >
+                {step === 0 ? '⬅ Login' : '⬅ Previous'} 
+              </Button>
+          <Button
+            variant="contained"
+            onClick={handleNext}
+            sx={{
+              borderRadius: '8px',
+              borderColor: 'primary',
+              '&:hover': { borderColor: '#5835b5' },
+              '&.Mui-disabled': { backgroundColor: '#ded5f7', color: '#ffffff' }
+            }}
+          >
+            Next →
+          </Button>
+        </Box>
     </Box>
   )
 
@@ -430,6 +429,7 @@ export const Register = () => {
             variant='outlined'
             value={formData.firstName}
             onChange={handleInputChange}
+            onInput={() => setIsTouched(true)}
             error={!!formErrors.firstName}
             helperText={formErrors.firstName}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
@@ -444,6 +444,7 @@ export const Register = () => {
             variant='outlined'
             value={formData.lastName}
             onChange={handleInputChange}
+            onInput={() => setIsTouched(true)}
             error={!!formErrors.lastName}
             helperText={formErrors.lastName}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
@@ -458,6 +459,7 @@ export const Register = () => {
             variant='outlined'
             value={formData.email}
             onChange={handleInputChange}
+            onInput={() => setIsTouched(true)}
             error={!!formErrors.email}
             helperText={formErrors.email}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
@@ -472,6 +474,7 @@ export const Register = () => {
             variant='outlined'
             value={formData.address}
             onChange={handleInputChange}
+            onInput={() => setIsTouched(true)}
             error={!!formErrors.address}
             helperText={formErrors.address}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
@@ -486,6 +489,7 @@ export const Register = () => {
             variant='outlined'
             value={formData.phoneNumber}
             onChange={handleInputChange}
+            onInput={() => setIsTouched(true)}
             error={!!formErrors.phoneNumber}
             helperText={formErrors.phoneNumber}
             InputLabelProps={{ shrink: isPhoneFocused || !!formData.phoneNumber }}

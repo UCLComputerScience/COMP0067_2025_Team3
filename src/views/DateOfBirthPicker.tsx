@@ -27,6 +27,7 @@ export const DateOfBirthPicker = ({
   minDate.setFullYear(minDate.getFullYear() - 120)
 
   const maxDate = new Date()
+  
 
   // Set max date to today
 

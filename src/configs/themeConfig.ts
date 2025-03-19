@@ -53,7 +53,7 @@ export type Config = {
 }
 
 const themeConfig: Config = {
-  templateName: 'Materio',
+  templateName: 'Spider',
   homePageUrl: '/home',
   settingsCookieName: 'materio-mui-next-demo',
   mode: 'system', // 'system', 'light', 'dark'
