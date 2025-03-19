@@ -186,9 +186,15 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
         {/* Password Error */}
         {clinicianError && <Alert severity='error'>{clinicianError}</Alert>}
 
-        <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')}>
+        {/* <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')} startIcon={<i className='ri-arrow-drop-left-line' />}>
                 Back
-        </Button>
+        </Button> */}
+        <IconButton
+            color='secondary'
+            onClick={() => router.push('/my-profile/patient-settings')}
+            >
+            <i className='ri-arrow-drop-left-line' />
+        </IconButton>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <Typography variant='h5' gutterBottom>
