@@ -1,38 +1,46 @@
-import { Button } from '@mui/material'
-
-import Link from '@/components/Link'
 import { prisma } from '@/prisma/client'
+import { getServerSession } from 'next-auth'
+import UsersList from '@/views/AllUsers'
+import { authOptions } from '@/libs/auth'
 
-const fakeGetAllUsers = async () => {
-  const users = await prisma.user.findMany({
+export interface Users {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  role: string
+  status: string
+}
+
+const getUsers = async (currentUserId: string): Promise<Users[]> =>{
+  return await prisma.user.findMany({
+    where: {
+      NOT: {
+        id: currentUserId, // Exclude the current user
+      },
+    },
     select: {
+      id: true,
       firstName: true,
       lastName: true,
-      id: true
+      email: true,
+      role: true,
+      status: true
     }
-  })
+  });
+};
 
-  return users
+
+const AllUsers = async () => {
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return <p>Unauthorized</p>
+  }
+
+  const userData = await getUsers(session.user.id);
+
+  return <UsersList users={userData} />;
 }
 
-const Page = async () => {
-  const users = await fakeGetAllUsers()
-
-  return (
-    <>
-      {users.map((u, k) => {
-        return (
-          <div key={k}>
-            <Link href={`/all-users/${u.id}`}>
-              <Button>
-                {u.firstName} {u.lastName}
-              </Button>
-            </Link>
-          </div>
-        )
-      })}
-    </>
-  )
-}
-
-export default Page
+export default AllUsers;

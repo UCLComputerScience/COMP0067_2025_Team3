@@ -535,7 +535,7 @@ const UserProfile = ({ initialData, clinicians = [] }: Props) => {
                         <TableCell>
                           <div>
                             <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
-                            <Typography variant='body1'>{clinician.firstName}</Typography>
+                            <Typography variant='body1'>{clinician.firstName} {clinician.lastName}</Typography>
                           </div>
                           <Typography variant='body2' color='secondary'>
                             {clinician.institution}
