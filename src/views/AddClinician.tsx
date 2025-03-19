@@ -135,8 +135,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
     email: ''
   })
 
-  const showSearchButtons = Object.values(searchCriteria).some(term => term.trim() !== '')
-
   // Open the modal
   const handleOpenModal = () => {
     setOpenModal(true)

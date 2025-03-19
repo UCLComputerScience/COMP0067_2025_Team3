@@ -3,9 +3,12 @@
 'use client'
 
 // React imports
+import { useState} from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import {
   Box,
-  Button,
   Card,
   TextField,
   Typography,
@@ -25,8 +28,6 @@ import {
   IconButton
 } from '@mui/material'
 
-import { useRouter } from 'next/navigation'
-import { useState} from 'react'
 
 // User type import
 import type { Users } from '@/app/(private)/all-users/page'

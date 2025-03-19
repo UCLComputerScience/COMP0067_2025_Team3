@@ -1,5 +1,6 @@
-import { prisma } from '@/prisma/client'
 import { getServerSession } from 'next-auth'
+
+import { prisma } from '@/prisma/client'
 import UsersList from '@/views/AllUsers'
 import { authOptions } from '@/libs/auth'
 
