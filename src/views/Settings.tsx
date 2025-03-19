@@ -281,7 +281,7 @@ const UserProfile = ({ initialData, clinicians = [] }: Props) => {
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Card sx={{ width: 1132, p: 3 }}>
+        <Card sx={{ width: 2000, p: 3 }}>
           <Typography variant='h5' gutterBottom>
             Account Settings
           </Typography>
@@ -370,7 +370,7 @@ const UserProfile = ({ initialData, clinicians = [] }: Props) => {
       </Box>
       {/* Change Password Card */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Card sx={{ width: 1132, p: 3 }}>
+        <Card sx={{ width: 2000, p: 3 }}>
           <Typography variant='h5' gutterBottom>
             Change Password
           </Typography>
@@ -504,7 +504,7 @@ const UserProfile = ({ initialData, clinicians = [] }: Props) => {
       </Box>
       {/* Linked Clinicians Card*/}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Card sx={{ width: 1132, p: 3 }}>
+        <Card sx={{ width: 2000, p: 3 }}>
           <Typography variant='h5' gutterBottom>
             Linked Clinicians
           </Typography>
@@ -535,7 +535,7 @@ const UserProfile = ({ initialData, clinicians = [] }: Props) => {
                         <TableCell>
                           <div>
                             <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
-                            <Typography variant='body1'>{clinician.firstName}</Typography>
+                            <Typography variant='body1'>{clinician.firstName} {clinician.lastName}</Typography>
                           </div>
                           <Typography variant='body2' color='secondary'>
                             {clinician.institution}
@@ -581,7 +581,7 @@ const UserProfile = ({ initialData, clinicians = [] }: Props) => {
       </Box>
       {/* Data Sharing Consent*/}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Card sx={{ width: 1132, p: 3 }}>
+        <Card sx={{ width: 2000, p: 3 }}>
           <Typography variant='h5' gutterBottom>
             Data Privacy
           </Typography>

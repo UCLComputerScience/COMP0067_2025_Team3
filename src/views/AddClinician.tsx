@@ -135,8 +135,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
     email: ''
   })
 
-  const showSearchButtons = Object.values(searchCriteria).some(term => term.trim() !== '')
-
   // Open the modal
   const handleOpenModal = () => {
     setOpenModal(true)
@@ -182,16 +180,28 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-      <Card sx={{ width: 1132, p: 3 }}>
-        {/* Password Error */}
+      <Card sx={{ width: 2000, p: 3 }}>
+        {/* Error */}
         {clinicianError && <Alert severity='error'>{clinicianError}</Alert>}
 
+        {/* <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')} startIcon={<i className='ri-arrow-drop-left-line' />}>
+                Back
+        </Button> */}
+        <IconButton
+            color='secondary'
+            onClick={() => router.push('/my-profile/patient-settings')}
+            >
+            <i className='ri-arrow-drop-left-line' />
+        </IconButton>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <Typography variant='h5' gutterBottom>
-          Link a Clinician
+            Link a Clinician
         </Typography>
-        <Typography color='secondary' variant='body2' sx={{ alignItems: 'center' }}>
-          Link your clinicians to share your data with them
+        <Typography color='secondary' variant='body2'>
+            Link your clinicians to share your data with them
         </Typography>
+        </Box>
 
         {/* Search Grid */}
         <CardContent>
@@ -242,7 +252,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
             </Grid>
 
             {/* Search Button */}
-            {showSearchButtons && (
               <Grid size={{ xs: 6 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
                   <Button variant='contained' onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
@@ -253,7 +262,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                   </Button>
                 </Box>
               </Grid>
-            )}
           </Grid>
 
           {/* Clinician List */}
@@ -362,18 +370,14 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                   </Dialog>
                 </Typography>
               </Grid>
+            {/* Save and Cancel Buttons */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+                <Button variant='contained' color='primary' onClick={handleClinicianSave} ref={saveButtonRef}>
+                Save
+                </Button>
+            </Box>
             </>
           )}
-
-          {/* Save and Cancel Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-            <Button variant='contained' color='primary' onClick={handleClinicianSave} ref={saveButtonRef}>
-              Save
-            </Button>
-            <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')}>
-              Cancel
-            </Button>
-          </Box>
         </CardContent>
       </Card>
     </Box>
