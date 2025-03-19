@@ -182,7 +182,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-      <Card sx={{ width: 1132, p: 3 }}>
+      <Card sx={{ width: 2000, p: 3 }}>
         {/* Error */}
         {clinicianError && <Alert severity='error'>{clinicianError}</Alert>}
 

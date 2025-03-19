@@ -81,7 +81,7 @@ const UsersList = ({ users }: Props) => {
 
   return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-      <Card sx={{ width: 1132, p: 3 }}>
+      <Card sx={{ width: 2000, p: 3 }}>
       {/* Filters */}
       <Typography variant='body2'>Filters</Typography>
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
