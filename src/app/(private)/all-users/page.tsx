@@ -1,7 +1,9 @@
 import { getServerSession } from 'next-auth'
 
+import { Role } from '@prisma/client'
+
 import { prisma } from '@/prisma/client'
-import UsersList from '@/views/AllUsers'
+import UsersList from '@/views/UsersList'
 import { authOptions } from '@/libs/auth'
 
 export interface Users {
@@ -13,12 +15,13 @@ export interface Users {
   status: string
 }
 
-const getUsers = async (currentUserId: string): Promise<Users[]> =>{
+const getAllUsersExceptAdmin = async (currentUserId: string): Promise<Users[]> => {
   return await prisma.user.findMany({
     where: {
-      NOT: {
-        id: currentUserId, // Exclude the current user
-      },
+      AND: [
+        { id: { not: currentUserId } }, // Exclude the current user
+        { role: { not: Role.ADMIN } } // Exclude users with the ADMIN role
+      ]
     },
     select: {
       id: true,
@@ -28,20 +31,19 @@ const getUsers = async (currentUserId: string): Promise<Users[]> =>{
       role: true,
       status: true
     }
-  });
-};
+  })
+}
 
-
-const AllUsers = async () => {
+const Page = async () => {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
     return <p>Unauthorized</p>
   }
 
-  const userData = await getUsers(session.user.id);
+  const userData = await getAllUsersExceptAdmin(session.user.id)
 
-  return <UsersList users={userData} />;
+  return <UsersList users={userData} />
 }
 
-export default AllUsers;
+export default Page
