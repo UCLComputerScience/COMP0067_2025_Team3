@@ -26,7 +26,7 @@ import {
   Link,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,FormControl, InputLabel, Select, MenuItem
 } from '@mui/material'
 
 import { PatientRegister } from './RegisterPatient'
@@ -76,14 +76,24 @@ export const Register = () => {
   const [mounted, setMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [accountType, setAccountType] = useState('patient')
   const [success, setSuccess] = useState<string | null>(null)
   const [completedSteps, setCompletedSteps] = useState<boolean[]>([])
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isPhoneFocused, setIsPhoneFocused] = useState(false)
   const [openPrivacyTerms, setOpenPrivacyTerms] = useState<boolean>(false)
+  const [isFirstNameFocused, setIsFirstNameFocused] = useState(false)
+  const [isLastNameFocused, setIsLastNameFocused] = useState(false)
+  const [isEmailFocused, setIsEmailFocused] = useState(false)
+  const [isAddressFocused, setIsAddressFocused] = useState(false)
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false)
+  const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState(false)
+  const [isDateOfBirthFocused, setIsDateOfBirthFocused] = useState(false)
+  const [isRegistrationNumberFocused, setIsRegistrationNumberFocused] = useState(false)
+  const [isInstitutionFocused, setIsInstitutionFocused] = useState(false)
+  const [isProfessionFocused, setIsProfessionFocused] = useState(false)
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({})
+
 
   const [formData, setFormData] = useState<AccountDetailsForm>({
     firstName: '',
@@ -112,8 +122,6 @@ export const Register = () => {
     institution: '',
     profession: ''
   })
-
-  const [isTouched, setIsTouched] = useState(false) 
   const router = useRouter();
 
   // Define debouncedCheckDuplicates
@@ -158,116 +166,157 @@ export const Register = () => {
   }
 
   const validateForm = (fieldName?: string) => {
-    if (!isTouched) return 
-    
-    const errors: FormErrors = { ...formErrors }
-    let isValid = true
-
-    if (!fieldName || fieldName === 'firstName') {
-      errors.firstName = !formData.firstName.trim() ? 'First name is required' : ''
-      isValid = isValid && !errors.firstName
+    const errors: FormErrors = { ...formErrors };
+    let isValid = true;
+  
+    const shouldValidateField = (field: string) => {
+      return !fieldName || (fieldName === field && touchedFields[field]);
+    };
+  
+    if (shouldValidateField('firstName')) {
+      errors.firstName = !formData.firstName.trim() ? 'First name is required' : '';
+      isValid = isValid && !errors.firstName;
+    } else {
+      errors.firstName = '';
     }
-
-    if (!fieldName || fieldName === 'lastName') {
-      errors.lastName = !formData.lastName.trim() ? 'Last name is required' : ''
-      isValid = isValid && !errors.lastName
+  
+    if (shouldValidateField('lastName')) {
+      errors.lastName = !formData.lastName.trim() ? 'Last name is required' : '';
+      isValid = isValid && !errors.lastName;
+    } else {
+      errors.lastName = '';
     }
-
-    if (!fieldName || fieldName === 'email') {
+  
+    if (shouldValidateField('email')) {
       if (!formData.email.trim()) {
-        errors.email = ''
+        errors.email = '';
       } else {
-        errors.email = !/^\S+@\S+\.\S+$/.test(formData.email) ? 'Please enter a valid email address' : ''
+        errors.email = !/^\S+@\S+\.\S+$/.test(formData.email) ? 'Please enter a valid email address' : '';
       }
-
-      isValid = isValid && !errors.email
+      isValid = isValid && !errors.email;
+    } else {
+      errors.email = '';
     }
-
-    if (!fieldName || fieldName === 'password') {
-      if (!fieldName && !formData.password) {
-        errors.password = 'Password is required'
-      } else if (formData.password && formData.password.length < 8) {
-        errors.password = 'Password must be at least 9 characters'
+  
+    if (shouldValidateField('password')) {
+      if (!formData.password) {
+        errors.password = 'Password is required';
+      } else if (formData.password.length < 8) {
+        errors.password = 'Password must be at least 9 characters';
       } else {
-        errors.password = ''
+        errors.password = '';
       }
-
-      isValid = isValid && !errors.password
+      isValid = isValid && !errors.password;
+    } else {
+      errors.password = '';
     }
-
-    if (!fieldName || fieldName === 'confirmPassword') {
+  
+    if (shouldValidateField('confirmPassword')) {
       if (formData.password && formData.password !== formData.confirmPassword) {
-        console.log('Password:', formData.password)
-        console.log('Confirm:', formData.confirmPassword)
-        errors.confirmPassword = 'Passwords do not match'
+        errors.confirmPassword = 'Passwords do not match';
       } else {
-        errors.confirmPassword = ''
+        errors.confirmPassword = '';
       }
-
-      isValid = isValid && !errors.confirmPassword
+      isValid = isValid && !errors.confirmPassword;
+    } else {
+      errors.confirmPassword = '';
     }
-
-    if (!fieldName || fieldName === 'phoneNumber') {
+  
+    if (shouldValidateField('phoneNumber')) {
       if (formData.phoneNumber) {
-        // const cleanedPhoneNumber = formData.phoneNumber.replace(/\D/g, '')
-        const isValidDigits = /^\d+$/.test(formData.phoneNumber)
-
-        // const isValidLength = cleanedPhoneNumber.length === 10
-        errors.phoneNumber = !isValidDigits ? 'Phone numbers can only contain digits' : ''
+        const isValidDigits = /^\d+$/.test(formData.phoneNumber);
+        errors.phoneNumber = !isValidDigits ? 'Phone numbers can only contain digits' : '';
       } else {
-        errors.phoneNumber = ''
+        errors.phoneNumber = '';
       }
-
-      isValid = isValid && !errors.phoneNumber
+      isValid = isValid && !errors.phoneNumber;
+    } else {
+      errors.phoneNumber = '';
     }
-
-    if ((!fieldName || fieldName === 'dateOfBirth') && accountType === 'patient') {
-      errors.dateOfBirth = !fieldName && !formData.dateOfBirth ? 'Date of birth is required' : ''
-      isValid = isValid && !errors.dateOfBirth
+  
+    if (shouldValidateField('dateOfBirth') && accountType === 'patient') {
+      errors.dateOfBirth = !formData.dateOfBirth ? 'Date of birth is required' : '';
+      isValid = isValid && !errors.dateOfBirth;
+    } else {
+      errors.dateOfBirth = '';
     }
-
-    if ((!fieldName || fieldName === 'registrationNumber') && accountType === 'clinician') {
-      errors.registrationNumber =
-        !fieldName && !formData.registrationNumber?.trim() ? 'Registration number is required' : ''
-      isValid = isValid && !errors.registrationNumber
+  
+    if (shouldValidateField('registrationNumber') && accountType === 'clinician') {
+      errors.registrationNumber = !formData.registrationNumber?.trim() ? 'Registration number is required' : '';
+      isValid = isValid && !errors.registrationNumber;
+    } else {
+      errors.registrationNumber = '';
     }
-
-    if ((!fieldName || fieldName === 'institution') && (accountType === 'clinician' || accountType === 'researcher')) {
-      errors.institution = !fieldName && !formData.institution?.trim() ? 'Institution is required' : ''
-      isValid = isValid && !errors.institution
+  
+    if (shouldValidateField('institution') && (accountType === 'clinician' || accountType === 'researcher')) {
+      errors.institution = !formData.institution?.trim() ? 'Institution is required' : '';
+      isValid = isValid && !errors.institution;
+    } else {
+      errors.institution = '';
     }
-
-    if ((!fieldName || fieldName === 'profession') && accountType === 'clinician') {
-      errors.profession = !fieldName && !formData.profession?.trim() ? 'Profession is required' : ''
-      isValid = isValid && !errors.profession
+  
+    if (shouldValidateField('profession') && accountType === 'clinician') {
+      errors.profession = !formData.profession?.trim() ? 'Profession is required' : '';
+      isValid = isValid && !errors.profession;
+    } else {
+      errors.profession = '';
     }
-
-    setFormErrors(errors)
-
-    return isValid
-  }
+  
+    setFormErrors(errors);
+    return isValid;
+  };
   
 
   useEffect(() => {
-    setMounted(true)
-
+    setMounted(true);
+  
+    const checkAutofill = () => {
+      const firstNameInput = document.querySelector('input[name="firstName"]') as HTMLInputElement;
+      const lastNameInput = document.querySelector('input[name="lastName"]') as HTMLInputElement;
+      const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
+      const addressInput = document.querySelector('input[name="address"]') as HTMLInputElement;
+      const phoneNumberInput = document.querySelector('input[name="phoneNumber"]') as HTMLInputElement;
+      const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
+      const confirmPasswordInput = document.querySelector('input[name="confirmPassword"]') as HTMLInputElement;
+  
+      if (firstNameInput?.value) {
+        setFormData(prev => ({ ...prev, firstName: firstNameInput.value }));
+        setTouchedFields(prev => ({ ...prev, firstName: true }));
+      }
+      if (lastNameInput?.value) {
+        setFormData(prev => ({ ...prev, lastName: lastNameInput.value }));
+        setTouchedFields(prev => ({ ...prev, lastName: true }));
+      }
+      if (emailInput?.value) {
+        setFormData(prev => ({ ...prev, email: emailInput.value }));
+        setTouchedFields(prev => ({ ...prev, email: true }));
+      }
+      if (addressInput?.value) {
+        setFormData(prev => ({ ...prev, address: addressInput.value }));
+        setTouchedFields(prev => ({ ...prev, address: true }));
+      }
+      if (phoneNumberInput?.value) {
+        setFormData(prev => ({ ...prev, phoneNumber: phoneNumberInput.value }));
+        setTouchedFields(prev => ({ ...prev, phoneNumber: true }));
+      }
+      if (passwordInput?.value) {
+        setFormData(prev => ({ ...prev, password: passwordInput.value }));
+        setTouchedFields(prev => ({ ...prev, password: true }));
+      }
+      if (confirmPasswordInput?.value) {
+        setFormData(prev => ({ ...prev, confirmPassword: confirmPasswordInput.value }));
+        setTouchedFields(prev => ({ ...prev, confirmPassword: true }));
+      }
+    };
+  
+    const timer = setTimeout(checkAutofill, 500);
+  
     return () => {
-      setSuccess(null)
-      setError(null)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (isTouched) {
-      validateForm() 
-    }
-  }, [formData, isTouched])
-  
-  useEffect(() => {
-    if (formData.dateOfBirth) {
-      validateForm('dateOfBirth') 
-    }
-  }, [formData.dateOfBirth])
+      clearTimeout(timer);
+      setSuccess(null);
+      setError(null);
+    };
+  }, []);
 
   useEffect(() => {
     setSuccess(null)
@@ -284,13 +333,12 @@ export const Register = () => {
   
     console.log(`Input ${name}:`, value)
     setFormData(prev => ({ ...prev, [name]: value }))
-  
-    if (!isTouched) setIsTouched(true) 
-  
+
+    setTouchedFields(prev => ({ ...prev, [name]: true }))
     setTimeout(() => {
       validateForm(name)
     }, 0)
-
+  
     if (name === 'confirmPassword') {
       setTimeout(() => {
         if (formData.password !== value) {
@@ -327,8 +375,22 @@ export const Register = () => {
     setSuccess(null)
 
     if (step === 1) {
+      setTouchedFields({
+        firstName: true,
+        lastName: true,
+        email: true,
+        password: true,
+        confirmPassword: true,
+        dateOfBirth: true,
+        address: true,
+        phoneNumber: true,
+        registrationNumber: true,
+        institution: true,
+        profession: true
+      });
+  
       if (!validateForm() || !agreeTerms) {
-        return
+        return;
       }
     }
 
@@ -425,43 +487,67 @@ export const Register = () => {
           <TextField
             label='First name'
             name='firstName'
+            autoComplete="given-name"
             fullWidth
             variant='outlined'
             value={formData.firstName}
             onChange={handleInputChange}
-            onInput={() => setIsTouched(true)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, firstName: true }));
+              setFormData(prev => ({ ...prev, firstName: e.target.value }));
+              validateForm('firstName');
+              setIsFirstNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.firstName}
             helperText={formErrors.firstName}
+            InputLabelProps={{ shrink: isFirstNameFocused || !!formData.firstName }}
+            onFocus={() => setIsFirstNameFocused(true)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </Grid>
         <Grid item xs={6}>
           {' '}
           <TextField
-            label='Last name'
-            name='lastName'
+            label="Last name"
+            name="lastName"
+            autoComplete="family-name"
             fullWidth
-            variant='outlined'
+            variant="outlined"
             value={formData.lastName}
             onChange={handleInputChange}
-            onInput={() => setIsTouched(true)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, lastName: true }));
+              setFormData(prev => ({ ...prev, lastName: e.target.value }));
+              validateForm('lastName');
+              setIsLastNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.lastName}
             helperText={formErrors.lastName}
+            InputLabelProps={{ shrink: isLastNameFocused || !!formData.lastName }}
+            onFocus={() => setIsLastNameFocused(true)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </Grid>
         <Grid item xs={12}>
-          <TextField
+        <TextField
             label='Email'
             name='email'
             type='email'
+            autoComplete="email"
             fullWidth
             variant='outlined'
             value={formData.email}
             onChange={handleInputChange}
-            onInput={() => setIsTouched(true)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, email: true }));
+              setFormData(prev => ({ ...prev, email: e.target.value }));
+              validateForm('email');
+              setIsFirstNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.email}
             helperText={formErrors.email}
+            InputLabelProps={{ shrink: isEmailFocused || !!formData.email }}
+            onFocus={() => setIsEmailFocused(true)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </Grid>
@@ -470,13 +556,21 @@ export const Register = () => {
           <TextField
             label='Address'
             name='address'
+            autoComplete="street-address"
             fullWidth
             variant='outlined'
             value={formData.address}
             onChange={handleInputChange}
-            onInput={() => setIsTouched(true)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, address: true }));
+              setFormData(prev => ({ ...prev, address: e.target.value }));
+              validateForm('address');
+              setIsFirstNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.address}
             helperText={formErrors.address}
+            InputLabelProps={{ shrink: isAddressFocused || !!formData.address }}
+            onFocus={() => setIsAddressFocused(true)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </Grid>
@@ -485,30 +579,44 @@ export const Register = () => {
           <TextField
             label='Phone Number'
             name='phoneNumber'
+            autoComplete="tel"
             fullWidth
             variant='outlined'
             value={formData.phoneNumber}
             onChange={handleInputChange}
-            onInput={() => setIsTouched(true)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, phoneNumber: true }));
+              setFormData(prev => ({ ...prev, phoneNumber: e.target.value }));
+              validateForm('phoneNumber');
+              setIsFirstNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.phoneNumber}
             helperText={formErrors.phoneNumber}
             InputLabelProps={{ shrink: isPhoneFocused || !!formData.phoneNumber }}
             onFocus={() => setIsPhoneFocused(true)}
-            onBlur={() => setIsPhoneFocused(!!formData.phoneNumber)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />{' '}
         </Grid>
         <Grid item xs={12}>
-          <TextField
+        <TextField
             label='Password'
             name='password'
             type='password'
+            autoComplete="new-password"
             fullWidth
             variant='outlined'
             value={formData.password}
             onChange={handleInputChange}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, password: true }));
+              setFormData(prev => ({ ...prev, password: e.target.value }));
+              validateForm('password');
+              setIsFirstNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.password}
             helperText={formErrors.password}
+            InputLabelProps={{ shrink: isPasswordFocused || !!formData.password }}
+            onFocus={() => setIsPasswordFocused(true)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </Grid>
@@ -518,31 +626,41 @@ export const Register = () => {
             label='Confirm password'
             name='confirmPassword'
             type='password'
+            autoComplete="confirm-password"
             fullWidth
             variant='outlined'
             value={formData.confirmPassword}
             onChange={handleInputChange}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setTouchedFields(prev => ({ ...prev, confirmPassword: true }));
+              setFormData(prev => ({ ...prev, confirmPassword: e.target.value }));
+              validateForm('confirmPassword');
+              setIsFirstNameFocused(!!e.target.value);
+            }}
             error={!!formErrors.confirmPassword}
             helperText={formErrors.confirmPassword}
+            InputLabelProps={{ shrink: isConfirmPasswordFocused || !!formData.confirmPassword }}
+            onFocus={() => setIsConfirmPasswordFocused(true)}
             sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </Grid>
         {accountType === 'patient' && (
           <Grid item xs={12}>
-            <DateOfBirthPicker
-              value={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
-              onChange={newDate => {
-                setFormData(prev => ({
-                  ...prev,
-                  dateOfBirth: newDate ? newDate.toISOString().split('T')[0] : ''
-                }))
-                validateForm('dateOfBirth')
-              }}
-              label='Date of birth'
-              error={!!formErrors.dateOfBirth}
-              helperText={formErrors.dateOfBirth}
-            />
-          </Grid>
+          <DateOfBirthPicker
+            value={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
+            onChange={(newDate: Date | null) => {
+              setFormData(prev => ({
+                ...prev,
+                dateOfBirth: newDate ? newDate.toISOString().split('T')[0] : ''
+              }));
+              setTouchedFields(prev => ({ ...prev, dateOfBirth: true }));
+              validateForm('dateOfBirth');
+            }}
+            label="Date of birth"
+            error={!!formErrors.dateOfBirth}
+            helperText={formErrors.dateOfBirth}
+          />
+        </Grid>
         )}
         {accountType === 'clinician' && (
           <>
@@ -551,28 +669,56 @@ export const Register = () => {
               <TextField
                 label='Registration Number'
                 name='registrationNumber'
+                autoComplete="off"
                 fullWidth
                 variant='outlined'
                 value={formData.registrationNumber}
                 onChange={handleInputChange}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, registrationNumber: true }))
+                  validateForm('registrationNumber')
+                  setIsFirstNameFocused(!!formData.registrationNumber)
+                }}
                 error={!!formErrors.registrationNumber}
                 helperText={formErrors.registrationNumber}
+                InputLabelProps={{ shrink: isRegistrationNumberFocused || !!formData.registrationNumber }}
+                onFocus={() => setIsRegistrationNumberFocused(true)}
                 sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />{' '}
             </Grid>
             <Grid item xs={12}>
               {' '}
-              <TextField
-                label='Institution'
-                name='institution'
-                fullWidth
-                variant='outlined'
-                value={formData.institution}
-                onChange={handleInputChange}
-                error={!!formErrors.institution}
-                helperText={formErrors.institution}
-                sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
-              />
+              <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel shrink={isInstitutionFocused || !!formData.institution}>Institution</InputLabel>
+                <Select
+                  name='institution'
+                  value={formData.institution}
+                  onChange={(event: SelectChangeEvent<string>) =>
+                    handleInputChange({
+                      target: { name: "institution", value: event.target.value }
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
+                  onBlur={() => {
+                    setTouchedFields(prev => ({ ...prev, institution: true }))
+                    validateForm('institution')
+                    setIsFirstNameFocused(!!formData.institution)
+                  }}
+                  onOpen={() => setIsInstitutionFocused(true)}
+                  onClose={() => setIsInstitutionFocused(!!formData.institution)}
+                >
+                  <MenuItem value='University College London (UCL)'>University College London (UCL)</MenuItem>
+                  <MenuItem value='Kings College London'>Kings College London</MenuItem>
+                  <MenuItem value='Imperial College London'>Imperial College London</MenuItem>
+                  <MenuItem value='NHS England'>NHS England</MenuItem>
+                  <MenuItem value='South London and Maudsley NHS Trust'>South London and Maudsley NHS Trust</MenuItem>
+                  <MenuItem value='Other'>Other</MenuItem>
+                </Select>
+                {formErrors.institution && (
+                  <Typography variant='caption' color='error'>
+                    {formErrors.institution}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               {' '}
@@ -583,8 +729,15 @@ export const Register = () => {
                 variant='outlined'
                 value={formData.profession}
                 onChange={handleInputChange}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, profession: true }))
+                  validateForm('profession')
+                  setIsFirstNameFocused(!!formData.profession)
+                }}
                 error={!!formErrors.profession}
                 helperText={formErrors.profession}
+                InputLabelProps={{ shrink: isProfessionFocused || !!formData.profession }}
+                onFocus={() => setIsProfessionFocused(true)}
                 sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />{' '}
             </Grid>
@@ -594,17 +747,37 @@ export const Register = () => {
         {accountType === 'researcher' && (
           <Grid item xs={12}>
             {' '}
-            <TextField
-              label='Institution'
-              name='institution'
-              fullWidth
-              variant='outlined'
-              value={formData.institution}
-              onChange={handleInputChange}
-              error={!!formErrors.institution}
-              helperText={formErrors.institution}
-              sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
-            />
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel shrink={isInstitutionFocused || !!formData.institution}>Institution</InputLabel>
+                <Select
+                  name='institution'
+                  value={formData.institution}
+                  onChange={(event: SelectChangeEvent<string>) =>
+                    handleInputChange({
+                      target: { name: "institution", value: event.target.value }
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
+                  onBlur={() => {
+                    setTouchedFields(prev => ({ ...prev, institution: true }))
+                    validateForm('institution')
+                    setIsFirstNameFocused(!!formData.institution)
+                  }}
+                  onOpen={() => setIsInstitutionFocused(true)}
+                  onClose={() => setIsInstitutionFocused(!!formData.institution)}
+                >
+                  <MenuItem value='University College London (UCL)'>University College London (UCL)</MenuItem>
+                  <MenuItem value='Kings College London'>Kings College London</MenuItem>
+                  <MenuItem value='Imperial College London'>Imperial College London</MenuItem>
+                  <MenuItem value='NHS England'>NHS England</MenuItem>
+                  <MenuItem value='South London and Maudsley NHS Trust'>South London and Maudsley NHS Trust</MenuItem>
+                  <MenuItem value='Other'>Other</MenuItem>
+                </Select>
+                {formErrors.institution && (
+                  <Typography variant='caption' color='error'>
+                    {formErrors.institution}
+                  </Typography>
+                )}
+              </FormControl>
           </Grid>
         )}
       </Grid>
