@@ -13,8 +13,7 @@ import type { VerticalNavContextProps } from '@menu/contexts/verticalNavContext'
 // Component Imports
 import MaterioLogo from '@core/svg/Logo'
 
-// Config Imports
-import themeConfig from '@configs/themeConfig'
+
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'

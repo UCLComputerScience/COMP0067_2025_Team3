@@ -1,4 +1,5 @@
 import Image from 'next/image'
+
 import SpiderLogo from '@components/layout/horizontal/spider_logo_1.png'
 
 const Logo = ({ className }: { className?: string }) => {
