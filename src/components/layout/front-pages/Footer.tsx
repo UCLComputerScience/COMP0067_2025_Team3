@@ -1,9 +1,8 @@
 // MUI Imports
+import Image from 'next/image'
+
 import Grid from '@mui/material/Grid2'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
 
 // Third-party Imports
@@ -11,17 +10,17 @@ import classnames from 'classnames'
 
 // Component Imports
 import Link from '@components/Link'
-import Logo from '@components/layout/shared/Logo'
 
 // Util Imports
 import { frontLayoutClasses } from '@layouts/utils/layoutClasses'
 
-// Styles Imports
-
-// eslint-disable-next-line import/no-duplicates
-import styles from './styles.module.css'
 // eslint-disable-next-line import/no-duplicates
 import frontCommonStyles from './styles.module.css'
+
+// Image Imports
+import UCLGOSH from '../../../../public/images/ucl-GOSH-logo.png'
+
+import GHENTUNI from '../../../../public/images/ghent-logo.png'
 
 const Footer = () => {
   return (
@@ -33,127 +32,79 @@ const Footer = () => {
           className='absolute inset-0 is-full bs-full object-cover -z-[1]'
         />
         <div className={classnames('plb-12 text-white', frontCommonStyles.layoutSpacing)}>
-          <Grid container rowSpacing={10} columnSpacing={12}>
-            <Grid size={{ xs: 12, lg: 5 }}>
+          <Grid container rowSpacing={10} columnSpacing={12} justifyContent={'center'}>
+            <Grid>
+              <Image src={UCLGOSH} alt='logo' width={184} height={74.1} flex-shrink={0} aspect-ration={184.0 / 74.11} />
+            </Grid>
+            <Grid>
+              <Image src={GHENTUNI} alt='logo' width={85} height={81} />
+            </Grid>
+            <Grid>
               <div className='flex flex-col items-start gap-6'>
-                <Link href='/front-pages/landing-page'>
-                  <Logo color='var(--mui-palette-common-white)' />
-                </Link>
-                <Typography color='white' className='lg:max-is-[390px] opacity-[0.78]'>
-                  Most Powerful & Comprehensive 🤩 React NextJS Admin Template with Elegant Material Design & Unique
-                  Layouts.
+                <Typography variant='body2' className='text-white opacity-[0.92]'>
+                  About
                 </Typography>
                 <div className='flex gap-4'>
-                  <TextField
+                  <IconButton
+                    component={Link}
                     size='small'
-                    className={styles.inputBorder}
-                    label='Subscribe to newsletter'
-                    placeholder='Your email'
-                    sx={{
-                      ' & .MuiInputBase-root:hover:not(.Mui-focused) fieldset': {
-                        borderColor: 'rgb(var(--mui-mainColorChannels-dark) / 0.6) !important'
-                      },
-                      '& .MuiInputBase-root.Mui-focused fieldset': {
-                        borderColor: 'var(--mui-palette-primary-main)!important'
-                      },
-                      '& .MuiFormLabel-root.Mui-focused': {
-                        color: 'var(--mui-palette-primary-main) !important'
-                      }
-                    }}
-                  />
-                  <Button variant='contained' color='primary'>
-                    Subscribe
-                  </Button>
+                    href='https://www.facebook.com/ThemeSelections/'
+                    target='_blank'
+                  >
+                    <i className='ri-facebook-fill text-white text-lg' />
+                  </IconButton>
+                  <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
+                    <i className='ri-twitter-fill text-white text-lg' />
+                  </IconButton>
                 </div>
               </div>
             </Grid>
-            <Grid size={{ xs: 12, sm: 3, lg: 2 }}>
-              <Typography color='white' className='font-medium mbe-6 opacity-[0.92]'>
-                Pages
-              </Typography>
-              <div className='flex flex-col gap-4'>
-                <Typography component={Link} href='/front-pages/pricing' color='white' className='opacity-[0.78]'>
-                  Pricing
+            <Grid>
+              <div className='flex flex-col items-start gap-6'>
+                <Typography variant='body2' className='text-white opacity-[0.92]'>
+                  Team
                 </Typography>
-                <Link href='/front-pages/payment' className='flex items-center gap-[10px]'>
-                  <Typography color='white' className='opacity-[0.78]'>
-                    Payment
-                  </Typography>
-                  <Chip label='New' color='primary' size='small' />
-                </Link>
-                <Typography
-                  component={Link}
-                  href='/pages/misc/under-maintenance'
-                  color='white'
-                  className='opacity-[0.78]'
-                >
-                  Maintenance
-                </Typography>
-                <Typography component={Link} href='/pages/misc/coming-soon' color='white' className='opacity-[0.78]'>
-                  Coming Soon
-                </Typography>
+                <div className='flex gap-4'>
+                  <IconButton
+                    component={Link}
+                    size='small'
+                    href='https://www.facebook.com/ThemeSelections/'
+                    target='_blank'
+                  >
+                    <i className='ri-pinterest-fill text-white text-lg' />
+                  </IconButton>
+                  <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
+                    <i className='ri-whatsapp-fill text-white text-lg' />
+                  </IconButton>
+                </div>
               </div>
             </Grid>
-            <Grid size={{ xs: 12, sm: 3, lg: 2 }}>
-              <Typography color='white' className='font-medium mbe-6 opacity-[0.92]'>
-                Products
-              </Typography>
-              <div className='flex flex-col gap-4'>
-                <Typography component={Link} href='/front-pages/landing-page' color='white' className='opacity-[0.78]'>
-                  Page builder
+            <Grid>
+              <div className='flex flex-col items-start gap-6'>
+                <Typography variant='body2' className='text-white opacity-[0.92]'>
+                  Resources
                 </Typography>
-                <Typography component={Link} href='/front-pages/landing-page' color='white' className='opacity-[0.78]'>
-                  Admin Dashboards
-                </Typography>
-                <Typography component={Link} href='/front-pages/landing-page' color='white' className='opacity-[0.78]'>
-                  UI Kits
-                </Typography>
-                <Typography component={Link} href='/front-pages/landing-page' color='white' className='opacity-[0.78]'>
-                  Illustrations
-                </Typography>
+                <div className='flex gap-4'>
+                  <IconButton
+                    component={Link}
+                    size='small'
+                    href='https://www.facebook.com/ThemeSelections/'
+                    target='_blank'
+                  >
+                    <i className='ri-linkedin-box-fill text-white text-lg' />
+                  </IconButton>
+                  <IconButton
+                    component={Link}
+                    size='small'
+                    href='https://www.facebook.com/ThemeSelections/'
+                    target='_blank'
+                  >
+                    <i className='ri-links-fill text-white text-lg' />
+                  </IconButton>
+                </div>
               </div>
             </Grid>
           </Grid>
-        </div>
-      </div>
-      <div className='bg-[#211B2C]'>
-        <div
-          className={classnames(
-            'flex flex-wrap items-center justify-center sm:justify-between gap-4 plb-[15px]',
-            frontCommonStyles.layoutSpacing
-          )}
-        >
-          <Typography className='text-white opacity-[0.92]' variant='body2'>
-            <span>{`© ${new Date().getFullYear()}, Made with `}</span>
-            <span>{`❤️`}</span>
-            <span>{` by `}</span>
-            <Link
-              href='https://mui.com/store/contributors/themeselection'
-              target='_blank'
-              className='font-medium text-white'
-            >
-              ThemeSelection
-            </Link>
-          </Typography>
-          <div className='flex gap-6 items-center'>
-            <IconButton component={Link} size='small' href='https://github.com/themeselection' target='_blank'>
-              <i className='ri-github-fill text-white text-lg' />
-            </IconButton>
-            <IconButton component={Link} size='small' href='https://www.facebook.com/ThemeSelections/' target='_blank'>
-              <i className='ri-facebook-fill text-white text-lg' />
-            </IconButton>
-            <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
-              <i className='ri-twitter-fill text-white text-lg' />
-            </IconButton>
-            <IconButton
-              component={Link}
-              size='small'
-              href='https://in.linkedin.com/company/themeselection'
-              target='_blank'
-            >
-              <i className='ri-linkedin-fill text-white text-lg' />
-            </IconButton>
-          </div>
         </div>
       </div>
     </footer>
