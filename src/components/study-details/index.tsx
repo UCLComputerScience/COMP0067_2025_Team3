@@ -3,26 +3,35 @@
 // React Imports
 import { useState, useEffect } from 'react'
 
-// Next.js Imports
 import { useParams } from 'next/navigation'
 
-// Actions / API Calls
+import { useSession } from 'next-auth/react'
+
+// Next.js Imports
 
 // MUI (Material-UI) Imports
 import { Card, CardHeader, CardContent, Typography, CardActions, Button } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
+// Actions
+import { ApplicationStatus, Role } from '@prisma/client'
+
 import { getApplicationById } from '@/actions/researcher/applicationAction'
+
+// Prisma
 
 // Utility Functions
 import type { FormValues } from '@/components/DataAccessApplicationForm'
 import { extractFileName } from '@/utils/DocumentUtils'
+import { formatDate } from '@/utils/dateUtils'
+import { reverseMapDataAccessFields } from '@/libs/mappers'
 
 // Component Imports
 import DataAccessApplicationForm from '@/components/DataAccessApplicationForm'
 import GridRow from './GridRow'
 import DocumentsGridRow from './DocumentsGrid'
-import { reverseMapDataAccessFields } from '@/libs/mappers'
+import type { AdminStudyFormValues } from './AdminStudyProcessForm';
+import AdminStudyProcessForm from './AdminStudyProcessForm'
 
 export interface DocumentType {
   applicationId: number
@@ -45,6 +54,7 @@ interface StudyDetailsType {
   documents: DocumentType[]
   demographicDataAccess: string[]
   questionnaireAccess: string[]
+  adminMessage?: string
 }
 
 const studyDetailsTypeToFormType = (studyDetails: StudyDetailsType): FormValues => {
@@ -68,7 +78,21 @@ const studyDetailsTypeToFormType = (studyDetails: StudyDetailsType): FormValues 
   }
 }
 
+const adminFormTypeToAdminStudyFormValues = (studyDetails: StudyDetailsType): AdminStudyFormValues => {
+  return {
+    message: studyDetails.adminMessage,
+    status: studyDetails.status,
+    demographicDataAccess: reverseMapDataAccessFields(studyDetails.demographicDataAccess, 'demographic'),
+    questionnaireAccess: reverseMapDataAccessFields(studyDetails.questionnaireAccess, 'questionnaire'),
+    dateRange: {
+      expectedStartDate: studyDetails.expectedStartDate,
+      expectedEndDate: studyDetails.expectedEndDate
+    }
+  }
+}
+
 const StudyDetails = () => {
+  const { data: session } = useSession()
   const { studyId } = useParams()
   const [study, setStudy] = useState<StudyDetailsType | null>(null)
   const [isEditting, setIsEditting] = useState<boolean>(false)
@@ -78,8 +102,11 @@ const StudyDetails = () => {
       try {
         const res = await getApplicationById(id)
 
-        console.log(res.documents)
-        setStudy(res)
+        console.log(res)
+        setStudy({
+          ...res,
+          adminMessage: res.adminMessage ?? undefined
+        })
       } catch (error) {
         console.error('Error fetching study details:', error)
       }
@@ -109,6 +136,11 @@ const StudyDetails = () => {
     { label: 'Summary', value: study.summary }
   ]
 
+  const studyFieldsAdmin = [
+    { label: 'Application submitted date', value: formatDate(study.createdAt) },
+    { label: 'Application last updated date', value: formatDate(study.updatedAt) }
+  ]
+
   return isEditting ? (
     <DataAccessApplicationForm
       formValues={studyDetailsTypeToFormType(study)}
@@ -120,23 +152,39 @@ const StudyDetails = () => {
       submitTypes='update'
     />
   ) : (
-    <Card>
-      <CardHeader title='Study Details' className='pbe-4' />
-      <CardContent className='flex flex-col gap-6'>
-        <Grid container rowSpacing={6} columnSpacing={{ xs: 2, sm: 2, md: 3 }}>
-          {studyFields.map((field, index) => (
-            <GridRow {...field} key={index} />
-          ))}
-          <DocumentsGridRow documents={study.documents} />
-        </Grid>
+    <>
+      <Card className='mb-4'>
+        <CardHeader title='Study Details' className='pbe-4' />
+        <CardContent className='flex flex-col gap-6'>
+          <Grid container rowSpacing={6} columnSpacing={{ xs: 2, sm: 2, md: 3 }}>
+            {studyFields.map((field, index) => (
+              <GridRow {...field} key={index} />
+            ))}
+            <DocumentsGridRow documents={study.documents} />
+            {session?.user.role === Role.ADMIN &&
+              studyFieldsAdmin.map((field, index) => <GridRow {...field} key={index} />)}
+            {study.adminMessage && study.status === ApplicationStatus.REJECTED && (
+              <GridRow label={'Admin Message'} value={study.adminMessage} color={'error.main'} />
+            )}
+          </Grid>
 
-        <CardActions sx={{ ml: -5 }}>
-          <Button variant='outlined' color='primary' onClick={() => setIsEditting(true)}>
-            Edit
-          </Button>
-        </CardActions>
-      </CardContent>
-    </Card>
+          {session?.user.role === Role.RESEARCHER && (
+            <CardActions sx={{ ml: -5 }}>
+              <Button variant='outlined' color='primary' onClick={() => setIsEditting(true)}>
+                Edit
+              </Button>
+            </CardActions>
+          )}
+        </CardContent>
+      </Card>
+      {session?.user.role === Role.ADMIN && (
+        <AdminStudyProcessForm
+          formValues={adminFormTypeToAdminStudyFormValues(study)}
+          researcherId={study.userId}
+          applicationId={study.id}
+        />
+      )}
+    </>
   )
 }
 

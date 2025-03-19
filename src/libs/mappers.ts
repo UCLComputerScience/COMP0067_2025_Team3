@@ -1,5 +1,6 @@
-import { DataField } from '@prisma/client'
+import { ApplicationStatus, DataField } from '@prisma/client'
 
+// data field mappers
 const demographicFieldMap: Record<string, DataField> = {
   Age: DataField.AGE,
   Sex: DataField.SEX,
@@ -40,4 +41,18 @@ export function reverseMapDataAccessFields(selectedValues: string[], fieldType: 
   const reverseFieldMap = fieldType === 'demographic' ? reverseDemographicFieldMap : reverseQuestionnaireFieldMap
 
   return selectedValues.map(value => reverseFieldMap[value]).filter((value): value is string => value !== undefined)
+}
+
+// application status
+export const stringToApplicationStatus = (statusStr: string): ApplicationStatus => {
+  const upperCaseStatus = statusStr.toUpperCase()
+
+  if (upperCaseStatus === 'APPROVED') return ApplicationStatus.APPROVED
+  if (upperCaseStatus === 'PENDING') return ApplicationStatus.PENDING
+  if (upperCaseStatus === 'REJECTED') return ApplicationStatus.REJECTED
+
+  // Default case
+  console.warn(`Invalid application status: ${statusStr}, defaulting to PENDING`)
+  
+return ApplicationStatus.PENDING
 }

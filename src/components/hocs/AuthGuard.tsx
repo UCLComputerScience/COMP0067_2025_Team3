@@ -21,31 +21,37 @@ export default function AuthGuard({ children }: ChildrenType) {
 
     if (!session) {
       setIsLoading(false)
-      
-return
+
+      return
     }
 
     const userRole = session.user.role
 
     if (userRole !== Role.PATIENT && pathName.includes('my-records')) {
       router.push('/home')
-      
-return
+
+      return
     }
 
     if (userRole !== Role.RESEARCHER && pathName.includes('download')) {
       router.push('/home')
-      
-return
+
+      return
     }
 
     if (userRole !== Role.CLINICIAN && pathName.includes('all-patients')) {
       router.push('/home')
-      
-return
+
+      return
     }
 
     if (userRole !== Role.ADMIN && pathName.includes('all-users')) {
+      router.push('/home')
+
+      return
+    }
+
+    if (userRole !== Role.ADMIN && userRole !== Role.RESEARCHER && pathName.includes('study-application')) {
       router.push('/home')
       
 return

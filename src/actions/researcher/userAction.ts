@@ -13,7 +13,8 @@ export const getDataAccessData = async (id: string) => {
         hasAccess: true,
         createdAt: true,
         updatedAt: true,
-        expiresAt: true
+        expiresAt: true,
+        startFrom: true
       }
     })
 
