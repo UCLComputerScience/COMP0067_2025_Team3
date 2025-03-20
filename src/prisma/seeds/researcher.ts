@@ -5,8 +5,7 @@ import { prisma } from '../client'
 const getRandomDataFields = (fields: DataField[], count: number) => {
   const shuffled = [...fields].sort(() => 0.5 - Math.random()) // Shuffle array
 
-  
-return shuffled.slice(0, count) // Select `count` random elements
+  return shuffled.slice(0, count) // Select `count` random elements
 }
 
 const createRandomDataAccessForResearcher = async () => {
@@ -19,8 +18,8 @@ const createRandomDataAccessForResearcher = async () => {
 
     if (!researcher) {
       console.error('No researcher found')
-      
-return null
+
+      return null
     }
 
     // Define available DataFields
@@ -40,17 +39,18 @@ return null
         researcherId: researcher.id,
         dataFields: { set: selectedFields },
         hasAccess: true,
-        expiresAt
+        expiresAt: expiresAt,
+        startFrom: new Date()
       }
     })
 
     console.log('Created DataAccessPermission:', dataAccessPermission)
-    
-return dataAccessPermission
+
+    return dataAccessPermission
   } catch (error) {
     console.error('Error creating random data access:', error)
-    
-return null
+
+    return null
   }
 }
 

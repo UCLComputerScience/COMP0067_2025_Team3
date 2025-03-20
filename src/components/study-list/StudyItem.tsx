@@ -1,13 +1,29 @@
+'use client'
+
 import { Typography, Chip, Button } from '@mui/material'
 import { capitalize } from 'lodash'
 
-import type { StudyListType} from '.';
+import { useSession } from 'next-auth/react'
+
+import { Role } from '@prisma/client'
+
+import type { StudyListType } from '.'
 import { getChipColor } from '.'
 import DialogsAlert from '../DialogsAlert'
 import Link from '../Link'
 import { formatDate } from '@/utils/dateUtils'
 
-const StudyItem = ({ item, handleDelete }: { item: StudyListType; handleDelete: (id: number) => Promise<void> }) => {
+const StudyItem = ({
+  item,
+  researcherId,
+  handleDelete
+}: {
+  item: StudyListType
+  researcherId: string
+  handleDelete: (id: number) => Promise<void>
+}) => {
+  const { data: session } = useSession()
+
   return (
     <div className='flex flex-col md:flex-row md:justify-between gap-4 p-4 rounded bg-actionHover'>
       {/* Left Section - Study Details */}
@@ -36,7 +52,13 @@ const StudyItem = ({ item, handleDelete }: { item: StudyListType; handleDelete: 
 
       {/* Right Section - Buttons (Responsive) */}
       <div className='flex flex-wrap md:flex-nowrap items-start gap-2 ml-4 md:ml-auto'>
-        <Link href={`/my-profile/study-application/${item.id}`}>
+        <Link
+          href={
+            session?.user.role === Role.ADMIN
+              ? `/all-users/${researcherId}/study-application/${item.id}`
+              : `/my-profile/study-application/${item.id}`
+          }
+        >
           <Button variant='outlined' color='primary'>
             Details
           </Button>

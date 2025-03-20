@@ -30,7 +30,7 @@ model User {
 
   // researcher attribute
   applications          Application[]
-  dataAccessPermissions DataAccessPermission[]
+  dataAccessPermissions DataAccessPermission?
 
   // patient
   agreedForResearch Boolean?
@@ -128,6 +128,9 @@ model Application {
   expectedEndDate   DateTime
   summary           String
 
+  // admin message
+  adminMessage String?
+
   // temp, eventually stored in the cloud service, and stored the path here
   documents Document[]
 
@@ -147,13 +150,16 @@ model Document {
 
 model DataAccessPermission {
   id           Int    @id @default(autoincrement())
+  // Change to one-to-one relationship
+  
   researcher   User   @relation(fields: [researcherId], references: [id])
-  researcherId String @db.Uuid
+  researcherId String @unique @db.Uuid  // Add @unique constraint here
 
   dataFields DataField[]
   hasAccess Boolean     @default(false)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  startFrom DateTime
   expiresAt DateTime
 }
 

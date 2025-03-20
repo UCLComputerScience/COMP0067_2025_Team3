@@ -1,13 +1,22 @@
+// MUI
 import { notFound } from 'next/navigation'
-
-import { Role } from '@prisma/client'
 
 import Grid from '@mui/material/Grid2'
 
+// Prisma
+import { Role } from '@prisma/client'
+
+import { prisma } from '@/prisma/client'
+
+// next
+
+// user action
 import { getUserProfile } from '@/actions/all-users/userAction'
+
+// components
 import AccountSettingsCardAdminView from '@/components/AccountSettingsCardAdminView'
 import DataAccessCard from '@/components/DataAccessCard'
-import { prisma } from '@/prisma/client'
+import StudyList from '@/components/study-list'
 
 interface PageProps {
   params: Promise<{
@@ -38,8 +47,8 @@ const Page = async ({ params }: PageProps) => {
   return (
     <Grid container spacing={4}>
       <AccountSettingsCardAdminView user={user} />
-      {userRole === Role.RESEARCHER && <DataAccessCard data={dataAccess} />}
-      {userRole === Role.RESEARCHER && <div>Study List</div>}
+      {userRole === Role.RESEARCHER && <DataAccessCard data={dataAccess} view='admin' />}
+      {userRole === Role.RESEARCHER && <StudyList researcherId={userId} view='admin' />}
     </Grid>
   )
 }

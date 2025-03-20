@@ -107,6 +107,7 @@ CREATE TABLE "Application" (
     "expectedStartDate" TIMESTAMP(3) NOT NULL,
     "expectedEndDate" TIMESTAMP(3) NOT NULL,
     "summary" TEXT NOT NULL,
+    "adminMessage" TEXT,
     "demographicDataAccess" "DataField"[],
     "questionnaireAccess" "DataField"[],
 
@@ -131,6 +132,7 @@ CREATE TABLE "DataAccessPermission" (
     "hasAccess" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "startFrom" TIMESTAMP(3) NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "DataAccessPermission_pkey" PRIMARY KEY ("id")
@@ -138,6 +140,9 @@ CREATE TABLE "DataAccessPermission" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DataAccessPermission_researcherId_key" ON "DataAccessPermission"("researcherId");
 
 -- AddForeignKey
 ALTER TABLE "PatientInfo" ADD CONSTRAINT "PatientInfo_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

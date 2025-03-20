@@ -4,7 +4,7 @@ import { capitalize } from 'lodash'
 
 import { getChipColor } from '../study-list'
 
-const GridRow = ({ label, value }: { label: string; value: string }) => {
+const GridRow = ({ label, value, color }: { label: string; value: string; color?: string }) => {
   return (
     <>
       <Grid size={4}>
@@ -14,7 +14,7 @@ const GridRow = ({ label, value }: { label: string; value: string }) => {
         {label.includes('status') ? (
           <Chip variant='tonal' color={getChipColor(value)} label={capitalize(value)} size='small' />
         ) : (
-          <Typography>{value}</Typography>
+          <Typography color={color ? color : ''}>{value}</Typography>
         )}
       </Grid>
     </>

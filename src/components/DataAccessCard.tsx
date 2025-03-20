@@ -14,10 +14,12 @@ interface Props {
     dataFields: string[]
     hasAccess: boolean
     expiresAt: Date
+    startFrom: Date
   } | null
+  view?: 'admin' | 'researcher'
 }
 
-const DataAccessCard = ({ data }: Props) => {
+const DataAccessCard = ({ data, view = 'researcher' }: Props) => {
   const hasAccess = data?.hasAccess ?? false
 
   // Convert backend dataFields to their readable labels
@@ -30,17 +32,37 @@ const DataAccessCard = ({ data }: Props) => {
       <CardContent className='flex flex-col gap-6'>
         <Grid container spacing={6} sx={{ mb: 2 }}>
           <Grid size={{ xs: 12 }}>
-            {!hasAccess ? (
+            {view === 'admin' ? (
+              !hasAccess ? (
+                <Typography variant='body1'>The current user does not have any data access permission.</Typography>
+              ) : (
+                <>
+                  <Typography variant='body1'>
+                    Data access granted and valid from <strong>{formatDate(data!.startFrom)}</strong> until{' '}
+                    <strong>{formatDate(data!.expiresAt)}</strong>
+                  </Typography>
+
+                  <Typography sx={{ mb: 2 }}>Created on: {formatDate(data!.createdAt)}</Typography>
+                  <Typography>Last Updated: {formatDate(data!.updatedAt)}</Typography>
+                </>
+              )
+            ) : !hasAccess ? (
               <Typography variant='body1'>
                 You currently have no data access. To request access, please navigate to the &quot;My Studies&quot;
                 section and submit an application.
               </Typography>
             ) : (
               <>
-                <Typography variant='body1' sx={{ mb: 2 }}>
-                  Data access granted and valid until <strong>{formatDate(data!.expiresAt)}</strong>
+                <Typography variant='body1'>
+                  Data access granted and valid from <strong>{formatDate(data!.startFrom)}</strong> until{' '}
+                  <strong>{formatDate(data!.expiresAt)}</strong>
                 </Typography>
-                <Typography>Created on: {formatDate(data!.createdAt)}</Typography>
+                <Typography variant='body1' sx={{ mb: 4 }}>
+                  {' '}
+                  To extend your access, please submit a new study application or update your current one with
+                  additional supporting evidence.
+                </Typography>
+                <Typography sx={{ mb: 2 }}>Created on: {formatDate(data!.createdAt)}</Typography>
                 <Typography>Last Updated: {formatDate(data!.updatedAt)}</Typography>
               </>
             )}
