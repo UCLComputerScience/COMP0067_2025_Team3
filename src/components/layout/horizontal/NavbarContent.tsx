@@ -39,7 +39,7 @@ const NavbarContent = () => {
     ...(userRole === 'GUEST'
       ? [
           { label: 'Home', href: '/home' },
-          { label: 'The Spider', href: '/about' }
+          { label: 'The Spider', href: '/questionnaire' }
         ]
       : userRole === Role.RESEARCHER
         ? [
@@ -56,7 +56,7 @@ const NavbarContent = () => {
           : userRole === Role.PATIENT
             ? [
                 { label: 'Home', href: '/home' },
-                { label: 'The Spider', href: '/about' },
+                { label: 'The Spider', href: '/questionnaire' },
                 { label: 'My Records', href: '/my-records' },
                 { label: 'My Profile', href: '/my-profile' }
               ]

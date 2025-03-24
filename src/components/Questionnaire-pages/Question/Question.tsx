@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 
+import '@fontsource/outfit'
+
 import { Box, Grid2, Typography, Radio } from '@mui/material'
 
 import Tooltip from '@mui/material/Tooltip'
@@ -18,10 +20,10 @@ interface QuestionProps {
 
 function Question({ question, note, selectedValue, onValueChange }: QuestionProps) {
   return (
-    <Box>
+    <Box sx={{ padding: '15px' }}>
       <Grid2 container spacing={2}>
         <Grid2 size={1.71}>
-          <Typography className={styles.question}>
+          <Typography className={styles.question} sx={{ fontFamily: 'Outfit' }}>
             {question}
             {'  '}
             {note && (

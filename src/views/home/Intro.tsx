@@ -93,7 +93,7 @@ const Intro = () => {
         may have.
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}>
-        <Button variant='contained' color='primary' href='/about'>
+        <Button variant='contained' color='primary' href='/questionnaire'>
           Take The Test
         </Button>
       </Box>

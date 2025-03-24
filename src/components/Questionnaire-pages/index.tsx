@@ -78,12 +78,9 @@ const Questionnaire = () => {
                 }}
               >
                 <div className='step-label cursor-pointer'>
-                  <Typography className='step-number' color='text.primary'>{`0${index + 1}`}</Typography>
-                  <div>
-                    <Typography className='step-title' color='text.primary'>
-                      {step.title}
-                    </Typography>
-                  </div>
+                  <Typography className='step-title' color='text.primary'>
+                    {step.title}
+                  </Typography>
                 </div>
               </StepLabel>
             </Step>
