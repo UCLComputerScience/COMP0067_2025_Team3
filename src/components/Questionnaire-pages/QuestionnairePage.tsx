@@ -14,7 +14,9 @@ import Question from '@/components/Questionnaire-pages/Question/Question'
 
 import { QuestionnaireSchema } from '@/actions/formValidation'
 
-// Define Props for the Quesiton Page TODO - Correctly type props for the rest of the functions
+import '@fontsource/inter'
+
+// Define Props for the Question Page TODO - Correctly type props for the rest of the functions
 interface QuestionPageProps {
   domain: string
   handleNext: () => void
@@ -67,9 +69,22 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
 
   return (
     <Box>
-      <Typography variant='h1'>{domain}</Typography>
+      <Typography
+        sx={{
+          fontFamily: 'Outfit',
+          fontSize: '48px',
+          fontStyle: 'normal',
+          fontWeight: '600',
+          lineHeight: '68px',
+          padding: '20px'
+        }}
+      >
+        {domain}
+      </Typography>
       <br />
-      <Typography variant='body1'>
+      <Typography
+        sx={{ fontFamily: 'Inter', fontSize: '24px', fontWeight: '400', lineHeight: '28px', paddingBottom: '79px' }}
+      >
         How much have these symptoms impacted your daily life during the past ONE month?
       </Typography>
       <br />

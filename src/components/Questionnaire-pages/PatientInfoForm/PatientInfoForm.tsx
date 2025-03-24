@@ -5,6 +5,8 @@ import { useState } from 'react'
 
 import { safeParse } from 'valibot'
 
+import country from 'country-list-js'
+
 // MUI Imports
 
 import Box from '@mui/material/Box'
@@ -60,6 +62,8 @@ interface PatientInfoFormProps {
   handleNext: () => void
 }
 
+const COUNTRIES = country.names()
+
 // Give the Info form the handleNext prop defined in the stepper
 const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   // States
@@ -105,8 +109,8 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
     const result = safeParse(InfoSchema, formData)
 
     if (result.success) {
@@ -235,9 +239,11 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                   value={formData.country}
                   onChange={e => setFormData({ ...formData, country: e.target.value })}
                 >
-                  <MenuItem value='PLACEHOLDER UNTIL COUNTRIES ARE ESTABLISHED'>
-                    PLACEHOLDER UNTIL COUNTRIES ARE ESTABLISHED
-                  </MenuItem>
+                  {COUNTRIES.map((country, index) => (
+                    <MenuItem key={index} value={country}>
+                      {country}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -367,6 +373,9 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     }
                   }}
                 >
+                  <MenuItem value='n/a' hidden>
+                    n/a
+                  </MenuItem>
                   {SPECIALIST_OPTIONS.map((option, index) => (
                     <MenuItem key={index} value={option}>
                       {option}
