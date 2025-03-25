@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 
+import { useRouter } from 'next/navigation'
+
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -43,6 +45,7 @@ const formatDate = (dateInput: string | Date): string => {
 }
 
 const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick }: Props) => {
+  const router = useRouter()
   const [order, setOrder] = React.useState<Order>('desc')
   const [orderBy, setOrderBy] = React.useState<keyof Data>('date')
   const [page, setPage] = React.useState(0)
@@ -152,9 +155,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
                     <IconButton
                       aria-label='view single record'
                       size='large'
-                      onClick={event => {
-                        event.stopPropagation()
-                      }}
+                      onClick={() => router.push(`/my-records/${row.submissionId}`)}
                       sx={{ mr: 2 }}
                     >
                       <i className='ri-eye-line' />
