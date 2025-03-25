@@ -2,7 +2,7 @@ import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import type { DocumentType } from '.'
-import { extractFileName } from '../../utils/documentUtils'
+import { extractFileName } from '../../utils/docUtils'
 import OpenDocumentButton from '../OpenDocumentButton'
 
 const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {

@@ -22,7 +22,7 @@ import { getApplicationById } from '@/actions/researcher/applicationAction'
 
 // Utility Functions
 import type { FormValues } from '@/components/DataAccessApplicationForm'
-import { extractFileName } from '../../utils/documentUtils'
+import { extractFileName } from '../../utils/docUtils'
 import { formatDate } from '@/utils/dateUtils'
 import { reverseMapDataAccessFields } from '@/libs/mappers'
 

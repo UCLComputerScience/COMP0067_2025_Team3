@@ -7,7 +7,7 @@ export const extractFileName = (filePath: string) => {
     return fileName
   } catch (error) {
     console.error('Error extracting file name:', error)
-    
-return ''
+
+    return ''
   }
 }
