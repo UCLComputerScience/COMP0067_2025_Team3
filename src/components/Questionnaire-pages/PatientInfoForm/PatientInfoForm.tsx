@@ -1,7 +1,6 @@
 'use client'
 
 // React Imports
-import { info } from 'console'
 
 import { useEffect, useState } from 'react'
 
@@ -39,7 +38,8 @@ import {
   ETHNICITY_OPTIONS,
   GENDER_OPTIONS,
   SEX_OPTIONS,
-  SPECIALIST_OPTIONS
+  SPECIALIST_OPTIONS,
+  DIAGNOSIS_OPTIONS
 } from '@/constants'
 
 import Styles from './styles.module.css'
@@ -58,8 +58,6 @@ type FormDataType = {
   minutes_of_exercise: string
   diagnosis_confirmed: string
   healthcare_professional: string
-  receiving_treatment: string
-  treatment: string
   taking_medications: string
   medications: string
   other_conditions: string
@@ -79,9 +77,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   // Check that user is logged in
   let userId = ''
 
-  // Toast notification
-  const notify = () => toast('Is this information still correct?')
-
   if (session) {
     userId = session.user.id
   }
@@ -100,8 +95,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     minutes_of_exercise: '',
     diagnosis_confirmed: '',
     healthcare_professional: '',
-    receiving_treatment: '',
-    treatment: '',
     taking_medications: '',
     medications: '',
     other_conditions: ''
@@ -121,8 +114,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
       minutes_of_exercise: '',
       diagnosis_confirmed: '',
       healthcare_professional: '',
-      receiving_treatment: '',
-      treatment: '',
       taking_medications: '',
       medications: '',
       other_conditions: ''
@@ -153,8 +144,21 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
         console.log(userInfo)
 
         if (userInfo) {
+          // If query is successful run toast notification
           if (!toast.isActive('correctInfo')) {
             toast.info('Is this information still correct?', { toastId: 'correctInfo' })
+          }
+
+          let taking_medication = ''
+
+          if (userInfo.medications === null) {
+            taking_medication = 'No'
+
+            userInfo.medications = 'n/a'
+          }
+
+          if (userInfo.otherConditions === null) {
+            userInfo.otherConditions = 'None'
           }
 
           setFormData({
@@ -170,9 +174,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
             minutes_of_exercise: userInfo.weeklyExerciseMinutes.toString(),
             diagnosis_confirmed: userInfo.diagnosis,
             healthcare_professional: userInfo.diagnosedBy,
-            receiving_treatment: '',
-            treatment: '',
-            taking_medications: '',
+            taking_medications: taking_medication,
             medications: userInfo.medications,
             other_conditions: userInfo.otherConditions
           })
@@ -405,8 +407,11 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     }
                   }}
                 >
-                  <MenuItem value='Yes'>Yes</MenuItem>
-                  <MenuItem value='No'>No</MenuItem>
+                  {DIAGNOSIS_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -442,46 +447,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography className={Styles.info_questions}>Are you currently receiving treatment?</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>Select</InputLabel>
-                <Select
-                  label='Select Treatment'
-                  value={formData.receiving_treatment}
-                  onChange={e => {
-                    if (e.target.value === 'No') {
-                      setFormData({ ...formData, receiving_treatment: e.target.value, treatment: 'n/a' })
-                    } else {
-                      setFormData({ ...formData, receiving_treatment: e.target.value })
-                    }
-                  }}
-                >
-                  <MenuItem value='Yes'>Yes</MenuItem>
-                  <MenuItem value='No'>No</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography className={Styles.info_questions}>What treatment are you receiving?</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                disabled={formData.receiving_treatment === 'No'}
-                label='List your treatments'
-                value={formData.treatment}
-                onChange={e => {
-                  if (formData.receiving_treatment === 'No') {
-                    setFormData({ ...formData, treatment: 'n/a' })
-                  } else {
-                    setFormData({ ...formData, treatment: e.target.value })
-                  }
-                }}
-              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>Are you taking medications?</Typography>

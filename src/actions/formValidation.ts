@@ -1,4 +1,4 @@
-import { object, string, minLength, email, pipe, nonEmpty, regex, optional } from 'valibot'
+import { object, string, minLength, email, pipe, nonEmpty, regex, optional, boolean } from 'valibot'
 
 // User Profile Validation
 export const userProfileSchema = object({
@@ -26,7 +26,7 @@ export const InfoSchema = object({
   age: pipe(string('Your age must be a number')),
   sex_at_birth: pipe(string(), nonEmpty('Please Select')),
   gender: pipe(string(), nonEmpty('Please Select')),
-  gender_same_as_sex: pipe(string(), nonEmpty('Please Select')),
+  gender_same_as_sex: pipe(boolean()),
   ethnicity: pipe(string(), nonEmpty('Please Select')),
   country: pipe(string(), nonEmpty('Please Select Country')),
   employment_status: pipe(string(), nonEmpty('Please Select')),
@@ -34,9 +34,7 @@ export const InfoSchema = object({
   activity_level: pipe(string(), nonEmpty('Please Select')),
   minutes_of_exercise: pipe(string(), nonEmpty('Please Select')),
   diagnosis_confirmed: pipe(string(), nonEmpty('Please Select if confirmed')),
-  healthcare_professional: pipe(string(), nonEmpty('Please Select Healthcare Professional')),
-  receiving_treatment: pipe(string(), nonEmpty('Please Select Yes or No')),
-  treatment: optional(pipe(string(), nonEmpty('Please Input Treatment'))), // Optional in case user is not receiving treatment
+  healthcare_professional: pipe(string(), nonEmpty('Please Select Healthcare Professional')), // Optional in case user is not receiving treatment
   taking_medications: pipe(string(), nonEmpty('Please Select Yes or No')),
   medications: optional(pipe(string())), // Optional if user is not taking medications
   other_conditions: optional(pipe(string(), nonEmpty('Please Enter If you have other conditions'))) // Optional field
