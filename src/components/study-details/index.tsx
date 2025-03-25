@@ -22,7 +22,7 @@ import { getApplicationById } from '@/actions/researcher/applicationAction'
 
 // Utility Functions
 import type { FormValues } from '@/components/DataAccessApplicationForm'
-import { extractFileName } from '@/utils/DocumentUtils'
+import { extractFileName } from '@/utils/documentUtils'
 import { formatDate } from '@/utils/dateUtils'
 import { reverseMapDataAccessFields } from '@/libs/mappers'
 
@@ -30,7 +30,7 @@ import { reverseMapDataAccessFields } from '@/libs/mappers'
 import DataAccessApplicationForm from '@/components/DataAccessApplicationForm'
 import GridRow from './GridRow'
 import DocumentsGridRow from './DocumentsGrid'
-import type { AdminStudyFormValues } from './AdminStudyProcessForm';
+import type { AdminStudyFormValues } from './AdminStudyProcessForm'
 import AdminStudyProcessForm from './AdminStudyProcessForm'
 
 export interface DocumentType {
@@ -133,7 +133,15 @@ const StudyDetails = () => {
           ? `${new Date(study.expectedStartDate).toDateString()} - ${new Date(study.expectedEndDate).toDateString()}`
           : 'N/A'
     },
-    { label: 'Summary', value: study.summary }
+    { label: 'Summary', value: study.summary },
+    {
+      label: 'Requested demographic data access',
+      value: reverseMapDataAccessFields(study.demographicDataAccess, 'demographic').join(', ')
+    },
+    {
+      label: 'Requested questionnaire access',
+      value: reverseMapDataAccessFields(study.questionnaireAccess, 'questionnaire').join(', ')
+    }
   ]
 
   const studyFieldsAdmin = [

@@ -1,14 +1,12 @@
 export const extractFileName = (filePath: string) => {
-  if (process.env.NODE_ENV === 'development') {
-    return filePath.split('\\').pop() || ''
-  } else if (process.env.NODE_ENV === 'production') {
-    return filePath.split('/').pop() || ''
+  try {
+    const fileNameWithNumbers = filePath.split('/').pop() || ''
+
+    const fileName = fileNameWithNumbers.replace(/^\d+(-\d+)*-/, '')
+
+    return fileName
+  } catch (error) {
+    console.error('Error extracting file name:', error)
+    return ''
   }
-
-  return ''
-}
-
-// TODO: not allowed to open local files so find other solutions later
-export const openFile = (filePath: string) => {
-  console.log(filePath)
 }

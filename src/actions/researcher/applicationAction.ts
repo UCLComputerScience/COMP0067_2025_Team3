@@ -140,7 +140,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
       expectedStartDate: formData.get('expectedStartDate'),
       expectedEndDate: formData.get('expectedEndDate'),
       summary: formData.get('summary'),
-      documents: [] as string[] | null,
+      newDocuments: [] as string[],
       demographicDataAccess: mapDataAccessFields(formData.getAll('demographicDataAccess') as string[], 'demographic'),
       questionnaireAccess: mapDataAccessFields(formData.getAll('questionnaireAccess') as string[], 'questionnaire')
     }
@@ -155,37 +155,77 @@ export async function updateApplication(formData: FormData, userId: string, appl
       throw new Error(`Application with ID ${applicationId} not found`)
     }
 
-    // Get all existing document paths to delete them
-    const existingDocumentPaths = currentApplication.documents.map(doc => doc.documentPath)
+    // Get existing document paths from the database
+    const existingDocuments = currentApplication.documents.map(doc => ({
+      path: doc.documentPath,
+      filename: doc.documentPath.split('/').pop() || ''
+    }))
 
-    // Delete all existing document files from disk
-    for (const docPath of existingDocumentPaths) {
-      console.log('doc path extracted from db:', docPath)
+    // Get filenames from the form submission
+    const newDocumentFiles = formData.getAll('documents') as File[]
+    const newDocumentFilenames = newDocumentFiles.map(file => file.name)
 
-      if (existsSync(docPath)) {
-        try {
-          await fs.unlink(docPath) // Delete the file from the local disk
-          await fs.rm(docPath, { force: true })
-          console.log('delete the doc locally now')
-        } catch (error) {
-          console.error('Failed to remove file locally:', error)
-        }
+    // Find documents to delete (documents in DB but not in the form)
+    const documentsToDelete = existingDocuments.filter(doc => {
+      // Extract the original filename without the timestamp prefix
+      const originalFilename = doc.filename.split('-').slice(1).join('-')
+      return !newDocumentFilenames.some(
+        newFilename => newFilename === originalFilename || originalFilename.endsWith(newFilename)
+      )
+    })
+
+    // Delete documents from Azure that are no longer needed
+    for (const doc of documentsToDelete) {
+      try {
+        await deleteDocumentByPath(doc.path)
+        console.log(`Deleted document from Azure: ${doc.path}`)
+      } catch (error) {
+        console.error(`Failed to delete document from Azure: ${doc.path}`, error)
       }
     }
 
-    // Upload all new documents
-    let newDocumentPaths: string[] = []
+    // Determine which documents need to be uploaded
+    let documentPaths: string[] = []
 
-    // Get all documents from the form
-    const newDocuments = formData.getAll('documents') as File[]
+    // Keep existing documents that are still needed
+    existingDocuments.forEach(doc => {
+      const originalFilename = doc.filename.split('-').slice(1).join('-')
+      if (
+        newDocumentFilenames.some(
+          newFilename => newFilename === originalFilename || originalFilename.endsWith(newFilename)
+        )
+      ) {
+        documentPaths.push(doc.path)
+        console.log(`Keeping existing document: ${doc.path}`)
+      }
+    })
 
-    // Only upload if new documents are provided
-    if (newDocuments.length > 0) {
-      newDocumentPaths = await uploadDocuments(formData)
-      console.log(newDocumentPaths)
+    // Upload new documents
+    if (newDocumentFiles.length > 0) {
+      // Create a new FormData containing only the new documents that need to be uploaded
+      const newDocsFormData = new FormData()
+
+      for (const file of newDocumentFiles) {
+        const filename = file.name
+        const isExistingFile = existingDocuments.some(doc => {
+          const originalFilename = doc.filename.split('-').slice(1).join('-')
+          return filename === originalFilename || originalFilename.endsWith(filename)
+        })
+
+        if (!isExistingFile) {
+          newDocsFormData.append('documents', file)
+        }
+      }
+
+      // Only upload if there are actually new files to upload
+      if (newDocsFormData.getAll('documents').length > 0) {
+        const uploadedPaths = await uploadDocuments(newDocsFormData)
+        documentPaths = [...documentPaths, ...uploadedPaths]
+        console.log(`Uploaded new documents: ${uploadedPaths.join(', ')}`)
+      }
     }
 
-    // Update the application record with the new documents
+    // Update the application record with all documents (existing + new)
     const updatedApplication = await prisma.application.update({
       where: { id: applicationId },
       data: {
@@ -196,11 +236,11 @@ export async function updateApplication(formData: FormData, userId: string, appl
         expectedEndDate: new Date(rawFormData.expectedEndDate as string),
         summary: rawFormData.summary as string,
         documents: {
-          // Delete all existing documents
+          // Delete all existing document records
           deleteMany: {},
 
-          // Create new document records
-          create: newDocumentPaths.map(docPath => ({
+          // Create new document records for all paths we want to keep
+          create: documentPaths.map(docPath => ({
             documentPath: docPath
           }))
         },
@@ -219,7 +259,6 @@ export async function updateApplication(formData: FormData, userId: string, appl
     return true
   } catch (error) {
     console.error('Failed to update application:', error)
-
     return false
   }
 }
