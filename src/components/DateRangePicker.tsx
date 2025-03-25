@@ -17,9 +17,10 @@ interface Props {
   value: { expectedStartDate: Date | null; expectedEndDate: Date | null }
   onChange: (dates: { expectedStartDate: Date | null; expectedEndDate: Date | null }) => void
   error?: boolean
+  disabled?: boolean
 }
 
-const DateRangePicker = ({ label = '', value, onChange, error }: Props) => {
+const DateRangePicker = ({ label = '', value, onChange, error, disabled = false }: Props) => {
   const { expectedStartDate, expectedEndDate } = value
 
   const handleOnChangeRange = (dates: [Date | null, Date | null]) => {
@@ -49,6 +50,7 @@ const DateRangePicker = ({ label = '', value, onChange, error }: Props) => {
       shouldCloseOnSelect={false}
       id='date-range-picker-months'
       onChange={handleOnChangeRange}
+      disabled={disabled}
       customInput={
         <CustomInput label={label} end={expectedEndDate as Date | number} start={expectedStartDate as Date | number} />
       }

@@ -1,46 +1,103 @@
 'use server'
 
-import { existsSync } from 'fs'
-import { mkdir, unlink, writeFile } from 'fs/promises'
+import { DefaultAzureCredential } from '@azure/identity'
+import { BlobSASPermissions, BlobServiceClient } from '@azure/storage-blob'
 
-import { join } from 'path'
+const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME as string
+const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME as string
+const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING as string
 
+let blobServiceClient: BlobServiceClient
+
+if (connectionString) {
+  blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+} else if (accountName) {
+  blobServiceClient = new BlobServiceClient(
+    `https://${accountName}.blob.core.windows.net`,
+    new DefaultAzureCredential()
+  )
+} else {
+  throw Error('Azure storage configuration not found')
+}
+
+const containerClient = blobServiceClient.getContainerClient(containerName)
+
+/**
+ * Upload documents to Azure Blob Storage
+ */
 export async function uploadDocuments(formData: FormData) {
-  /* saved in the local machine for now, later change it to the cloud server services we use */
   const documents = formData.getAll('documents') as File[]
 
-  const uploadDir = join(process.cwd(), 'uploads')
-
-  if (!existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true })
-  }
-
-  const documentPaths = await Promise.all(
+  const uploadedFiles = await Promise.all(
     documents.map(async document => {
+      const blobName = `${Date.now()}-${document.name}`
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+      console.log(`Uploading file: ${blobName} to Azure Blob Storage`)
+
       const bytes = await document.arrayBuffer()
       const buffer = Buffer.from(bytes)
 
-      const fileName = `${document.name}`
-      const filePath = join(uploadDir, fileName)
+      await blockBlobClient.uploadData(buffer, {
+        blobHTTPHeaders: { blobContentType: document.type }
+      })
 
-      console.log(`Saving file: ${fileName}`)
+      console.log(`Successfully uploaded ${blobName}`)
 
-      await writeFile(filePath, buffer)
-
-      return filePath
+      return blockBlobClient.url
     })
   )
 
-  return documentPaths
+  return uploadedFiles
 }
 
-export async function deleteDocumentByPath(filePath: string) {
+export async function deleteDocumentByPath(fileUrl: string) {
   try {
-    console.log(`Deleting document at path: ${filePath}`)
-    await unlink(filePath)
-    console.log(`Successfully deleted document: ${filePath}`)
+    const blobName = fileUrl.split('/').pop()
+    if (!blobName) throw new Error(`Invalid file URL: ${fileUrl}`)
+
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+    console.log(`Deleting file: ${blobName} from Azure Block Storage`)
+    await blockBlobClient.deleteIfExists()
+    console.log(`Successfully deleted ${blobName}`)
+
+    return {
+      success: true,
+      message: `Deleted ${blobName}`
+    }
   } catch (error) {
-    console.error(`Error deleting document at path ${filePath}:`, error)
-    throw new Error(`Failed to delete document at path ${filePath}`)
+    console.error(`Error deleting file: `, error)
+    throw new Error(`Fail to delete file: ${fileUrl}`)
+  }
+}
+
+/**
+ * Generate a temporary URL with access to a blob
+ * @param documentPath - The path or URL of the document
+ * @returns A URL that can be used to access the document
+ */
+export async function getDocumentAccessUrl(documentPath: string) {
+  try {
+    const blobName = documentPath.includes('/') ? documentPath.split('/').pop() : documentPath
+
+    if (!blobName) {
+      throw new Error('Invalid document path')
+    }
+
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+
+    // Generate a SAS token valid for 1 hour
+    const now = new Date()
+    const expiresOn = new Date(now)
+    expiresOn.setMinutes(now.getMinutes() + 60)
+
+    const sasToken = await blockBlobClient.generateSasUrl({
+      expiresOn,
+      permissions: BlobSASPermissions.from({ read: true })
+    })
+
+    return sasToken
+  } catch (error) {
+    console.error(`Error generating document URL: `, error)
+    throw new Error(`Failed to get access URL for document: ${documentPath}`)
   }
 }

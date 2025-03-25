@@ -2,7 +2,8 @@ import { Typography, IconButton } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import type { DocumentType } from '.'
-import { extractFileName } from '@/utils/DocumentUtils'
+import { extractFileName } from '@/utils/documentUtils'
+import OpenDocumentButton from '../OpenDocumentButton'
 
 const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
   // Function to check if the file is an image
@@ -31,15 +32,12 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
       <Grid size={8}>
         {documents.map((document, key) => (
           <div className='flex items-center gap-2.5 is-fit bg-actionHover rounded plb-[5px] pli-2.5 mt-2' key={key}>
-            {/* Conditional Rendering: */}
             {isImageFile(document.documentPath) ? (
-
               // For image files (JPEG, JPG, PNG) - show image
               <i className='ri-file-image-line' />
             ) : document.documentPath.endsWith('.pdf') ||
               document.documentPath.endsWith('.doc') ||
               document.documentPath.endsWith('.docx') ? (
-
               // For document files (PDF, DOC, DOCX) - show document icon
               <img
                 height={20}
@@ -47,7 +45,6 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
                 src={getDocumentIcon(document.documentPath)}
               />
             ) : (
-
               // For unknown file types - show a default text icon
               <i className='ri-file-text-line' />
             )}
@@ -56,9 +53,7 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
               {extractFileName(document.documentPath)}
             </Typography>
 
-            <IconButton size='small' edge='end' onClick={() => console.log(document.documentPath)}>
-              <i className='ri-eye-line' />
-            </IconButton>
+            <OpenDocumentButton documentPath={document.documentPath} />
           </div>
         ))}
       </Grid>
