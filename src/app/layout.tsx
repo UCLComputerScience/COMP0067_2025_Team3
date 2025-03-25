@@ -17,9 +17,9 @@ import '@/app/globals.css'
 import '@assets/iconify-icons/generated-icons.css'
 
 export const metadata = {
-  title: 'Materio - Material Design Next.js Admin Template',
+  title: 'The Spider - Hypermobility Symptom Questionnaire',
   description:
-    'Materio - Material Design Next.js Admin Dashboard Template - is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.'
+    'The Spider is a questionnaire for individuals with Hypermobility Spectrum Disorders (HSD) or Hypermobile Ehlers-Danlos Syndrome (hEDS). It assesses symptoms across eight key areas and visualizes results on a Spider’s web chart.'
 }
 
 const RootLayout = async (props: ChildrenType) => {
