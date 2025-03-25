@@ -32,6 +32,7 @@ export async function uploadDocuments(formData: FormData) {
     documents.map(async document => {
       const blobName = `${Date.now()}-${document.name}`
       const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+
       console.log(`Uploading file: ${blobName} to Azure Blob Storage`)
 
       const bytes = await document.arrayBuffer()
@@ -53,9 +54,11 @@ export async function uploadDocuments(formData: FormData) {
 export async function deleteDocumentByPath(fileUrl: string) {
   try {
     const blobName = fileUrl.split('/').pop()
+
     if (!blobName) throw new Error(`Invalid file URL: ${fileUrl}`)
 
     const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+
     console.log(`Deleting file: ${blobName} from Azure Block Storage`)
     await blockBlobClient.deleteIfExists()
     console.log(`Successfully deleted ${blobName}`)
@@ -88,6 +91,7 @@ export async function getDocumentAccessUrl(documentPath: string) {
     // Generate a SAS token valid for 1 hour
     const now = new Date()
     const expiresOn = new Date(now)
+
     expiresOn.setMinutes(now.getMinutes() + 60)
 
     const sasToken = await blockBlobClient.generateSasUrl({

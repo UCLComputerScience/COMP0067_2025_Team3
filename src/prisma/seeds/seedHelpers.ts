@@ -1,5 +1,7 @@
-import { ApplicationStatus, DataField, Role } from '@prisma/client'
+import type { DataField} from '@prisma/client';
+import { ApplicationStatus, Role } from '@prisma/client'
 import { faker } from '@faker-js/faker'
+
 import {
   SEX_OPTIONS,
   GENDER_OPTIONS,

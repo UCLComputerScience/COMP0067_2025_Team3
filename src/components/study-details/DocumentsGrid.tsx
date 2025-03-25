@@ -1,4 +1,4 @@
-import { Typography, IconButton } from '@mui/material'
+import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import type { DocumentType } from '.'
@@ -33,11 +33,13 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
         {documents.map((document, key) => (
           <div className='flex items-center gap-2.5 is-fit bg-actionHover rounded plb-[5px] pli-2.5 mt-2' key={key}>
             {isImageFile(document.documentPath) ? (
+
               // For image files (JPEG, JPG, PNG) - show image
               <i className='ri-file-image-line' />
             ) : document.documentPath.endsWith('.pdf') ||
               document.documentPath.endsWith('.doc') ||
               document.documentPath.endsWith('.docx') ? (
+
               // For document files (PDF, DOC, DOCX) - show document icon
               <img
                 height={20}
@@ -45,6 +47,7 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
                 src={getDocumentIcon(document.documentPath)}
               />
             ) : (
+
               // For unknown file types - show a default text icon
               <i className='ri-file-text-line' />
             )}

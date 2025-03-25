@@ -1,9 +1,5 @@
 'use server'
 
-// node.js
-import { existsSync } from 'fs'
-import fs from 'fs/promises'
-
 // prisma
 import { revalidatePath } from 'next/cache'
 
@@ -169,6 +165,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     const documentsToDelete = existingDocuments.filter(doc => {
       // Extract the original filename without the timestamp prefix
       const originalFilename = doc.filename.split('-').slice(1).join('-')
+
       return !newDocumentFilenames.some(
         newFilename => newFilename === originalFilename || originalFilename.endsWith(newFilename)
       )
@@ -190,6 +187,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     // Keep existing documents that are still needed
     existingDocuments.forEach(doc => {
       const originalFilename = doc.filename.split('-').slice(1).join('-')
+
       if (
         newDocumentFilenames.some(
           newFilename => newFilename === originalFilename || originalFilename.endsWith(newFilename)
@@ -207,8 +205,10 @@ export async function updateApplication(formData: FormData, userId: string, appl
 
       for (const file of newDocumentFiles) {
         const filename = file.name
+
         const isExistingFile = existingDocuments.some(doc => {
           const originalFilename = doc.filename.split('-').slice(1).join('-')
+
           return filename === originalFilename || originalFilename.endsWith(filename)
         })
 
@@ -220,6 +220,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
       // Only upload if there are actually new files to upload
       if (newDocsFormData.getAll('documents').length > 0) {
         const uploadedPaths = await uploadDocuments(newDocsFormData)
+
         documentPaths = [...documentPaths, ...uploadedPaths]
         console.log(`Uploaded new documents: ${uploadedPaths.join(', ')}`)
       }
@@ -259,6 +260,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     return true
   } catch (error) {
     console.error('Failed to update application:', error)
+
     return false
   }
 }

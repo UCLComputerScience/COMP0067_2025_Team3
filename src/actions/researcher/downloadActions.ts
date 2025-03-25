@@ -1,10 +1,10 @@
 'use server'
 
-import { prisma } from '@/prisma/client'
 import { DataField } from '@prisma/client'
 import { mkConfig, generateCsv } from 'export-to-csv'
-import { mimeType } from 'valibot'
 import * as XLSX from 'xlsx'
+
+import { prisma } from '@/prisma/client'
 
 interface RequestData {
   demographicFields: DataField[]
@@ -116,6 +116,7 @@ export const generateQuestionnaireResponseExport = async (requestData: RequestDa
   switch (requestData.format) {
     case 'CSV':
       const csvOutput = generateCsv(csvConfig)(formattedResponses)
+
       return {
         data: csvOutput.toString(),
         mimeType: 'text/csv;charset=utf-8;',
@@ -132,6 +133,7 @@ export const generateQuestionnaireResponseExport = async (requestData: RequestDa
     case 'XLSX':
       const worksheet = XLSX.utils.json_to_sheet(formattedResponses)
       const workbook = XLSX.utils.book_new()
+
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Responses')
 
       const xlsxOutput = XLSX.write(workbook, { type: 'binary', bookType: 'xlsx' })
@@ -159,6 +161,7 @@ export const generatePatientDemographicDataExport = async (requestData: RequestD
     },
     {} as Record<string, boolean>
   )
+
   const demographicInfos = await prisma.patientInfo.findMany({
     where: {
       user: {
@@ -182,6 +185,7 @@ export const generatePatientDemographicDataExport = async (requestData: RequestD
   switch (requestData.format) {
     case 'CSV':
       const csvOutput = generateCsv(csvConfig)(formattedDemographicInfos)
+
       return {
         data: csvOutput.toString(),
         mimeType: 'text/csv;charset=utf-8;',
@@ -198,6 +202,7 @@ export const generatePatientDemographicDataExport = async (requestData: RequestD
     case 'XLSX':
       const worksheet = XLSX.utils.json_to_sheet(formattedDemographicInfos)
       const workbook = XLSX.utils.book_new()
+
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Demographics')
 
       const xlsxOutput = XLSX.write(workbook, { type: 'binary', bookType: 'xlsx' })
@@ -219,6 +224,7 @@ export const generateQuestionsExport = async () => {
   // only have CSV format for now
   const questions = await prisma.question.findMany()
   const csvOutput = generateCsv(csvConfig)(questions)
+
   return {
     data: csvOutput.toString(),
     mimeType: 'text/csv;charset=utf-8;',

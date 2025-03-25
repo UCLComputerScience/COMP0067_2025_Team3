@@ -1,13 +1,16 @@
 'use client'
 
+import { Button, Card, CardActions, CardHeader } from '@mui/material'
+
+import { toast } from 'react-toastify'
+
 import { generateQuestionsExport } from '@/actions/researcher/downloadActions'
 import { downloadFile } from '@/utils/downloadUtils'
-import { Button, Card, CardActions, CardHeader } from '@mui/material'
-import { toast } from 'react-toastify'
 
 const DownloadQuestionsCard = () => {
   const handleDownloadOnClick = async () => {
     const questionsResult = await generateQuestionsExport()
+
     await downloadFile(questionsResult, `spider_questionnaire_questions.${questionsResult.fileExtension}`)
     toast.success('Questions downloaded successfully!')
   }
