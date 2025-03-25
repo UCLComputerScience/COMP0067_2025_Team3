@@ -1,6 +1,8 @@
 'use client'
 
 // MUI
+import { useState, useEffect, useMemo } from 'react'
+
 import {
   Button,
   Card,
@@ -20,18 +22,18 @@ import {
 import Grid from '@mui/material/Grid2'
 
 // react
-import { useState, useEffect, useMemo } from 'react'
 
 // Form validation
 import { useForm, Controller } from 'react-hook-form'
-import { object, string, array, date, optional } from 'valibot'
+import { object, string, array, date } from 'valibot'
 import type { InferInput } from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
 // component
+import { toast } from 'react-toastify'
+
 import DateRangePicker from './DateRangePicker'
 import LabeledCheckbox from './LabeledCheckbox'
-import { toast } from 'react-toastify'
 
 // utils
 import { DATA_ACCESS_ATTRIBUTES } from '@/constants'
@@ -120,6 +122,7 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
         questionnaireType: accessibleFields.questionnaire[0]
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasValidAccess, accessibleFields, reset])
 
   // Function to check if a specific field should be disabled
@@ -127,6 +130,7 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     if (!hasValidAccess) return true
 
     const accessibleFieldsList = accessibleFields[fieldType]
+
     return !accessibleFieldsList.includes(fieldName)
   }
 
@@ -148,6 +152,7 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
       console.log('request data:', requestData)
 
       const questionnaireResult = await generateQuestionnaireResponseExport(requestData)
+
       if (questionnaireResult.message) {
         toast.warn(questionnaireResult.message)
       } else {
@@ -159,6 +164,7 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
 
       if (data.demographicDataAccess.length > 0) {
         const demographicResult = await generatePatientDemographicDataExport(requestData)
+
         await downloadFile(
           demographicResult,
           `demographic_data_${new Date().toISOString().split('T')[0]}.${demographicResult.fileExtension}`

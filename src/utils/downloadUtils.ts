@@ -13,6 +13,7 @@ export const downloadFile = async (
     }
 
     const byteArray = new Uint8Array(byteNumbers)
+
     blob = new Blob([byteArray], { type: exportResult.mimeType })
   } else {
     blob = new Blob([exportResult.data], { type: exportResult.mimeType })
@@ -21,6 +22,7 @@ export const downloadFile = async (
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
+
   link.href = url
   link.download = fileName
   document.body.appendChild(link)

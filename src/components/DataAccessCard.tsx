@@ -1,9 +1,6 @@
 import { Card, CardHeader, CardContent, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import { DATA_ACCESS_ATTRIBUTES } from '@/constants'
-
-import LabeledCheckbox from './LabeledCheckbox'
 import { formatDate } from '@/utils/dateUtils'
 import { reverseMapDataAccessFields } from '@/libs/mappers'
 

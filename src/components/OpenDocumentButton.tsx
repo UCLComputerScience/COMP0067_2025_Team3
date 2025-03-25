@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
+
 import { IconButton } from '@mui/material'
+
 import { getDocumentAccessUrl } from '@/actions/researcher/documentHelpers'
 
 interface OpenDocumentButtonProps {

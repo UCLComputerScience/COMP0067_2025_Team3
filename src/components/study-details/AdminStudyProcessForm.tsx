@@ -84,8 +84,7 @@ const AdminStudyProcessForm = ({ formValues = defaultFormValues, researcherId, a
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isDirty },
-    setValue
+    formState: { errors, isDirty }
   } = useForm<AdminStudyFormValues>({
     resolver: valibotResolver(adminStudySchema),
     defaultValues: formValues

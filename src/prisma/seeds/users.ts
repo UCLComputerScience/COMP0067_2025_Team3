@@ -64,12 +64,14 @@ async function generateMultiplePatientsWithResponses(num_patient = 2) {
     const submissionId = uuidv4()
     const patientBasicInfo = generateRandomPatientInformation(1)[0]
     const patientDemoData = generateRandomPatientInfo(submissionId)
+
     const patient = await prisma.user.create({
       data: {
         ...patientBasicInfo,
         hashedPassword: hashedPassword
       }
     })
+
     const patientDemo = await prisma.patientInfo.create({
       data: {
         ...patientDemoData,
@@ -91,12 +93,14 @@ async function generateMultipleClinicians(num_clinciian = 2) {
 
   for (let i = 0; i < num_clinciian; i++) {
     const clinicianData = generateRandomClincianInformation(1)[0]
+
     const clinician = await prisma.user.create({
       data: {
         ...clinicianData,
         hashedPassword: hashedPassword
       }
     })
+
     console.log(clinician)
   }
 }
@@ -106,6 +110,7 @@ async function generateMultipleResearcher(num_researcher = 2) {
 
   for (let i = 0; i < num_researcher; i++) {
     const researcherData = generateRandomResearcherInformation(1)[0]
+
     const researcher = await prisma.user.create({
       data: {
         ...researcherData,
@@ -118,6 +123,7 @@ async function generateMultipleResearcher(num_researcher = 2) {
 
     if (hasApplication) {
       const applicationData = generateRandomApplicationInformation(researcher.id)
+
       const application = await prisma.application.create({
         data: {
           ...applicationData

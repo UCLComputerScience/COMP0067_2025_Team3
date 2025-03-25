@@ -1,14 +1,20 @@
+import { redirect } from 'next/navigation'
+
+import Grid from '@mui/material/Grid2'
+
+import { getServerSession } from 'next-auth'
+
 import { getEarlisetResponseDate } from '@/actions/researcher/downloadActions'
 import { getDataAccessData } from '@/actions/researcher/userAction'
-import DownloadCard, { DownloadFormValues } from '@/components/DownloadCard'
+import type { DownloadFormValues } from '@/components/DownloadCard';
+import DownloadCard from '@/components/DownloadCard'
 import DownloadQuestionsCard from '@/components/DownloadQuestionsCard'
 import { authOptions } from '@/libs/auth'
-import Grid from '@mui/material/Grid2'
-import { getServerSession } from 'next-auth'
-import { redirect } from 'next/navigation'
+
 
 const Page = async () => {
   const session = await getServerSession(authOptions)
+
   if (!session?.user?.id) {
     redirect('/not-found')
   }
@@ -33,4 +39,5 @@ const Page = async () => {
     </Grid>
   )
 }
+
 export default Page
