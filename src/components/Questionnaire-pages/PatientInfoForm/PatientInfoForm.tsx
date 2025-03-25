@@ -1,11 +1,17 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { info } from 'console'
+
+import { useEffect, useState } from 'react'
 
 import { safeParse } from 'valibot'
 
 import country from 'country-list-js'
+
+import { useSession } from 'next-auth/react'
+
+import { toast } from 'react-toastify'
 
 // MUI Imports
 
@@ -22,6 +28,8 @@ import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 
+import { getUserDemographicAndClinical } from '@/actions/all-users/userAction'
+
 import { InfoSchema } from '@/actions/formValidation'
 
 import {
@@ -30,7 +38,6 @@ import {
   EMPLOYMENT_STATUS_OPTIONS,
   ETHNICITY_OPTIONS,
   GENDER_OPTIONS,
-  GENDER_SAME_AS_SEX_OPTIONS,
   SEX_OPTIONS,
   SPECIALIST_OPTIONS
 } from '@/constants'
@@ -42,7 +49,7 @@ type FormDataType = {
   age: string
   sex_at_birth: string
   gender: string
-  gender_same_as_sex: string
+  gender_same_as_sex: boolean
   ethnicity: string
   country: string
   employment_status: string
@@ -66,12 +73,25 @@ const COUNTRIES = country.names()
 
 // Give the Info form the handleNext prop defined in the stepper
 const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
+  // Session data
+  const { data: session } = useSession()
+
+  // Check that user is logged in
+  let userId = ''
+
+  // Toast notification
+  const notify = () => toast('Is this information still correct?')
+
+  if (session) {
+    userId = session.user.id
+  }
+
   // States
   const [formData, setFormData] = useState<FormDataType>({
     age: '',
     sex_at_birth: '',
     gender: '',
-    gender_same_as_sex: '',
+    gender_same_as_sex: true,
     country: '',
     ethnicity: '',
     employment_status: '',
@@ -92,7 +112,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
       age: '',
       sex_at_birth: '',
       gender: '',
-      gender_same_as_sex: '',
+      gender_same_as_sex: false,
       ethnicity: '',
       country: '',
       employment_status: '',
@@ -123,8 +143,49 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     }
   }
 
-  return (
+  // Get user's information data and set it as the default
 
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const userInfo = await getUserDemographicAndClinical(userId)
+
+        console.log(userInfo)
+
+        if (userInfo) {
+          if (!toast.isActive('correctInfo')) {
+            toast.info('Is this information still correct?', { toastId: 'correctInfo' })
+          }
+
+          setFormData({
+            age: userInfo.age.toString(),
+            sex_at_birth: userInfo.sex,
+            gender_same_as_sex: userInfo.isSexMatchingGender,
+            gender: userInfo.gender,
+            ethnicity: userInfo.ethnicity,
+            country: userInfo.residenceCountry,
+            employment_status: userInfo.employment,
+            education_level: userInfo.education,
+            activity_level: userInfo.activityLevel,
+            minutes_of_exercise: userInfo.weeklyExerciseMinutes.toString(),
+            diagnosis_confirmed: userInfo.diagnosis,
+            healthcare_professional: userInfo.diagnosedBy,
+            receiving_treatment: '',
+            treatment: '',
+            taking_medications: '',
+            medications: userInfo.medications,
+            other_conditions: userInfo.otherConditions
+          })
+        }
+      } catch {
+        console.log('error')
+      }
+    }
+
+    loadUserInfo()
+  }, [userId])
+
+  return (
     // Return the Information form
     <Box>
       <form onSubmit={e => e.preventDefault()}>
@@ -194,13 +255,11 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 <Select
                   label='Select'
                   value={formData.gender_same_as_sex}
-                  onChange={e => setFormData({ ...formData, gender_same_as_sex: e.target.value })}
+                  onChange={e => setFormData({ ...formData, gender_same_as_sex: !!e.target.value })}
                 >
-                  {GENDER_SAME_AS_SEX_OPTIONS.map((option, index) => (
-                    <MenuItem key={index} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value='true'>Yes</MenuItem>
+                  <MenuItem value='false'>No</MenuItem>
+                  <MenuItem value='null'>Prefer not to say</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

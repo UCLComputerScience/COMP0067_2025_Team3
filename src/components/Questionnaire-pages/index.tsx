@@ -22,7 +22,7 @@ const steps = [
 ]
 
 const stepperStyle = {
-  backgroundColor: '#f4f5fa',
+  backgroundColor: 'var(--mui-palette-customColors-bodyBg)',
   padding: 20
 }
 
