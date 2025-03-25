@@ -7,9 +7,9 @@ import { prisma } from '@/prisma/client'
 import Record from '@/views/SingleRecord'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     submissionId: string
-  }
+  }>
 }
 
 const getRecords = async (submissionId: string) => {   
@@ -45,7 +45,7 @@ const calculateScores = (records: { score: number; domain: string }[]) => {
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { submissionId } = params
+  const { submissionId } = await params
   const records = await getRecords(submissionId)
 
   if (!records || records.length === 0) {
