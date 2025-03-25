@@ -7,7 +7,8 @@ import {
   EDUCATION_LEVEL_OPTIONS,
   ACTIVITY_LEVEL_OPTIONS,
   DIAGNOSIS_OPTIONS,
-  SPECIALIST_OPTIONS
+  SPECIALIST_OPTIONS,
+  EMPLOYMENT_STATUS_OPTIONS
 } from '../../constants'
 
 import { demographicFieldMap, questionnaireFieldMap } from '../../libs/mappers'
@@ -77,6 +78,7 @@ export const generateRandomPatientInfo = (submissionId: string) => {
     ethnicity: generateRandomOptions(ETHNICITY_OPTIONS),
     residenceCountry: faker.location.country(),
     education: generateRandomOptions(EDUCATION_LEVEL_OPTIONS),
+    employment: generateRandomOptions(EMPLOYMENT_STATUS_OPTIONS),
     activityLevel: generateRandomOptions(ACTIVITY_LEVEL_OPTIONS),
     weeklyExerciseMinutes: 30,
     diagnosis: generateRandomOptions(DIAGNOSIS_OPTIONS),

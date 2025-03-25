@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid'
 import bcrypt from 'bcryptjs'
 
 import { prisma } from '../client'
-import { createRandomDataAccessForResearcher } from './researcher'
 import {
   generateRandomApplicationInformation,
   generateRandomClincianInformation,
@@ -200,14 +199,13 @@ export async function initialiseUsersAndResponses() {
   })
 
   console.log(patient1, clinician1, researcher1, patientInfo1, admin1)
-  // await createRandomDataAccessForResearcher()
   await createQuestionResponses(patient1.id, patient1SubmissionUuid1)
   await createQuestionResponses(patient1.id)
   await createQuestionResponses(patient1.id)
   await createQuestionResponses(patient1.id)
 
   // generate more patient data
-  await generateMultiplePatientsWithResponses(4)
-  await generateMultipleClinicians(4)
-  await generateMultipleResearcher(4)
+  await generateMultiplePatientsWithResponses(5)
+  await generateMultipleClinicians(5)
+  await generateMultipleResearcher(5)
 }
