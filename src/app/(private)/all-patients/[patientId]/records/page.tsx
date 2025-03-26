@@ -11,11 +11,6 @@ import { prisma } from '@/prisma/client'
 
 import Records from '@/views/Records'
 
-type PageProps = {
-    params: {
-      patientId: string
-    }
-  }
 
 const getResponseDataByUser = async (userId: string) => {
   const responses = await prisma.response.groupBy({
@@ -58,7 +53,8 @@ const getResponseDataByUser = async (userId: string) => {
     .sort((a, b) => b.date.getTime() - a.date.getTime())
 }
 
-const Page = async ({ params }: PageProps) => {
+
+export default async function Page({ params }: { params: { patientId: string } }) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user || session.user.role !== Role.CLINICIAN) {
@@ -69,5 +65,3 @@ const Page = async ({ params }: PageProps) => {
 
   return <Records data={data} />
 }
-
-export default Page
