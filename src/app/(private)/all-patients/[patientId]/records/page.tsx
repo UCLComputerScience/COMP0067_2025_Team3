@@ -12,6 +12,10 @@ import { prisma } from '@/prisma/client'
 import Records from '@/views/Records'
 
 
+interface PageProps {
+  params: Promise<{ patientId: string }>
+}
+
 const getResponseDataByUser = async (userId: string) => {
   const responses = await prisma.response.groupBy({
     by: ['domain', 'submissionId'],
@@ -54,14 +58,18 @@ const getResponseDataByUser = async (userId: string) => {
 }
 
 
-export default async function Page({ params }: { params: { patientId: string } }) {
+export default async function Page({ params }: PageProps) {
+
+  const resolvedParams = await params
+  const patientId = resolvedParams.patientId
+  
   const session = await getServerSession(authOptions)
 
   if (!session?.user || session.user.role !== Role.CLINICIAN) {
     redirect('/not-found')
   }
   
-  const data = await getResponseDataByUser(params.patientId)
+  const data = await getResponseDataByUser(patientId)
 
   return <Records data={data} />
 }
