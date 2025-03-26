@@ -22,7 +22,7 @@ const ETHNICITY_OPTIONS = [
 const DIAGNOSIS_OPTIONS = [
   'Hypermobility Spectrum Disorder',
   'Hypermobile Ehlers Danlos Syndrome',
-  'Hypermobile Ehlers Danlos Syndrome'
+  'Symptomatic Hypermobility'
 ] as const
 
 const SPECIALIST_OPTIONS = [

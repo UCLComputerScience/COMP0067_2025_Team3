@@ -1,11 +1,18 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+
+import { useEffect, useState } from 'react'
 
 import { safeParse } from 'valibot'
 // eslint-disable-next-line import/no-unresolved
 import country from 'country-list-js'
+
+import { useSession } from 'next-auth/react'
+
+import { toast } from 'react-toastify'
+
+import { v4 as uuidv4 } from 'uuid'
 
 // MUI Imports
 
@@ -22,6 +29,10 @@ import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 
+import { savePatientInfo } from '@/actions/submit-response/info-submission-action'
+
+import { getUserDemographicAndClinical } from '@/actions/all-users/userAction'
+
 import { InfoSchema } from '@/actions/formValidation'
 
 import {
@@ -30,9 +41,9 @@ import {
   EMPLOYMENT_STATUS_OPTIONS,
   ETHNICITY_OPTIONS,
   GENDER_OPTIONS,
-  GENDER_SAME_AS_SEX_OPTIONS,
   SEX_OPTIONS,
-  SPECIALIST_OPTIONS
+  SPECIALIST_OPTIONS,
+  DIAGNOSIS_OPTIONS
 } from '@/constants'
 
 import Styles from './styles.module.css'
@@ -42,7 +53,7 @@ type FormDataType = {
   age: string
   sex_at_birth: string
   gender: string
-  gender_same_as_sex: string
+  gender_same_as_sex: boolean
   ethnicity: string
   country: string
   employment_status: string
@@ -51,8 +62,6 @@ type FormDataType = {
   minutes_of_exercise: string
   diagnosis_confirmed: string
   healthcare_professional: string
-  receiving_treatment: string
-  treatment: string
   taking_medications: string
   medications: string
   other_conditions: string
@@ -66,12 +75,22 @@ const COUNTRIES = country.names()
 
 // Give the Info form the handleNext prop defined in the stepper
 const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
+  // Session data
+  const { data: session } = useSession()
+
+  // Check that user is logged in
+  let userId = ''
+
+  if (session) {
+    userId = session.user.id
+  }
+
   // States
   const [formData, setFormData] = useState<FormDataType>({
     age: '',
     sex_at_birth: '',
     gender: '',
-    gender_same_as_sex: '',
+    gender_same_as_sex: true,
     country: '',
     ethnicity: '',
     employment_status: '',
@@ -80,8 +99,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     minutes_of_exercise: '',
     diagnosis_confirmed: '',
     healthcare_professional: '',
-    receiving_treatment: '',
-    treatment: '',
     taking_medications: '',
     medications: '',
     other_conditions: ''
@@ -92,7 +109,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
       age: '',
       sex_at_birth: '',
       gender: '',
-      gender_same_as_sex: '',
+      gender_same_as_sex: false,
       ethnicity: '',
       country: '',
       employment_status: '',
@@ -101,27 +118,112 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
       minutes_of_exercise: '',
       diagnosis_confirmed: '',
       healthcare_professional: '',
-      receiving_treatment: '',
-      treatment: '',
       taking_medications: '',
       medications: '',
       other_conditions: ''
     })
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const formatPatientInfo = (formData: FormDataType, userId: string) => {
+    return {
+      userId,
+      submissionId: uuidv4(),
+      age: Number(formData.age),
+      sex: formData.sex_at_birth,
+      gender: formData.gender,
+      isSexMatchingGender: formData.gender_same_as_sex,
+      ethnicity: formData.ethnicity,
+      residenceCountry: formData.country,
+      employment: formData.employment_status,
+      education: formData.education_level,
+      activityLevel: formData.activity_level,
+      weeklyExerciseMinutes: Number(formData.minutes_of_exercise),
+      diagnosis: formData.diagnosis_confirmed,
+      diagnosedBy: formData.healthcare_professional,
+      medications: formData.medications,
+      otherConditions: formData.other_conditions
+    }
+  }
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     const result = safeParse(InfoSchema, formData)
+
+    console.log('Formatted patient data: ', formatPatientInfo(formData, userId))
 
     if (result.success) {
       console.log('Success!', result.output)
       console.log(formData)
+      const databaseResult = await savePatientInfo(formatPatientInfo(formData, userId))
+
+      if (databaseResult.success) {
+        console.log('Data saved successfully')
+        alert('Data saved successfully')
+      } else {
+        console.log('Error!', databaseResult.error)
+        alert('Error saving data')
+      }
+
       handleNext()
     } else {
       console.log('Error!', result.issues)
       alert('Please fill out all fields correctly')
     }
   }
+
+  // Get user's information data and set it as the default
+
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const userInfo = await getUserDemographicAndClinical(userId)
+
+        console.log(userInfo)
+
+        if (userInfo) {
+          // If query is successful run toast notification
+          if (!toast.isActive('correctInfo')) {
+            toast.info('Is this information still correct?', { toastId: 'correctInfo' })
+          }
+
+          let taking_medication = ''
+
+          // Change null values to strings for the form
+          if (userInfo.medications === null) {
+            taking_medication = 'No'
+
+            userInfo.medications = 'n/a'
+          }
+
+          if (userInfo.otherConditions === null) {
+            userInfo.otherConditions = 'None'
+          }
+
+          setFormData({
+            age: userInfo.age.toString(),
+            sex_at_birth: userInfo.sex,
+            gender_same_as_sex: userInfo.isSexMatchingGender,
+            gender: userInfo.gender,
+            ethnicity: userInfo.ethnicity,
+            country: userInfo.residenceCountry,
+            employment_status: userInfo.employment,
+            education_level: userInfo.education,
+            activity_level: userInfo.activityLevel,
+            minutes_of_exercise: userInfo.weeklyExerciseMinutes.toString(),
+            diagnosis_confirmed: userInfo.diagnosis,
+            healthcare_professional: userInfo.diagnosedBy,
+            taking_medications: taking_medication,
+            medications: userInfo.medications,
+            other_conditions: userInfo.otherConditions
+          })
+        }
+      } catch {
+        console.log('error')
+      }
+    }
+
+    loadUserInfo()
+  }, [userId])
 
   return (
 
@@ -194,13 +296,11 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 <Select
                   label='Select'
                   value={formData.gender_same_as_sex}
-                  onChange={e => setFormData({ ...formData, gender_same_as_sex: e.target.value })}
+                  onChange={e => setFormData({ ...formData, gender_same_as_sex: !!e.target.value })}
                 >
-                  {GENDER_SAME_AS_SEX_OPTIONS.map((option, index) => (
-                    <MenuItem key={index} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value='true'>Yes</MenuItem>
+                  <MenuItem value='false'>No</MenuItem>
+                  <MenuItem value='null'>Prefer not to say</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -346,8 +446,11 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     }
                   }}
                 >
-                  <MenuItem value='Yes'>Yes</MenuItem>
-                  <MenuItem value='No'>No</MenuItem>
+                  {DIAGNOSIS_OPTIONS.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -383,46 +486,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography className={Styles.info_questions}>Are you currently receiving treatment?</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>Select</InputLabel>
-                <Select
-                  label='Select Treatment'
-                  value={formData.receiving_treatment}
-                  onChange={e => {
-                    if (e.target.value === 'No') {
-                      setFormData({ ...formData, receiving_treatment: e.target.value, treatment: 'n/a' })
-                    } else {
-                      setFormData({ ...formData, receiving_treatment: e.target.value })
-                    }
-                  }}
-                >
-                  <MenuItem value='Yes'>Yes</MenuItem>
-                  <MenuItem value='No'>No</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography className={Styles.info_questions}>What treatment are you receiving?</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                disabled={formData.receiving_treatment === 'No'}
-                label='List your treatments'
-                value={formData.treatment}
-                onChange={e => {
-                  if (formData.receiving_treatment === 'No') {
-                    setFormData({ ...formData, treatment: 'n/a' })
-                  } else {
-                    setFormData({ ...formData, treatment: e.target.value })
-                  }
-                }}
-              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>Are you taking medications?</Typography>

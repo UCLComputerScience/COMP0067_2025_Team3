@@ -194,3 +194,55 @@ export const updateUserStatusAndRoleById = async (
     }
   }
 }
+
+export interface UserInfoData {
+  age: number
+  sex: string
+  gender: string
+  isSexMatchingGender: boolean
+  ethnicity: string
+  residenceCountry: string
+  employment: string
+  education: string
+  activityLevel: string
+  weeklyExerciseMinutes: number
+  diagnosis: string
+  diagnosedBy: string
+  medications: string
+  otherConditions: string
+}
+
+// Get the user's demographic and clinical information
+export const getUserDemographicAndClinical = async (userId: string): Promise<UserInfoData | null> => {
+  try {
+    const userInfo = await prisma.patientInfo.findFirst({
+      where: { userId: userId },
+      select: {
+        age: true,
+        sex: true,
+        gender: true,
+        isSexMatchingGender: true,
+        ethnicity: true,
+        residenceCountry: true,
+        employment: true,
+        education: true,
+        activityLevel: true,
+        weeklyExerciseMinutes: true,
+        diagnosis: true,
+        diagnosedBy: true,
+        medications: true,
+        otherConditions: true
+      }
+    })
+
+    if (!userInfo) {
+      console.error('User not found:', userId)
+
+      return null
+    }
+
+    return userInfo as UserInfoData
+  } catch (error) {
+    return null
+  }
+}

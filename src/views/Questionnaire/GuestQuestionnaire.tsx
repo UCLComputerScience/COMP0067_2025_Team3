@@ -4,13 +4,11 @@ import { useState } from 'react'
 
 import { Stepper, Step, StepLabel, Typography } from '@mui/material'
 
-import PatientInfoForm from '@/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
-import StepperCustomDot from '../stepper-dot'
+import StepperCustomDot from '@/components/stepper-dot'
 import StepperWrapper from '@/@core/styles/stepper'
-import QuestionPage from './QuestionnairePage'
+import QuestionPage from '@/components/Questionnaire-pages/QuestionnairePage'
 
 const steps = [
-  { title: 'Info' },
   { title: 'Pain' },
   { title: 'Fatigue and Sleep' },
   { title: 'NMSK' },
@@ -22,29 +20,27 @@ const steps = [
 ]
 
 const stepperStyle = {
-  backgroundColor: '#f4f5fa',
+  backgroundColor: 'var(--mui-palette-customColors-bodyBg)',
   padding: 20
 }
 
 const getStepContent = (step: number, handleNext: () => void, handlePrev: () => void) => {
   switch (step) {
     case 0:
-      return <PatientInfoForm handleNext={handleNext} />
-    case 1:
       return <QuestionPage domain={'Pain'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 2:
+    case 1:
       return <QuestionPage domain={'Fatigue'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 3:
+    case 2:
       return <QuestionPage domain={'Neuromusculoskeletal'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 4:
+    case 3:
       return <QuestionPage domain={'Gastrointestinal'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 5:
+    case 4:
       return <QuestionPage domain={'Cardiac Dysautonomia'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 6:
+    case 5:
       return <QuestionPage domain={'Urogenital'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 7:
+    case 6:
       return <QuestionPage domain={'Anxiety'} handleNext={handleNext} handlePrev={handlePrev} />
-    case 8:
+    case 7:
       return <QuestionPage domain={'Depression'} handleNext={handleNext} handlePrev={handlePrev} />
     default:
       return null

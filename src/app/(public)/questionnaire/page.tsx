@@ -1,4 +1,4 @@
-import Questionnaire from '@/components/Questionnaire-pages'
+import Questionnaire from '@/views/Questionnaire/GuestQuestionnaire'
 
 export default function Page() {
   return <Questionnaire />
