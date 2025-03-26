@@ -226,6 +226,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   }, [userId])
 
   return (
+
     // Return the Information form
     <Box>
       <form onSubmit={e => e.preventDefault()}>

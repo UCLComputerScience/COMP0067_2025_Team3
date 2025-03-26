@@ -4,8 +4,6 @@ import * as React from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Role } from '@prisma/client'
-
 import { v4 as uuidv4 } from 'uuid'
 import { Button, Grid2, Typography, Box, Tooltip } from '@mui/material'
 import { safeParse } from 'valibot'
