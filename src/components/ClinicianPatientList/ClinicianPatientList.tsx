@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import Link from 'next/link'
 
 import {
@@ -23,6 +24,7 @@ import {
 } from '@mui/material'
 
 import { RelationshipStatus } from '@prisma/client'
+
 import { getPatients, updatePatientLink } from '@/actions/clinician-patientlist/PatientListActions'
 
 type Patient = {
@@ -42,6 +44,7 @@ type PatientData = {
 
 export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   const [data, setData] = useState<PatientData | null>(null)
+
   const [filters, setFilters] = useState({
     patientName: '',
     email: '',
@@ -49,6 +52,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     page: 1,
     pageSize: 10
   })
+
   const [error, setError] = useState<string | null>(null)
   const [selectAll, setSelectAll] = useState(false)
   const [selectedPatients, setSelectedPatients] = useState<string[]>([])
@@ -58,6 +62,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     async function fetchData() {
       try {
         const result = await getPatients(filters, clinicianId)
+
         setData(result)
         setError(null)
       } catch (err) {
@@ -86,6 +91,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
       if (relationshipStatus in RelationshipStatus) {
         await updatePatientLink(clinicianId, patientId, relationshipStatus)
         const result = await getPatients(filters, clinicianId)
+
         setData(result)
       }
     } catch (err) {
@@ -101,14 +107,17 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
 
       if (exportFormat === 'csv') {
         const headers = ['Name', 'Email', 'Date of Birth', 'Patient Link']
+
         const rows = selectedData.map((p) =>
           [p.name, p.email, p.dateOfBirth, p.patientLink ?? ''].join(',')
         )
+
         const csvContent = [headers.join(','), ...rows].join('\n')
         const blob = new Blob([csvContent], { type: 'text/csv' })
 
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
+
         a.href = url
         a.download = 'selected_patientsList.csv'
         a.click()
@@ -118,6 +127,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         const autoTable = (await import('jspdf-autotable')).default
 
         const doc = new jsPDF()
+
         doc.setFontSize(16)
         doc.text('Patient List', 14, 20)
 
@@ -205,6 +215,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
             value={filters.patientLink ?? 'all'}
             onChange={(e) => {
               const value = e.target.value
+
               handleFilterChange(
                 'patientLink',
                 value === 'all' ? undefined : (value as RelationshipStatus)
