@@ -205,7 +205,20 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
     if (result.success) {
       console.log('Success!', result.output)
       alert('Success! Your answers have been submitted')
-      handleNext()
+
+      const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
+        return Object.entries(questionSet).map(([questionId, value]) => {
+          return {
+            domain,
+            questionId: Number(questionId),
+
+            // Handles checkbox as well as n/a values
+            score: Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+          }
+        })
+      })
+
+      console.log('formattedAnswers', allFormattedAnswers)
     } else {
       // Checks that the full form is filled out
       console.log('Validation Errors:', result.issues)

@@ -114,7 +114,7 @@ export const QuestionnaireSchema = object({
   16: pipe(string(), nonEmpty('Please Select')),
   17: pipe(string(), nonEmpty('Please Select')),
   18: pipe(string(), nonEmpty('Please Select')),
-  19: pipe(string(), nonEmpty('Please Select')),
+  19: optional(array(string())),
   20: pipe(string(), nonEmpty('Please Select')),
   21: pipe(string(), nonEmpty('Please Select')),
   22: pipe(string(), nonEmpty('Please Select')),
