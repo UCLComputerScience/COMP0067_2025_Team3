@@ -1,9 +1,8 @@
 'use server'
 
-import { PrismaClient , RelationshipStatus } from '@prisma/client'
+import { RelationshipStatus } from '@prisma/client'
 
-
-const prisma = new PrismaClient()
+import { prisma } from '@/prisma/client'
 
 type PatientFilters = {
   patientName?: string
@@ -18,14 +17,15 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
 
   try {
     const skip = (page - 1) * pageSize
-    const orConditions: any[] = []
+
+    const orConditions: Array<{ [key: string]: any }> = []
 
     if (patientName) {
       orConditions.push({
         OR: [
           { firstName: { contains: patientName, mode: 'insensitive' } },
-          { lastName: { contains: patientName, mode: 'insensitive' } },
-        ],
+          { lastName: { contains: patientName, mode: 'insensitive' } }
+        ]
       })
     }
 
@@ -36,15 +36,12 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
     const clinicianPatients = await prisma.clinicianPatient.findMany({
       where: {
         clinicianId,
-        status: {
-          in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED],
-          ...(patientLink && { equals: patientLink }),
-        },
+        status: patientLink ? { equals: patientLink } : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
         ...(orConditions.length > 0 && {
           patient: {
-            OR: orConditions,
-          },
-        }),
+            OR: orConditions
+          }
+        })
       },
       select: {
         patientId: true,
@@ -55,48 +52,43 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
             firstName: true,
             lastName: true,
             email: true,
-            dateOfBirth: true,
-          },
-        },
+            dateOfBirth: true
+          }
+        }
       },
       skip,
-      take: pageSize,
+      take: pageSize
     })
 
     const total = await prisma.clinicianPatient.count({
       where: {
         clinicianId,
-        status: {
-          in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED],
-          ...(patientLink && { equals: patientLink }),
-        },
+        status: patientLink ? { equals: patientLink } : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
         ...(orConditions.length > 0 && {
           patient: {
-            OR: orConditions,
-          },
-        }),
-      },
+            OR: orConditions
+          }
+        })
+      }
     })
 
-    const patients = clinicianPatients.map((cp) => ({
+    const patients = clinicianPatients.map(cp => ({
       id: cp.patient.id,
       name: `${cp.patient.firstName} ${cp.patient.lastName}`,
       email: cp.patient.email,
       dateOfBirth: cp.patient.dateOfBirth?.toISOString().split('T')[0] || '',
-      patientLink: cp.status,
+      patientLink: cp.status
     }))
 
     return {
       patients,
       total,
       page,
-      pageSize,
+      pageSize
     }
   } catch (error) {
     console.error('Failed to obtain patient data:', error)
     throw new Error('Failed to obtain patient data')
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -108,16 +100,24 @@ export async function updatePatientLink(
   try {
     const existingRelation = await prisma.clinicianPatient.findUnique({
       where: {
-        patientId_clinicianId: { patientId, clinicianId },
-      },
+        patientId_clinicianId: {
+          patientId,
+          clinicianId
+        }
+      }
     })
 
     if (existingRelation) {
       await prisma.clinicianPatient.update({
         where: {
-          patientId_clinicianId: { patientId, clinicianId },
+          patientId_clinicianId: {
+            patientId,
+            clinicianId
+          }
         },
-        data: { status },
+        data: {
+          status
+        }
       })
     } else {
       await prisma.clinicianPatient.create({
@@ -125,16 +125,12 @@ export async function updatePatientLink(
           patientId,
           clinicianId,
           status,
-          agreedToShareData: false,
-        },
+          agreedToShareData: false
+        }
       })
     }
   } catch (error) {
     console.error('Failed to update patient link:', error)
     throw new Error('Failed to update patient link')
-  } finally {
-    await prisma.$disconnect()
   }
 }
-
-

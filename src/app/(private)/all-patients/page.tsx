@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
 import { useRouter } from 'next/navigation'
-
 import { getSession } from 'next-auth/react'
 
 import { ClinicianPatientList } from '@/components/ClinicianPatientList/ClinicianPatientList'

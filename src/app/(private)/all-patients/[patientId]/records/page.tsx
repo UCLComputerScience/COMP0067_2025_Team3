@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation'
-
 import { getServerSession } from 'next-auth'
 
 import { Role } from '@prisma/client'
 
 import { authOptions } from '@/libs/auth'
-
-
 import { prisma } from '@/prisma/client'
+
 import Records from '@/views/Records'
 
 interface PageProps {
@@ -21,7 +19,7 @@ const getResponseDataByUser = async (userId: string) => {
     by: ['domain', 'submissionId'],
     where: { userId },
     _avg: { score: true },
-    _min: { createdAt: true },
+    _min: { createdAt: true }
   })
 
   const groupedResults: Record<string, any> = {}
@@ -32,27 +30,29 @@ const getResponseDataByUser = async (userId: string) => {
     if (!groupedResults[submissionId]) {
       groupedResults[submissionId] = {
         createdAt: _min.createdAt!,
-        domains: {},
+        domains: {}
       }
     }
 
     groupedResults[submissionId].domains[domain] = {
-      averageScore: _avg.score!,
+      averageScore: _avg.score!
     }
   })
 
-  return Object.entries(groupedResults).map(([submissionId, submission]) => ({
-    submissionId,
-    date: submission.createdAt,
-    neuromusculoskeletal: submission.domains['Neuromusculoskeletal']?.averageScore,
-    pain: submission.domains['Pain']?.averageScore,
-    fatigue: submission.domains['Fatigue']?.averageScore,
-    gastrointestinal: submission.domains['Gastrointestinal']?.averageScore,
-    cardiacDysautonomia: submission.domains['Cardiac Dysautonomia']?.averageScore,
-    urogenital: submission.domains['Urogenital']?.averageScore,
-    anxiety: submission.domains['Anxiety']?.averageScore,
-    depression: submission.domains['Depression']?.averageScore,
-  })).sort((a, b) => b.date.getTime() - a.date.getTime())
+  return Object.entries(groupedResults)
+    .map(([submissionId, submission]) => ({
+      submissionId,
+      date: submission.createdAt,
+      neuromusculoskeletal: submission.domains['Neuromusculoskeletal']?.averageScore,
+      pain: submission.domains['Pain']?.averageScore,
+      fatigue: submission.domains['Fatigue']?.averageScore,
+      gastrointestinal: submission.domains['Gastrointestinal']?.averageScore,
+      cardiacDysautonomia: submission.domains['Cardiac Dysautonomia']?.averageScore,
+      urogenital: submission.domains['Urogenital']?.averageScore,
+      anxiety: submission.domains['Anxiety']?.averageScore,
+      depression: submission.domains['Depression']?.averageScore
+    }))
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
 }
 
 const Page = async ({ params }: PageProps) => {
