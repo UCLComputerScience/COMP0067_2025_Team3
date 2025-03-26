@@ -12,6 +12,8 @@ import { useSession } from 'next-auth/react'
 
 import { toast } from 'react-toastify'
 
+import { v4 as uuidv4 } from 'uuid'
+
 // MUI Imports
 
 import Box from '@mui/material/Box'
@@ -26,6 +28,8 @@ import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
+
+import { savePatientInfo } from '@/actions/submit-response/info-submission-action'
 
 import { getUserDemographicAndClinical } from '@/actions/all-users/userAction'
 
@@ -120,13 +124,46 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     })
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const formatPatientInfo = (formData: FormDataType, userId: string) => {
+    return {
+      userId,
+      submissionId: uuidv4(),
+      age: Number(formData.age),
+      sex: formData.sex_at_birth,
+      gender: formData.gender,
+      isSexMatchingGender: formData.gender_same_as_sex,
+      ethnicity: formData.ethnicity,
+      residenceCountry: formData.country,
+      employment: formData.employment_status,
+      education: formData.education_level,
+      activityLevel: formData.activity_level,
+      weeklyExerciseMinutes: Number(formData.minutes_of_exercise),
+      diagnosis: formData.diagnosis_confirmed,
+      diagnosedBy: formData.healthcare_professional,
+      medications: formData.medications,
+      otherConditions: formData.other_conditions
+    }
+  }
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     const result = safeParse(InfoSchema, formData)
+
+    console.log('Formatted patient data: ', formatPatientInfo(formData, userId))
 
     if (result.success) {
       console.log('Success!', result.output)
       console.log(formData)
+      const databaseResult = await savePatientInfo(formatPatientInfo(formData, userId))
+
+      if (databaseResult.success) {
+        console.log('Data saved successfully')
+        alert('Data saved successfully')
+      } else {
+        console.log('Error!', databaseResult.error)
+        alert('Error saving data')
+      }
+
       handleNext()
     } else {
       console.log('Error!', result.issues)
