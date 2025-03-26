@@ -1,3 +1,4 @@
+
 import { redirect } from 'next/navigation'
 
 import { getServerSession } from 'next-auth'
@@ -5,15 +6,16 @@ import { getServerSession } from 'next-auth'
 import { Role } from '@prisma/client'
 
 import { authOptions } from '@/libs/auth'
+
 import { prisma } from '@/prisma/client'
 
 import Records from '@/views/Records'
 
-interface PageProps {
-  params: {
-    patientId: string
+type PageProps = {
+    params: {
+      patientId: string
+    }
   }
-}
 
 const getResponseDataByUser = async (userId: string) => {
   const responses = await prisma.response.groupBy({
@@ -62,7 +64,7 @@ const Page = async ({ params }: PageProps) => {
   if (!session?.user || session.user.role !== Role.CLINICIAN) {
     redirect('/not-found')
   }
-
+  
   const data = await getResponseDataByUser(params.patientId)
 
   return <Records data={data} />
