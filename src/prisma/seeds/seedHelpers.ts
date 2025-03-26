@@ -1,15 +1,19 @@
+import type { DataField} from '@prisma/client';
 import { ApplicationStatus, Role } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 
 import {
+  SEX_OPTIONS,
+  GENDER_OPTIONS,
+  ETHNICITY_OPTIONS,
+  EDUCATION_LEVEL_OPTIONS,
   ACTIVITY_LEVEL_OPTIONS,
   DIAGNOSIS_OPTIONS,
-  EDUCATION_LEVEL_OPTIONS,
-  ETHNICITY_OPTIONS,
-  GENDER_OPTIONS,
-  SEX_OPTIONS,
-  SPECIALIST_OPTIONS
-} from '@/constants'
+  SPECIALIST_OPTIONS,
+  EMPLOYMENT_STATUS_OPTIONS
+} from '../../constants'
+
+import { demographicFieldMap, questionnaireFieldMap } from '../../libs/mappers'
 
 /*
   single helper functions
@@ -27,6 +31,22 @@ export const generateRandomOptions = (options: readonly string[]): string => {
   return options[randomIndex]
 }
 
+const getRandomFields = (fieldMap: Record<string, DataField>, count: number): DataField[] => {
+  const fieldNames = Object.keys(fieldMap)
+  const selectedFields: DataField[] = []
+
+  while (selectedFields.length < count) {
+    const randomFieldName = fieldNames[Math.floor(Math.random() * fieldNames.length)]
+    const randomField = fieldMap[randomFieldName]
+
+    if (!selectedFields.includes(randomField)) {
+      selectedFields.push(randomField)
+    }
+  }
+
+  return selectedFields
+}
+
 /*
   Basic User Information
 */
@@ -36,7 +56,6 @@ export const generateRandomOptions = (options: readonly string[]): string => {
 export const generateRandomPatientInformation = (count: number) => {
   return Array.from({ length: count }).map(() => ({
     email: faker.internet.email(),
-    hashedPassword: faker.internet.password(),
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     dateOfBirth: faker.date.birthdate({ mode: 'age', min: 18, max: 65 }),
@@ -61,12 +80,13 @@ export const generateRandomPatientInfo = (submissionId: string) => {
     ethnicity: generateRandomOptions(ETHNICITY_OPTIONS),
     residenceCountry: faker.location.country(),
     education: generateRandomOptions(EDUCATION_LEVEL_OPTIONS),
+    employment: generateRandomOptions(EMPLOYMENT_STATUS_OPTIONS),
     activityLevel: generateRandomOptions(ACTIVITY_LEVEL_OPTIONS),
     weeklyExerciseMinutes: 30,
     diagnosis: generateRandomOptions(DIAGNOSIS_OPTIONS),
     diagnosedBy: generateRandomOptions(SPECIALIST_OPTIONS),
     medications: faker.lorem.sentence(),
-    otherMedications: faker.lorem.sentence()
+    otherConditions: faker.lorem.sentence()
   }
 }
 
@@ -74,7 +94,6 @@ export const generateRandomPatientInfo = (submissionId: string) => {
 export const generateRandomClincianInformation = (count: number) => {
   return Array.from({ length: count }).map(() => ({
     email: faker.internet.email(),
-    hashedPassword: '',
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     phoneNumber: faker.phone.number(),
@@ -90,7 +109,6 @@ export const generateRandomClincianInformation = (count: number) => {
 export const generateRandomResearcherInformation = (count: number) => {
   return Array.from({ length: count }).map(() => ({
     email: faker.internet.email(),
-    hashedPassword: '',
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     phoneNumber: faker.phone.number(),
@@ -107,6 +125,13 @@ export const generateRandomApplicationInformation = (userId: string) => {
   const statuses = Object.values(ApplicationStatus)
   const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
 
+  const randomDemographicCount = Math.floor(Math.random() * Object.keys(demographicFieldMap).length) + 1
+
+  const randomQuestionnaireCount = Math.floor(Math.random() * 2) + 1
+
+  const demographicDataAccess = getRandomFields(demographicFieldMap, randomDemographicCount)
+  const questionnaireAccess = getRandomFields(questionnaireFieldMap, randomQuestionnaireCount)
+
   return {
     userId,
     title: `Random Research Title ${randomNumber}`,
@@ -115,7 +140,9 @@ export const generateRandomApplicationInformation = (userId: string) => {
     expectedStartDate: faker.date.future(),
     expectedEndDate: faker.date.future(),
     summary: faker.lorem.paragraph(3),
-    status: randomStatus
+    status: randomStatus,
+    demographicDataAccess: demographicDataAccess,
+    questionnaireAccess: questionnaireAccess
   }
 }
 

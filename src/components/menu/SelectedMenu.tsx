@@ -49,11 +49,11 @@ const MenuSelected = ({ options = demoOptions, selectedIndex, setSelectedIndex }
           aria-haspopup='true'
           aria-controls='lock-menu'
           onClick={handleClickListItem}
-          aria-label='Total Trends'
+          aria-label='Trends'
         >
           <ListItemButton>
             <Box component='span' sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant='h5' sx={{ mr: 2 }}>{`Total Trend of ${options[selectedIndex]}`}</Typography>
+              <Typography variant='h5' sx={{ mr: 2 }}>{`Trend of ${options[selectedIndex]}`}</Typography>
               <i className='ri-arrow-down-s-line'></i>
             </Box>
           </ListItemButton>

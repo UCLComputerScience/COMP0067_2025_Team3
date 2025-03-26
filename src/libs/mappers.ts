@@ -1,7 +1,7 @@
 import { ApplicationStatus, DataField } from '@prisma/client'
 
 // data field mappers
-const demographicFieldMap: Record<string, DataField> = {
+export const demographicFieldMap: Record<string, DataField> = {
   Age: DataField.AGE,
   Sex: DataField.SEX,
   Gender: DataField.GENDER,
@@ -18,7 +18,7 @@ const demographicFieldMap: Record<string, DataField> = {
   'Other Conditions': DataField.OTHERCONDITIONS
 }
 
-const questionnaireFieldMap: Record<string, DataField> = {
+export const questionnaireFieldMap: Record<string, DataField> = {
   'Single episode questionnaire': DataField.SINGLEEPISODE,
   'Longitudinal data (multiple questionnaires over time)': DataField.LONGITUDINAL
 }
@@ -53,6 +53,6 @@ export const stringToApplicationStatus = (statusStr: string): ApplicationStatus 
 
   // Default case
   console.warn(`Invalid application status: ${statusStr}, defaulting to PENDING`)
-  
-return ApplicationStatus.PENDING
+
+  return ApplicationStatus.PENDING
 }

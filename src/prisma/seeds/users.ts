@@ -3,13 +3,14 @@ import { v4 as uuidv4 } from 'uuid'
 
 import bcrypt from 'bcryptjs'
 
-// import {
-//   generateRandomClincianInformation,
-//   generateRandomPatientInformation,
-//   generateRandomResearcherInformation
-// } from './seedHelpers'
 import { prisma } from '../client'
-import { createRandomDataAccessForResearcher } from './researcher'
+import {
+  generateRandomApplicationInformation,
+  generateRandomClincianInformation,
+  generateRandomPatientInfo,
+  generateRandomPatientInformation,
+  generateRandomResearcherInformation
+} from './seedHelpers'
 
 const patient1SubmissionUuid1 = uuidv4()
 const responseValues = [0, 25, 50, 75, 100]
@@ -54,6 +55,86 @@ async function createQuestionResponses(
   console.log(
     `Created ${createdResponses.count} responses for patient ${patientId} - submissionId: ${submissionId} at ${timestamp}.`
   )
+}
+
+async function generateMultiplePatientsWithResponses(num_patient = 2) {
+  const hashedPassword = await bcrypt.hash('1234567', 10)
+
+  for (let i = 0; i < num_patient; i++) {
+    const submissionId = uuidv4()
+    const patientBasicInfo = generateRandomPatientInformation(1)[0]
+    const patientDemoData = generateRandomPatientInfo(submissionId)
+
+    const patient = await prisma.user.create({
+      data: {
+        ...patientBasicInfo,
+        hashedPassword: hashedPassword
+      }
+    })
+
+    const patientDemo = await prisma.patientInfo.create({
+      data: {
+        ...patientDemoData,
+        userId: patient.id
+      }
+    })
+
+    await createQuestionResponses(patient.id, submissionId)
+    await createQuestionResponses(patient.id)
+    await createQuestionResponses(patient.id)
+    await createQuestionResponses(patient.id)
+
+    console.log(patient, patientDemo)
+  }
+}
+
+async function generateMultipleClinicians(num_clinciian = 2) {
+  const hashedPassword = await bcrypt.hash('1234567', 10)
+
+  for (let i = 0; i < num_clinciian; i++) {
+    const clinicianData = generateRandomClincianInformation(1)[0]
+
+    const clinician = await prisma.user.create({
+      data: {
+        ...clinicianData,
+        hashedPassword: hashedPassword
+      }
+    })
+
+    console.log(clinician)
+  }
+}
+
+async function generateMultipleResearcher(num_researcher = 2) {
+  const hashedPassword = await bcrypt.hash('1234567', 10)
+
+  for (let i = 0; i < num_researcher; i++) {
+    const researcherData = generateRandomResearcherInformation(1)[0]
+
+    const researcher = await prisma.user.create({
+      data: {
+        ...researcherData,
+        hashedPassword: hashedPassword
+      }
+    })
+
+    const randomValue = Math.random()
+    const hasApplication = randomValue > 0.5
+
+    if (hasApplication) {
+      const applicationData = generateRandomApplicationInformation(researcher.id)
+
+      const application = await prisma.application.create({
+        data: {
+          ...applicationData
+        }
+      })
+
+      console.log('generated application:', application)
+    }
+
+    console.log(researcher)
+  }
 }
 
 export async function initialiseUsersAndResponses() {
@@ -123,14 +204,14 @@ export async function initialiseUsersAndResponses() {
     }
   })
 
-  // const patientAccountData = generateRandomPatientInformation(10)
-  // const clinicianAccountData = generateRandomClincianInformation(5)
-  // const researcherAccountData = generateRandomResearcherInformation(5)
-
   console.log(patient1, clinician1, researcher1, patientInfo1, admin1)
-  await createRandomDataAccessForResearcher()
   await createQuestionResponses(patient1.id, patient1SubmissionUuid1)
   await createQuestionResponses(patient1.id)
   await createQuestionResponses(patient1.id)
   await createQuestionResponses(patient1.id)
+
+  // generate more patient data
+  await generateMultiplePatientsWithResponses(5)
+  await generateMultipleClinicians(5)
+  await generateMultipleResearcher(5)
 }

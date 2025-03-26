@@ -1,8 +1,9 @@
-import { Typography, IconButton } from '@mui/material'
+import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import type { DocumentType } from '.'
-import { extractFileName } from '@/utils/DocumentUtils'
+import { extractFileName } from '../../utils/docUtils'
+import OpenDocumentButton from '../OpenDocumentButton'
 
 const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
   // Function to check if the file is an image
@@ -31,7 +32,6 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
       <Grid size={8}>
         {documents.map((document, key) => (
           <div className='flex items-center gap-2.5 is-fit bg-actionHover rounded plb-[5px] pli-2.5 mt-2' key={key}>
-            {/* Conditional Rendering: */}
             {isImageFile(document.documentPath) ? (
 
               // For image files (JPEG, JPG, PNG) - show image
@@ -56,9 +56,7 @@ const DocumentsGridRow = ({ documents }: { documents: DocumentType[] }) => {
               {extractFileName(document.documentPath)}
             </Typography>
 
-            <IconButton size='small' edge='end' onClick={() => console.log(document.documentPath)}>
-              <i className='ri-eye-line' />
-            </IconButton>
+            <OpenDocumentButton documentPath={document.documentPath} />
           </div>
         ))}
       </Grid>

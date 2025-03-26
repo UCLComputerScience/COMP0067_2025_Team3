@@ -47,8 +47,8 @@ const Page = async ({ params }: PageProps) => {
   return (
     <Grid container spacing={4}>
       <AccountSettingsCardAdminView user={user} />
-      {userRole === Role.RESEARCHER && <DataAccessCard data={dataAccess} view='admin' />}
       {userRole === Role.RESEARCHER && <StudyList researcherId={userId} view='admin' />}
+      {userRole === Role.RESEARCHER && <DataAccessCard data={dataAccess} view='admin' />}
     </Grid>
   )
 }

@@ -115,7 +115,7 @@ const StudyList = ({ researcherId, view = 'researcher' }: Props) => {
           </Typography>
         )}
 
-        {view === 'researcher' && (
+        {view === 'researcher' && studies.length === 0 && (
           <CardActions sx={{ ml: -5 }}>
             <Button
               variant='contained'

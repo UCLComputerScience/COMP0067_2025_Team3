@@ -114,7 +114,7 @@ const TrendCharts = ({ data = demoData }: Props) => {
         <CardContent>
           <Grid2 container>
             <Grid2 size={7} sx={{ mb: 8 }}>
-              <Typography variant='h5'>Total Trend by Domains</Typography>
+              <Typography variant='h5'>Trend by Domains</Typography>
             </Grid2>
             <Grid2 size={5} sx={{ mb: 8 }}>
               <SelectedMenu
