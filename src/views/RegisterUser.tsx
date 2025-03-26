@@ -3,9 +3,11 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+
 import { useRouter } from 'next/navigation'
 
 import debounce from 'lodash/debounce'
+
 import Stack from '@mui/material/Stack'
 
 import type { SelectChangeEvent } from '@mui/material/Select'
@@ -13,9 +15,13 @@ import type { SelectChangeEvent } from '@mui/material/Select'
 import {Grid,Box,Typography,Radio,RadioGroup,FormControlLabel,Button,Stepper,Step,StepLabel,TextField,Checkbox,Link,Snackbar,Alert,CircularProgress,FormControl, InputLabel, Select, MenuItem} from '@mui/material'
 
 import { PatientRegister } from './RegisterPatient'
+
 import { DateOfBirthPicker } from './DateOfBirthPicker'
+
 import { ClinicianRegister } from './RegisterClinician'
+
 import { ResearcherRegister } from './RegisterResearcher'
+
 import { PrivacyPolicyTerms } from './PrivacyPolicyTerms'
 
 import { checkUserDuplicates } from '@/actions/register/registerActions'
@@ -57,7 +63,7 @@ export const Register = () => {
   // Hooks must be called at the top level in a consistent order
   const [step, setStep] = useState(0)
   const [mounted, setMounted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [accountType, setAccountType] = useState('patient')
@@ -88,21 +94,22 @@ export const Register = () => {
       { met: /\d/.test(password), message: 'Password must include at least one number' },
       { met: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password), message: 'Password must include at least one special character' }
     ];
-    const allMet = requirements.every(req => req.met); 
-  if (!password) {
-    return { isValid: false, errorMessage: 'Password is required' };
-  } 
-  if (!allMet) {
-    const unmetRequirements = requirements
-      .filter(req => !req.met)
-      .map(req => req.message);
-    
-    return {  isValid: false,  errorMessage: 'Password must be at least 8 characters;\nPassword must include at least one uppercase letter;\nPassword must include at least one lowercase letter\nPassword must include at least one number;\nPassword must include at least one special character;' 
-    };
-  }
   
-  return { isValid: true, errorMessage: '' };
-};
+    const allMet = requirements.every(req => req.met);
+   
+    if (!password) {
+      return { isValid: false, errorMessage: 'Password is required' };
+    }
+   
+    if (!allMet) {
+      return {
+        isValid: false,
+        errorMessage: 'Password must be at least 8 characters;\nPassword must include at least one uppercase letter;\nPassword must include at least one lowercase letter\nPassword must include at least one number;\nPassword must include at least one special character;'
+      };
+    }
+    
+    return { isValid: true, errorMessage: '' };
+  };
   
 
   const [formData, setFormData] = useState<AccountDetailsForm>({ firstName: '', lastName: '',email: '',password: '',confirmPassword: '',dateOfBirth: '',address: '',phoneNumber: '',registrationNumber: '',institution: '', profession: ''})
@@ -111,21 +118,38 @@ export const Register = () => {
 
   // Define debouncedCheckDuplicates
   const debouncedCheckDuplicates = useCallback(
-    debounce(async (email: string, phoneNumber: string, registrationNumber: string) => {
-      if (email.trim() || phoneNumber.trim() || registrationNumber.trim()) {
-        try {
-          const result: DuplicateCheckResult = await checkUserDuplicates(email, phoneNumber, registrationNumber);    
-          setFormErrors(prev => {
-            const newErrors = { ...prev }; 
-            if (result.emailExists) { newErrors.email = 'This email already exists';}
-            if (result.phoneExists) {newErrors.phoneNumber = 'The phone number already exists';}
-            if (result.registrationNumberExists) { newErrors.registrationNumber = 'The Registration Number already exists';}
-            return newErrors;
-          });
-        } catch (error) { console.error('Error checking duplicates:', error)}
-      }
-    }, 500),
-    [] 
+    (email: string, phoneNumber: string, registrationNumber: string) => {
+      const checkDuplicates = debounce(async () => {
+        if (email.trim() || phoneNumber.trim() || registrationNumber.trim()) {
+          try {
+            const result: DuplicateCheckResult = await checkUserDuplicates(email, phoneNumber, registrationNumber);
+      
+            setFormErrors(prev => {
+              const newErrors = { ...prev };
+   
+              if (result.emailExists) { 
+                newErrors.email = 'This email already exists';
+              }
+              
+              if (result.phoneExists) {
+                newErrors.phoneNumber = 'The phone number already exists';
+              }
+              
+              if (result.registrationNumberExists) { 
+                newErrors.registrationNumber = 'The Registration Number already exists';
+              }
+              
+              return newErrors;
+            });
+          } catch (error) { 
+            console.error('Error checking duplicates:', error)
+          }
+        }
+      }, 500);
+      
+      checkDuplicates();
+    }, 
+    []
   );
 
   // Define functions before useEffect
@@ -137,10 +161,13 @@ export const Register = () => {
       default:return ['Account Type']
     }
   }
+
   const handleOpenPrivacyTerms = (): void => {setOpenPrivacyTerms(true)}
   const handleClosePrivacyTerms = (): void => { setOpenPrivacyTerms(false)}
+
   const validateForm = (fieldName?: string) => {const errors: FormErrors = { ...formErrors };
     let isValid = true;
+
     const shouldValidateField = (field: string) => {
       return !fieldName || (fieldName === field && touchedFields[field]);
     };
@@ -159,11 +186,14 @@ export const Register = () => {
       if (!formData.email.trim()) { errors.email = '';
       } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {errors.email = 'Please enter a valid email address';
       } else if (!errors.email?.includes('already exists')) { errors.email = '';
-      }isValid = isValid && !errors.email;
+      }
+
+isValid = isValid && !errors.email;
     }
   
     if (shouldValidateField('password')) {
       const passwordValidation = validatePassword(formData.password);
+
       errors.password = passwordValidation.errorMessage;
       isValid = isValid && passwordValidation.isValid;
     }
@@ -171,7 +201,9 @@ export const Register = () => {
     if (shouldValidateField('confirmPassword')) {
       if (formData.password && formData.password !== formData.confirmPassword) { errors.confirmPassword = 'Passwords do not match';
       } else { errors.confirmPassword = '';
-      }isValid = isValid && !errors.confirmPassword;
+      }
+
+isValid = isValid && !errors.confirmPassword;
     } else {errors.confirmPassword = '';
     }
   
@@ -181,7 +213,9 @@ export const Register = () => {
         else if (!errors.phoneNumber?.includes('already exists')) { errors.phoneNumber = '';}
       } else {
         errors.phoneNumber = '';
-      } isValid = isValid && !errors.phoneNumber;
+      }
+
+ isValid = isValid && !errors.phoneNumber;
     }
   
     if (shouldValidateField('dateOfBirth') && accountType === 'patient') {
@@ -193,7 +227,9 @@ export const Register = () => {
     if (shouldValidateField('registrationNumber') && accountType === 'clinician') {
       if (!formData.registrationNumber?.trim()) { errors.registrationNumber = 'Registration number is required';
       } else if (!errors.registrationNumber?.includes('already exists')) { errors.registrationNumber = '';
-      }isValid = isValid && !errors.registrationNumber;
+      }
+
+isValid = isValid && !errors.registrationNumber;
     }
   
     if (shouldValidateField('institution') && (accountType === 'clinician' || accountType === 'researcher')) {
@@ -205,13 +241,16 @@ export const Register = () => {
     if (shouldValidateField('profession') && accountType === 'clinician') { errors.profession = !formData.profession?.trim() ? 'Profession is required' : '';isValid = isValid && !errors.profession;
     } else { errors.profession = '';
     }
+
     setFormErrors(errors);
-    return isValid;
+    
+return isValid;
   };
   
 
   useEffect(() => {
     setMounted(true);
+
     const checkAutofill = () => {
       const firstNameInput = document.querySelector('input[name="firstName"]') as HTMLInputElement;
       const lastNameInput = document.querySelector('input[name="lastName"]') as HTMLInputElement;
@@ -223,16 +262,22 @@ export const Register = () => {
   
       if (firstNameInput?.value) { setFormData(prev => ({ ...prev, firstName: firstNameInput.value })); setTouchedFields(prev => ({ ...prev, firstName: true }));
       }
+
       if (lastNameInput?.value) { setFormData(prev => ({ ...prev, lastName: lastNameInput.value })); setTouchedFields(prev => ({ ...prev, lastName: true }));
       }
+
       if (emailInput?.value) { setFormData(prev => ({ ...prev, email: emailInput.value })); setTouchedFields(prev => ({ ...prev, email: true }));
       }
+
       if (addressInput?.value) { setFormData(prev => ({ ...prev, address: addressInput.value })); setTouchedFields(prev => ({ ...prev, address: true }));
       }
+
       if (phoneNumberInput?.value) { setFormData(prev => ({ ...prev, phoneNumber: phoneNumberInput.value })); setTouchedFields(prev => ({ ...prev, phoneNumber: true }));
       }
+
       if (passwordInput?.value) { setFormData(prev => ({ ...prev, password: passwordInput.value })); setTouchedFields(prev => ({ ...prev, password: true }));
       }
+
       if (confirmPasswordInput?.value) { setFormData(prev => ({ ...prev, confirmPassword: confirmPasswordInput.value }));  setTouchedFields(prev => ({ ...prev, confirmPassword: true }));
       }
     };
@@ -256,10 +301,12 @@ export const Register = () => {
     console.log(`Validating field format: ${fieldName} = ${value}`);
     setFormErrors(prev => {
       const newErrors = { ...prev };
+
       if (fieldName === 'email') {
         if (value.trim() && !/^\S+@\S+\.\S+$/.test(value)) { newErrors.email = 'Please enter a valid email address';
         } else if (newErrors.email && !newErrors.email.includes('already exists')) { newErrors.email = '';}
       }
+
       if (fieldName === 'phoneNumber') {
         if (value && !validatePhoneNumber(value)) { console.log('Phone validation failed');  newErrors.phoneNumber = 'Please enter a valid phone number';
         } else { console.log('Phone validation passed'); 
@@ -271,8 +318,10 @@ export const Register = () => {
         if (!value.trim()) { newErrors.registrationNumber = 'Registration number is required';
         } else if (newErrors.registrationNumber && !newErrors.registrationNumber.includes('already exists')) { newErrors.registrationNumber = '';
         }
-      } 
-      return newErrors;
+      }
+ 
+      
+return newErrors;
     });
   };
 
@@ -285,7 +334,9 @@ export const Register = () => {
     
     if (name === 'password') {
       const passwordValidation = validatePassword(value);
+
       setFormErrors(prev => ({ ...prev, password: passwordValidation.errorMessage }));
+
       if (formData.confirmPassword) {
         if (value !== formData.confirmPassword) { setFormErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match' }));
         } else {
@@ -294,7 +345,8 @@ export const Register = () => {
       }
     }
   else if (name === 'phoneNumber') {
-    console.log('Processing phone number input'); 
+    console.log('Processing phone number input');
+ 
         if (value && !validatePhoneNumber(value)) {
       console.log('Phone validation failed in handleInputChange'); 
       setFormErrors(prev => ({ ...prev, phoneNumber: 'Please enter a valid phone number' }));
@@ -304,8 +356,11 @@ export const Register = () => {
         if (prev.phoneNumber && !prev.phoneNumber.includes('already exists')) {
           return { ...prev, phoneNumber: '' };
         }
-        return prev;
+
+        
+return prev;
       });
+
       if (value) {
         debouncedCheckDuplicates(
           formData.email || '',
@@ -345,6 +400,7 @@ export const Register = () => {
 
     if (step === 1) {
       setTouchedFields({ firstName: true, lastName: true, email: true, password: true, confirmPassword: true, dateOfBirth: true, address: true, phoneNumber: true, registrationNumber: true,institution: true, profession: true});
+
       if (!validateForm() || !agreeTerms) {
         return;
       }
@@ -353,8 +409,10 @@ export const Register = () => {
     if (step < maxStep) {
       setCompletedSteps(prev => {
         const newCompleted = [...prev]
+
         newCompleted[step] = true
-        return newCompleted
+        
+return newCompleted
       })
       setStep(prevStep => prevStep + 1)
     }
