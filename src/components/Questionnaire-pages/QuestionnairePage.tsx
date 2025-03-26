@@ -8,6 +8,8 @@ import { Button, Grid2, Typography, Box, Tooltip } from '@mui/material'
 import { safeParse } from 'valibot'
 import { useSession } from 'next-auth/react'
 
+import { submitResponses } from '@/actions/submit-response/submission-action'
+
 import styles from './styles.module.css'
 import Question from '@/components/Questionnaire-pages/Question/Question'
 import {
@@ -201,7 +203,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
   }
 
   // Submission logic
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     const submissionId = uuidv4()
 
     e.preventDefault()
@@ -211,10 +213,10 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
       return { ...acc, ...domainObj }
     }, {})
 
-    const result = safeParse(QuestionnaireSchema, flatAnswers)
+    const validationResult = safeParse(QuestionnaireSchema, flatAnswers)
 
-    if (result.success) {
-      console.log('Success!', result.output)
+    if (validationResult.success) {
+      console.log('Success!', validationResult.output)
       alert('Success! Your answers have been submitted')
 
       const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
@@ -227,15 +229,24 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
             domain,
             questionId: Number(questionId),
             score,
+            label: String(score),
             submissionId
           }
         })
       })
 
+      const result = await submitResponses(allFormattedAnswers)
+
+      if (result.success) {
+        console.log('Successfully submitted responses')
+      } else {
+        console.error('Failed to submit responses:', result.error)
+      }
+
       console.log('formattedAnswers', allFormattedAnswers)
     } else {
       // Checks that the full form is filled out
-      console.log('Validation Errors:', result.issues)
+      console.log('Validation Errors:', validationResult.issues)
       alert('There is an issue with your questionnaire answers, go back and check them')
     }
   }
