@@ -8,7 +8,17 @@ import { safeParse } from 'valibot'
 
 import styles from './styles.module.css'
 import Question from '@/components/Questionnaire-pages/Question/Question'
-import { QuestionnaireSchema } from '@/actions/formValidation'
+import {
+  QuestionnaireSchema,
+  NeuromusculoskeletalSchema,
+  PainSchema,
+  FatigueSchema,
+  GastrointestinalSchema,
+  CardiacDysautonomiaSchema,
+  UrogenitalSchema,
+  AnxietySchema,
+  DepressionSchema
+} from '@/actions/formValidation'
 import '@fontsource/inter'
 
 interface QuestionPageProps {
@@ -75,6 +85,112 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
     })
   }
 
+  const validatePage = () => {
+    switch (domain) {
+      case 'Neuromusculoskeletal':
+        const nmskResult = safeParse(NeuromusculoskeletalSchema, answers[domain])
+
+        if (nmskResult.success) {
+          console.log('Success!', nmskResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', nmskResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+
+      case 'Pain':
+        const painResult = safeParse(PainSchema, answers[domain])
+
+        if (painResult.success) {
+          console.log('Success!', painResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', painResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+
+      case 'Fatigue':
+        const fatigueResult = safeParse(FatigueSchema, answers[domain])
+
+        if (fatigueResult.success) {
+          console.log('Success!', fatigueResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', fatigueResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+      case 'Gastrointestinal':
+        const gastrointestinalResult = safeParse(GastrointestinalSchema, answers[domain])
+
+        if (gastrointestinalResult.success) {
+          console.log('Success!', gastrointestinalResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', gastrointestinalResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+
+      case 'Cardiac Dysautonomia':
+        const cardiacDysautonomiaResult = safeParse(CardiacDysautonomiaSchema, answers[domain])
+
+        if (cardiacDysautonomiaResult.success) {
+          console.log('Success!', cardiacDysautonomiaResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', cardiacDysautonomiaResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+
+      case 'Urogenital':
+        const urogenitalResult = safeParse(UrogenitalSchema, answers[domain])
+
+        if (urogenitalResult.success) {
+          console.log('Success!', urogenitalResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', urogenitalResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+
+      case 'Anxiety':
+        const anxietyResult = safeParse(AnxietySchema, answers[domain])
+
+        if (anxietyResult.success) {
+          console.log('Success!', anxietyResult.output)
+          handleNext()
+        } else {
+          console.log('Validation Errors:', anxietyResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+
+      case 'Depression':
+        const depressionResult = safeParse(DepressionSchema, answers[domain])
+
+        if (depressionResult.success) {
+          console.log('Success!', depressionResult.output)
+          handleSubmit
+        } else {
+          console.log('Validation Errors:', depressionResult.issues)
+          alert('Please fill out all Questions')
+        }
+
+        break
+    }
+  }
+
   // Submission logic
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,8 +207,9 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
       alert('Success! Your answers have been submitted')
       handleNext()
     } else {
+      // Checks that the full form is filled out
       console.log('Validation Errors:', result.issues)
-      alert('Please fill out all Questions')
+      alert('There is an issue with your questionnaire answers, go back and check them')
     }
   }
 
@@ -247,11 +364,11 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           </Grid2>
           <Box display='flex' justifyContent='flex-end'>
             {domain === 'Depression' ? (
-              <Button variant='contained' type='submit'>
+              <Button onClick={validatePage} variant='contained' type='submit'>
                 Submit
               </Button>
             ) : (
-              <Button onClick={handleNext} variant='contained'>
+              <Button onClick={validatePage} variant='contained'>
                 Next
               </Button>
             )}

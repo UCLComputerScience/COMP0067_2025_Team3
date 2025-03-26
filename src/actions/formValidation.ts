@@ -1,4 +1,4 @@
-import { object, string, minLength, email, pipe, nonEmpty, regex, optional, boolean } from 'valibot'
+import { object, string, minLength, email, pipe, nonEmpty, regex, optional, boolean, array } from 'valibot'
 
 // User Profile Validation
 export const userProfileSchema = object({
@@ -38,6 +38,61 @@ export const InfoSchema = object({
   taking_medications: pipe(string(), nonEmpty('Please Select Yes or No')),
   medications: optional(pipe(string())), // Optional if user is not taking medications
   other_conditions: optional(pipe(string(), nonEmpty('Please Enter If you have other conditions'))) // Optional field
+})
+
+export const NeuromusculoskeletalSchema = object({
+  1: pipe(string(), nonEmpty('Please Select')),
+  2: pipe(string(), nonEmpty('Please Select')),
+  3: pipe(string(), nonEmpty('Please Select')),
+  4: pipe(string(), nonEmpty('Please Select')),
+  5: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const PainSchema = object({
+  6: pipe(string(), nonEmpty('Please Select')),
+  7: pipe(string(), nonEmpty('Please Select')),
+  8: pipe(string(), nonEmpty('Please Select')),
+  9: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const FatigueSchema = object({
+  10: pipe(string(), nonEmpty('Please Select')),
+  11: pipe(string(), nonEmpty('Please Select')),
+  12: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const GastrointestinalSchema = object({
+  13: pipe(string(), nonEmpty('Please Select')),
+  14: pipe(string(), nonEmpty('Please Select')),
+  15: pipe(string(), nonEmpty('Please Select')),
+  16: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const CardiacDysautonomiaSchema = object({
+  17: pipe(string(), nonEmpty('Please Select')),
+  18: pipe(string(), nonEmpty('Please Select')),
+  19: optional(array(string())),
+  20: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const UrogenitalSchema = object({
+  21: pipe(string(), nonEmpty('Please Select')),
+  22: pipe(string(), nonEmpty('Please Select')),
+  23: pipe(string(), nonEmpty('Please Select')),
+  24: pipe(string(), nonEmpty('Please Select')),
+  25: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const AnxietySchema = object({
+  26: pipe(string(), nonEmpty('Please Select')),
+  27: pipe(string(), nonEmpty('Please Select')),
+  28: pipe(string(), nonEmpty('Please Select'))
+})
+
+export const DepressionSchema = object({
+  29: pipe(string(), nonEmpty('Please Select')),
+  30: pipe(string(), nonEmpty('Please Select')),
+  31: pipe(string(), nonEmpty('Please Select'))
 })
 
 export const QuestionnaireSchema = object({
