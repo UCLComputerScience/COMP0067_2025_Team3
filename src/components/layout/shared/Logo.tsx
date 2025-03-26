@@ -13,8 +13,6 @@ import type { VerticalNavContextProps } from '@menu/contexts/verticalNavContext'
 // Component Imports
 import MaterioLogo from '@core/svg/Logo'
 
-// Config Imports
-import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -34,7 +32,7 @@ const LogoText = styled.span<LogoTextProps>`
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: 0.15px;
-  text-transform: uppercase;
+  text-transform: none;
   transition: ${({ transitionDuration }) =>
     `margin-inline-start ${transitionDuration}ms ease-in-out, opacity ${transitionDuration}ms ease-in-out`};
 
@@ -81,10 +79,11 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
         transitionDuration={transitionDuration}
         isBreakpointReached={isBreakpointReached}
       >
-        {themeConfig.templateName}
       </LogoText>
     </div>
   )
 }
 
 export default Logo
+
+
