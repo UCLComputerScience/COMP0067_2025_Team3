@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import * as React from 'react'
 
+import { v4 as uuidv4 } from 'uuid'
 import { Button, Grid2, Typography, Box, Tooltip } from '@mui/material'
 import { safeParse } from 'valibot'
+import { useSession } from 'next-auth/react'
 
 import styles from './styles.module.css'
 import Question from '@/components/Questionnaire-pages/Question/Question'
@@ -35,6 +37,13 @@ interface QuestionType {
 }
 
 export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
+  const { data: session } = useSession()
+  let userId = ''
+
+  if (session) {
+    userId = session.user.id
+  }
+
   const [questions, setQuestions] = useState<QuestionType[]>([])
   const [answers, setAnswers] = useState<Record<string, Record<number, string | string[]>>>({})
 
@@ -193,6 +202,8 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
 
   // Submission logic
   const handleSubmit = (e: React.FormEvent) => {
+    const submissionId = uuidv4()
+
     e.preventDefault()
     console.log('answers', answers)
 
@@ -208,12 +219,15 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
 
       const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
         return Object.entries(questionSet).map(([questionId, value]) => {
+          // Handles checkbox as well as n/a values
+          const score = Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+
           return {
+            userId,
             domain,
             questionId: Number(questionId),
-
-            // Handles checkbox as well as n/a values
-            score: Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+            score,
+            submissionId
           }
         })
       })
