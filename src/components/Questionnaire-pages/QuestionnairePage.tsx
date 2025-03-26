@@ -1,12 +1,17 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import * as React from 'react'
+
+import { useRouter } from 'next/navigation'
+
+import { Role } from '@prisma/client'
 
 import { v4 as uuidv4 } from 'uuid'
 import { Button, Grid2, Typography, Box, Tooltip } from '@mui/material'
 import { safeParse } from 'valibot'
 import { useSession } from 'next-auth/react'
+
+import { toast } from 'react-toastify'
 
 import { submitResponses } from '@/actions/submit-response/submission-action'
 
@@ -39,7 +44,9 @@ interface QuestionType {
 }
 
 export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
+  const router = useRouter()
   const { data: session } = useSession()
+  const userRole = session?.user?.role || 'GUEST'
   let userId = ''
 
   if (session) {
@@ -106,7 +113,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', nmskResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
@@ -119,7 +126,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', painResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
@@ -132,8 +139,10 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', fatigueResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
+
+        break
 
       case 'Gastrointestinal':
         const gastrointestinalResult = safeParse(GastrointestinalSchema, answers[domain])
@@ -143,7 +152,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', gastrointestinalResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
@@ -156,7 +165,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', cardiacDysautonomiaResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
@@ -169,7 +178,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', urogenitalResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
@@ -182,7 +191,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           handleNext()
         } else {
           console.log('Validation Errors:', anxietyResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
@@ -192,22 +201,19 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
 
         if (depressionResult.success) {
           console.log('Success!', depressionResult.output)
-          handleSubmit
+          submitData()
         } else {
           console.log('Validation Errors:', depressionResult.issues)
-          alert('Please fill out all Questions')
+          toast.error('Please fill out all Questions')
         }
 
         break
     }
   }
 
-  // Submission logic
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Data submission function
+  const submitData = async () => {
     const submissionId = uuidv4()
-
-    e.preventDefault()
-    console.log('answers', answers)
 
     const flatAnswers = Object.values(answers).reduce((acc, domainObj) => {
       return { ...acc, ...domainObj }
@@ -216,12 +222,8 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
     const validationResult = safeParse(QuestionnaireSchema, flatAnswers)
 
     if (validationResult.success) {
-      console.log('Success!', validationResult.output)
-      alert('Success! Your answers have been submitted')
-
       const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
         return Object.entries(questionSet).map(([questionId, value]) => {
-          // Handles checkbox as well as n/a values
           const score = Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
 
           return {
@@ -235,20 +237,32 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
         })
       })
 
-      const result = await submitResponses(allFormattedAnswers)
+      if (userRole === 'PATIENT') {
+        const result = await submitResponses(allFormattedAnswers)
 
-      if (result.success) {
-        console.log('Successfully submitted responses')
-      } else {
-        console.error('Failed to submit responses:', result.error)
+        if (result.success) {
+          toast.success('Successfully submitted responses, redirecting to records page')
+          setTimeout(() => {
+            router.push('/my-records')
+          }, 2000)
+        } else {
+          toast.error('Failed to submit responses')
+        }
+      } else if (userRole !== 'PATIENT') {
+        toast.success('Successfully submitted responses')
+        setTimeout(() => {
+          router.push('/home')
+        }, 2000)
       }
-
-      console.log('formattedAnswers', allFormattedAnswers)
     } else {
-      // Checks that the full form is filled out
-      console.log('Validation Errors:', validationResult.issues)
-      alert('There is an issue with your questionnaire answers, go back and check them')
+      toast.error('There is an issue with your questionnaire answers')
     }
+  }
+
+  // Submission logic
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    submitData()
   }
 
   return (
@@ -402,7 +416,7 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           </Grid2>
           <Box display='flex' justifyContent='flex-end'>
             {domain === 'Depression' ? (
-              <Button onClick={validatePage} variant='contained' type='submit'>
+              <Button onClick={validatePage} variant='contained'>
                 Submit
               </Button>
             ) : (

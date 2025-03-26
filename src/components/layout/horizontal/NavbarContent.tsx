@@ -56,7 +56,7 @@ const NavbarContent = () => {
           : userRole === Role.PATIENT
             ? [
                 { label: 'Home', href: '/home' },
-                { label: 'The Spider', href: '/questionnaire' },
+                { label: 'The Spider', href: '/my-questionnaire' },
                 { label: 'My Records', href: '/my-records' },
                 { label: 'My Profile', href: '/my-profile' }
               ]
