@@ -151,6 +151,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
 
           let taking_medication = ''
 
+          // Change null values to strings for the form
           if (userInfo.medications === null) {
             taking_medication = 'No'
 

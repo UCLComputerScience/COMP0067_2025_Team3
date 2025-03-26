@@ -1,31 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
 import * as React from 'react'
 
-import { Button, Grid2, Typography, Box } from '@mui/material'
-
+import { Button, Grid2, Typography, Box, Tooltip } from '@mui/material'
 import { safeParse } from 'valibot'
 
 import styles from './styles.module.css'
-
 import Question from '@/components/Questionnaire-pages/Question/Question'
-
 import { QuestionnaireSchema } from '@/actions/formValidation'
-
 import '@fontsource/inter'
 
-// Define Props for the Question Page TODO - Correctly type props for the rest of the functions
 interface QuestionPageProps {
   domain: string
   handleNext: () => void
   handlePrev: () => void
 }
 
-// Define props for the Question Type
 interface QuestionType {
-  id: string
+  id: number
   domain: string
   question: string
   note: string
@@ -33,22 +26,7 @@ interface QuestionType {
 
 export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
   const [questions, setQuestions] = useState<QuestionType[]>([])
-  const [answers, setAnswers] = useState<Record<number | string, string>>({})
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const result = safeParse(QuestionnaireSchema, answers)
-
-    if (result.success) {
-      console.log('Success!', result.output)
-      console.log(answers)
-      alert('Success! Your answers have been submitted')
-      handleNext()
-    } else {
-      console.log('Error!', result.issues)
-      alert('Please fill out all Questions')
-    }
-  }
+  const [answers, setAnswers] = useState<Record<string, Record<number, string | string[]>>>({})
 
   useEffect(() => {
     fetch('/api/questions')
@@ -60,11 +38,62 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
       })
   }, [domain])
 
-  const handleRadioChange = (questionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    setAnswers(prevAnswers => ({
-      ...prevAnswers,
-      [questionId]: event.target.value
-    }))
+  // Handle the checkboxes for question 19
+  const handleCheckboxChange = (domain: string, id: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+
+    setAnswers(prev => {
+      const domainAnswers = prev[domain] || {}
+      const current = Array.isArray(domainAnswers[id]) ? domainAnswers[id] : []
+
+      const updated = current.includes(value) ? current.filter(v => v !== value) : [...current, value]
+
+      return {
+        ...prev,
+        [domain]: {
+          ...domainAnswers,
+          [id]: updated
+        }
+      }
+    })
+  }
+
+  // Handle the radio buttons throughout
+  const handleRadioChange = (domain: string, id: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+
+    setAnswers(prev => {
+      const domainAnswers = prev[domain] || {}
+
+      return {
+        ...prev,
+        [domain]: {
+          ...domainAnswers,
+          [id]: value
+        }
+      }
+    })
+  }
+
+  // Submission logic
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('answers', answers)
+
+    const flatAnswers = Object.values(answers).reduce((acc, domainObj) => {
+      return { ...acc, ...domainObj }
+    }, {})
+
+    const result = safeParse(QuestionnaireSchema, flatAnswers)
+
+    if (result.success) {
+      console.log('Success!', result.output)
+      alert('Success! Your answers have been submitted')
+      handleNext()
+    } else {
+      console.log('Validation Errors:', result.issues)
+      alert('Please fill out all Questions')
+    }
   }
 
   return (
@@ -73,7 +102,6 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
         sx={{
           fontFamily: 'Outfit',
           fontSize: '48px',
-          fontStyle: 'normal',
           fontWeight: '600',
           lineHeight: '68px',
           padding: '20px'
@@ -81,13 +109,19 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
       >
         {domain}
       </Typography>
-      <br />
+
       <Typography
-        sx={{ fontFamily: 'Inter', fontSize: '24px', fontWeight: '400', lineHeight: '28px', paddingBottom: '79px' }}
+        sx={{
+          fontFamily: 'Inter',
+          fontSize: '24px',
+          fontWeight: '400',
+          lineHeight: '28px',
+          paddingBottom: '79px'
+        }}
       >
         How much have these symptoms impacted your daily life during the past ONE month?
       </Typography>
-      <br />
+
       <Grid2 container spacing={2}>
         <Grid2 size={1.71}></Grid2>
         <Grid2 size={1.71}>
@@ -117,37 +151,113 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
           <Typography className={styles.options}>Disabling (100)</Typography>
         </Grid2>
       </Grid2>
-      <form>
-        {questions.map(questions => (
-          <div key={questions.id}>
+
+      <form onSubmit={handleSubmit}>
+        {questions.map(q => (
+          <div key={q.id}>
+            {q.id === 19 && (
+              <Grid2 container spacing={2}>
+                <Grid2 size={2}></Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>
+                    In warm
+                    <br />
+                    environments(20)
+                  </Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>
+                    After a
+                    <br />
+                    meal (20)
+                  </Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>
+                    Right after
+                    <br />
+                    straining{' '}
+                    <Tooltip title={'e.g during or shortly after a toilet visit, lifting heavy items, ...)'}>
+                      <i className='   ri-information-line' />
+                    </Tooltip>{' '}
+                    (20)
+                  </Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>
+                    During or right
+                    <br />
+                    after physical
+                    <br />
+                    activity{' '}
+                    <Tooltip title={'e.g. walking, taking stairs, cycling, ...'}>
+                      <i className='   ri-information-line' />
+                    </Tooltip>{' '}
+                    (20)
+                  </Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>
+                    Other
+                    <br />
+                    20
+                  </Typography>
+                </Grid2>
+              </Grid2>
+            )}
+
+            {q.id === 25 && (
+              <Grid2 container spacing={2}>
+                <Grid2 size={2}></Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>Never (0)</Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>1-2 Times (33.3)</Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>3 Times (66.6)</Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Typography className={styles.options}>Over 3 times (100)</Typography>
+                </Grid2>
+                <Grid2 size={2}></Grid2>
+              </Grid2>
+            )}
+
             <Question
-              onValueChange={event => handleRadioChange(questions.id, event)}
-              selectedValue={answers[questions.id] || ''}
-              question={questions.question}
-              note={questions.note}
+              key={q.id}
+              id={q.id}
+              question={q.question}
+              note={q.note}
+              selectedValue={q.id === 19 ? answers[domain]?.[q.id] || [] : answers[domain]?.[q.id] || ''}
+              onValueChange={e =>
+                q.id === 19 ? handleCheckboxChange(domain, q.id, e) : handleRadioChange(domain, q.id, e)
+              }
             />
             <br />
           </div>
         ))}
-      </form>
-      <Grid2 container sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Grid2 size={6}>
-          <Button onClick={handlePrev} variant='contained'>
-            Previous
-          </Button>
+
+        <Grid2 container sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Grid2 size={6}>
+            <Button onClick={handlePrev} variant='contained'>
+              Previous
+            </Button>
+          </Grid2>
+          <Box display='flex' justifyContent='flex-end'>
+            {domain === 'Depression' ? (
+              <Button variant='contained' type='submit'>
+                Submit
+              </Button>
+            ) : (
+              <Button onClick={handleNext} variant='contained'>
+                Next
+              </Button>
+            )}
+          </Box>
         </Grid2>
-        <Box display='flex' justifyContent='flex-end'>
-          {domain === 'Depression' ? (
-            <Button variant='contained' onClick={handleSubmit}>
-              Submit
-            </Button>
-          ) : (
-            <Button onClick={handleNext} variant='contained'>
-              Next
-            </Button>
-          )}
-        </Box>
-      </Grid2>
+      </form>
     </Box>
   )
 }
