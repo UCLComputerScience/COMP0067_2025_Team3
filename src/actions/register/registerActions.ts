@@ -67,14 +67,14 @@ export async function saveDataPrivacyPreferences(
     // Create clinician relationships if clinician access is granted
     if (data.clinicianAccess && data.selectedClinicians.length > 0) {
       // Create an array of clinician relationship objects
-      const clinicianRelationships = data.selectedClinicians.map((clinician) => ({ patient: { connect: { id: userId } },  clinician: { connect: { id: clinician.id } },  agreedToShareData: true, status: 'CONNECTED', }));
+      const clinicianRelationships = data.selectedClinicians.map((clinician) => ({ patient: { connect: { id: userId } },  clinician: { connect: { id: clinician.id } },  agreedToShareData: true, status: 'PENDING', }));
       
       await prisma.$transaction(
         clinicianRelationships.map((relationship) =>
           prisma.clinicianPatient.upsert({
             where: {  patientId_clinicianId: {patientId: userId, clinicianId: relationship.clinician.connect!.id,  },},
-            update: { agreedToShareData: relationship.agreedToShareData, status: 'CONNECTED',},
-            create: { patient: { connect: { id: userId } }, clinician: { connect: { id: relationship.clinician.connect!.id } }, agreedToShareData: relationship.agreedToShareData, status: 'CONNECTED',},
+            update: { agreedToShareData: relationship.agreedToShareData, status: 'PENDING',},
+            create: { patient: { connect: { id: userId } }, clinician: { connect: { id: relationship.clinician.connect!.id } }, agreedToShareData: relationship.agreedToShareData, status: 'PENDING',},
           })
         )
       );
