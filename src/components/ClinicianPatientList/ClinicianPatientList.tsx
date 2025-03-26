@@ -1,8 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { getPatients, updatePatientLink } from '@/actions/clinician-patientlist/PatientListActions'
+
+import Link from 'next/link'
+
+
 import { RelationshipStatus } from '@prisma/client'
 
 // MUI Imports
@@ -23,6 +25,8 @@ import Typography from '@mui/material/Typography'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 
+import { getPatients, updatePatientLink } from '@/actions/clinician-patientlist/PatientListActions'
+
 type Patient = {
   id: string
   name: string
@@ -40,6 +44,7 @@ type PatientData = {
 
 export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   const [data, setData] = useState<PatientData | null>(null)
+
   const [filters, setFilters] = useState({
     patientName: '',
     email: '',
@@ -47,6 +52,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     page: 1,
     pageSize: 10,
   })
+
   const [error, setError] = useState<string | null>(null)
   const [selectAll, setSelectAll] = useState(false)
   const [selectedPatients, setSelectedPatients] = useState<string[]>([])
@@ -57,12 +63,14 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     async function fetchData() {
       try {
         const result = await getPatients(filters, clinicianId)
+
         setData(result)
         setError(null)
       } catch (err) {
         setError('Failed to get patient data')
       }
     }
+
     fetchData()
   }, [filters, clinicianId])
 
@@ -80,9 +88,11 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   const handlePatientLinkChange = async (patientId: string, status: string) => {
     try {
       const relationshipStatus = status as RelationshipStatus
+
       if (relationshipStatus in RelationshipStatus) {
         await updatePatientLink(clinicianId, patientId, relationshipStatus)
         const result = await getPatients(filters, clinicianId)
+
         setData(result)
       }
     } catch (err) {
@@ -98,6 +108,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   
       if (exportFormat === 'csv') {
         const headers = ['Name', 'Email', 'Date of Birth', 'Patient Link']
+
         const rows = selectedData.map(p =>
           [p.name, p.email, p.dateOfBirth, p.patientLink ?? ''].join(',')
         )
@@ -107,6 +118,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
+
         a.href = url
         a.download = 'selected_patientsList.csv'
         a.click()
@@ -158,6 +170,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     } else {
       setSelectedPatients(data?.patients.map((patient) => patient.id) || [])
     }
+
     setSelectAll(!selectAll)
   }
 
@@ -205,6 +218,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
             value={filters.patientLink ?? 'all'}
             onChange={(e) => {
                 const value = e.target.value
+
                 handleFilterChange('patientLink', value === 'all' ? undefined : (value as RelationshipStatus))
             }}
             variant="outlined"

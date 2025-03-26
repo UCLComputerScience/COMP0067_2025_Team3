@@ -1,7 +1,7 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
-import { RelationshipStatus } from '@prisma/client'
+import { PrismaClient , RelationshipStatus } from '@prisma/client'
+
 
 const prisma = new PrismaClient()
 
@@ -19,6 +19,7 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
   try {
     const skip = (page - 1) * pageSize
     const orConditions: any[] = []
+
     if (patientName) {
       orConditions.push({
         OR: [
@@ -27,6 +28,7 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
         ],
       })
     }
+
     if (email) {
       orConditions.push({ email: { contains: email, mode: 'insensitive' } })
     }

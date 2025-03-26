@@ -1,7 +1,12 @@
-import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import { authOptions } from '@/libs/auth'
+
+import { getServerSession } from 'next-auth'
+
 import { Role } from '@prisma/client'
+
+import { authOptions } from '@/libs/auth'
+
+
 import { prisma } from '@/prisma/client'
 import Records from '@/views/Records'
 
@@ -23,12 +28,14 @@ const getResponseDataByUser = async (userId: string) => {
 
   responses.forEach((res) => {
     const { submissionId, domain, _avg, _min } = res
+
     if (!groupedResults[submissionId]) {
       groupedResults[submissionId] = {
         createdAt: _min.createdAt!,
         domains: {},
       }
     }
+
     groupedResults[submissionId].domains[domain] = {
       averageScore: _avg.score!,
     }

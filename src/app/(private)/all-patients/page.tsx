@@ -1,8 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { getSession } from 'next-auth/react'
+
 import { ClinicianPatientList } from '@/components/ClinicianPatientList/ClinicianPatientList'
 
 const Page: React.FC = () => {
@@ -11,10 +14,12 @@ const Page: React.FC = () => {
   useEffect(() => {
     async function checkSession() {
       const session = await getSession()
+
       if (!session || session.user.role !== 'CLINICIAN') {
         router.push('/login')
       }
     }
+
     checkSession()
   }, [router])
 
@@ -23,11 +28,13 @@ const Page: React.FC = () => {
   useEffect(() => {
     async function fetchClinicianId() {
       const session = await getSession()
+
       if (session) {
         console.log('clinicianId:', session.user.id)
         setClinicianId(session.user.id as string)
       }
     }
+
     fetchClinicianId()
   }, [])
 
