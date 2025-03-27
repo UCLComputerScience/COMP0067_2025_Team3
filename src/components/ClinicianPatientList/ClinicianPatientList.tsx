@@ -100,6 +100,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   }
 
   {/* Export */}
+  
   const handleExport = async () => {
     try {
       if (!data) return
