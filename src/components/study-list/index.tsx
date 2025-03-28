@@ -17,7 +17,7 @@ import { useSession } from 'next-auth/react'
 
 import { toast } from 'react-toastify'
 
-import { deleteApplicationById, getApplications } from '@/actions/researcher/applicationAction'
+import { deleteApplicationById, getApplicationsByResearcherId } from '@/actions/researcher/applicationAction'
 
 import StudyItem from './StudyItem'
 
@@ -61,7 +61,7 @@ const StudyList = ({ researcherId, view = 'researcher' }: Props) => {
     const fetchStudies = async () => {
       try {
         const userId = researcherId ? researcherId : (session?.user.id as string)
-        const fetchedStudies = await getApplications(userId)
+        const fetchedStudies = await getApplicationsByResearcherId(userId)
 
         const mappedData: StudyListType[] = fetchedStudies.map(item => ({
           id: item.id,
@@ -108,7 +108,6 @@ const StudyList = ({ researcherId, view = 'researcher' }: Props) => {
             <StudyItem key={index} item={item} handleDelete={handleDelete} researcherId={researcherId as string} />
           ))
         ) : (
-
           // make it looks better
           <Typography className='flex md:flex-row md:justify-between gap-4 p-4 rounded bg-actionHover'>
             No studies found. Please add a study to proceed.

@@ -32,6 +32,7 @@ import GridRow from './GridRow'
 import DocumentsGridRow from './DocumentsGrid'
 import type { AdminStudyFormValues } from './AdminStudyProcessForm'
 import AdminStudyProcessForm from './AdminStudyProcessForm'
+import PatientConsentForm from './PatientConsentForm'
 
 export interface DocumentType {
   applicationId: number
@@ -121,8 +122,7 @@ const StudyDetails = () => {
     return <Typography variant='h6'>Study does not exist</Typography>
   }
 
-  const studyFields = [
-    { label: 'Data access application status', value: study.status },
+  const commonStudyFields = [
     { label: 'Research title', value: study.title },
     { label: 'Research question', value: study.question },
     { label: 'Institution', value: study.institution || 'N/A' },
@@ -144,10 +144,22 @@ const StudyDetails = () => {
     }
   ]
 
-  const studyFieldsAdmin = [
+  const userRole = session?.user?.role
+
+  const researcherAndAdminFields = [{ label: 'Data access application status', value: study.status }]
+
+  const adminFields = [
     { label: 'Application submitted date', value: formatDate(study.createdAt) },
     { label: 'Application last updated date', value: formatDate(study.updatedAt) }
   ]
+
+  let studyFields = [...commonStudyFields]
+
+  if (userRole === Role.RESEARCHER || userRole === Role.ADMIN) {
+    studyFields = [...researcherAndAdminFields, ...commonStudyFields]
+  } else if (userRole === Role.PATIENT) {
+    studyFields = [...commonStudyFields]
+  }
 
   return isEditting ? (
     <DataAccessApplicationForm
@@ -169,8 +181,7 @@ const StudyDetails = () => {
               <GridRow {...field} key={index} />
             ))}
             <DocumentsGridRow documents={study.documents} />
-            {session?.user.role === Role.ADMIN &&
-              studyFieldsAdmin.map((field, index) => <GridRow {...field} key={index} />)}
+            {session?.user.role === Role.ADMIN && adminFields.map((field, index) => <GridRow {...field} key={index} />)}
             {study.adminMessage && study.status === ApplicationStatus.REJECTED && (
               <GridRow label={'Admin Message'} value={study.adminMessage} color={'error.main'} />
             )}
@@ -192,8 +203,10 @@ const StudyDetails = () => {
           applicationId={study.id}
         />
       )}
+      {session?.user.role === Role.PATIENT && <PatientConsentForm studyId={study.id} />}
     </>
   )
 }
 
 export default StudyDetails
+// export default StudyDetails

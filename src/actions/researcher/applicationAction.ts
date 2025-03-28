@@ -63,7 +63,7 @@ export async function createApplication(formData: FormData, userId: string) {
   }
 }
 
-export async function getApplications(userId: string) {
+export async function getApplicationsByResearcherId(userId: string) {
   return await prisma.application.findMany({
     where: {
       userId: userId
@@ -90,6 +90,47 @@ export async function getApplicationById(id: number) {
   } catch (error) {
     console.error(`Error getting application with id ${id}:`, error)
     throw new Error(`Failed to get application with ID ${id}`)
+  }
+}
+
+export async function getApplicationBasicInfoByResearcherId(userId: string) {
+  try {
+    const application = await prisma.application.findFirst({
+      where: {
+        userId: userId
+      },
+      select: {
+        id: true,
+        title: true,
+        _count: {
+          select: {
+            patientConsents: true
+          }
+        }
+      }
+    })
+
+    if (!application) {
+      return {
+        id: null,
+        title: null,
+        numPatientConsent: 0
+      }
+    }
+
+    return {
+      id: application.id,
+      title: application.title,
+      numPatientConsent: application._count.patientConsents
+    }
+  } catch (error) {
+    console.error(`Cannot find application for researcher with ID ${userId}`, error)
+    // Return a default value in case of error
+    return {
+      id: null,
+      title: null,
+      numPatientConsent: 0
+    }
   }
 }
 

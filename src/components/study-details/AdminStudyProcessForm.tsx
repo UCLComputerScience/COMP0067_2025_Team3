@@ -90,7 +90,6 @@ const AdminStudyProcessForm = ({ formValues = defaultFormValues, researcherId, a
     defaultValues: formValues
   })
 
-  // Watch the status field to conditionally render sections
   const currentStatus = watch('status')
   const showDataAccessSections = currentStatus === ApplicationStatus.APPROVED
   const showAdminMessage = currentStatus === ApplicationStatus.REJECTED
@@ -162,45 +161,6 @@ const AdminStudyProcessForm = ({ formValues = defaultFormValues, researcherId, a
                 {errors.status && <FormHelperText>{errors.status.message}</FormHelperText>}
               </FormControl>
             </Grid>
-            {/* Replace the existing FormControl with Select with this Button Group */}
-            {/* <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant='body1' sx={{ mb: 2 }}>
-                Decision
-              </Typography>
-              <div className='flex gap-2'>
-                <Button
-                  variant={currentStatus === ApplicationStatus.APPROVED ? 'contained' : 'outlined'}
-                  color='success'
-                  onClick={() => {
-                    // Set the status to APPROVED and mark form as dirty
-                    setValue('status', ApplicationStatus.APPROVED, {
-                      shouldDirty: true,
-                      shouldValidate: true
-                    })
-                  }}
-                  disabled={loading}
-                >
-                  Approve
-                </Button>
-                <Button
-                  variant={currentStatus === ApplicationStatus.REJECTED ? 'contained' : 'outlined'}
-                  color='error'
-                  onClick={() => {
-                    // Set the status to REJECTED and mark form as dirty
-                    setValue('status', ApplicationStatus.REJECTED, {
-                      shouldDirty: true,
-                      shouldValidate: true
-                    })
-                  }}
-                  disabled={loading}
-                >
-                  Reject
-                </Button>
-              </div>
-              {errors.status && <FormHelperText error>{errors.status.message}</FormHelperText>}
-            </Grid>
-
-            <Controller name='status' control={control} render={({ field }) => <input type='hidden' {...field} />} /> */}
             {/* Only show message sections if status is REJECT */}
             {showAdminMessage && (
               <Grid size={12}>
