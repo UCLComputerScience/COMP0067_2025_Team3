@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react'
 import { toast } from 'react-toastify'
 
 import { submitResponses } from '@/actions/submit-response/submission-action'
-
+import { fetchQuestionsByDomain } from '@/actions/questionnaire/userAction'
 import styles from './styles.module.css'
 import Question from '@/components/Questionnaire-pages/Question/Question'
 import {
@@ -38,7 +38,7 @@ interface QuestionType {
   id: number
   domain: string
   question: string
-  note: string
+  note: string | null
 }
 
 export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
@@ -55,13 +55,17 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
   const [answers, setAnswers] = useState<Record<string, Record<number, string | string[]>>>({})
 
   useEffect(() => {
-    fetch('/api/questions')
-      .then(res => res.json())
-      .then(data => {
-        const filteredQuestions = data.filter((q: QuestionType) => q.domain.includes(domain))
+    const fetchQuestions = async () => {
+      try {
+        const fetchedQuestions = await fetchQuestionsByDomain(domain)
 
-        setQuestions(filteredQuestions)
-      })
+        setQuestions(fetchedQuestions)
+      } catch (error) {
+        console.error('Error fetching questions:', error)
+      }
+    }
+
+    fetchQuestions()
   }, [domain])
 
   // Handle the checkboxes for question 19
@@ -396,11 +400,11 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
               key={q.id}
               id={q.id}
               question={q.question}
-              note={q.note}
               selectedValue={q.id === 19 ? answers[domain]?.[q.id] || [] : answers[domain]?.[q.id] || ''}
               onValueChange={e =>
                 q.id === 19 ? handleCheckboxChange(domain, q.id, e) : handleRadioChange(domain, q.id, e)
               }
+              {...(q.note !== null ? { note: q.note } : {})}
             />
             <br />
           </div>
