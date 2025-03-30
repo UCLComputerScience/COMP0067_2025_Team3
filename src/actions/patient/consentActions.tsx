@@ -3,6 +3,46 @@
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/prisma/client'
 
+export async function updatePatientAgreedToResearch(patientId: string, agreedForResearch: boolean) {
+  try {
+    await prisma.user.update({
+      where: {
+        id: patientId
+      },
+      data: {
+        agreedForResearch
+      }
+    })
+
+    if (!agreedForResearch) {
+      await prisma.studyConsent.updateMany({
+        where: {
+          patientId: patientId,
+          hasConsented: true
+        },
+        data: {
+          hasConsented: false,
+          updatedAt: new Date()
+        }
+      })
+    }
+
+    return {
+      success: true,
+      message: agreedForResearch
+        ? 'Successfully opted in to research participation'
+        : 'Successfully opted out to research participation'
+    }
+  } catch (error) {
+    console.error('Error updating research consent:', error)
+
+    return {
+      success: false,
+      message: 'Failed to update research consent. Please try again later.'
+    }
+  }
+}
+
 export async function getPatientAgreedToResearch(patientId: string) {
   const patient = await prisma.user.findUnique({
     where: {
