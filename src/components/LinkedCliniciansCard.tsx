@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useSession } from 'next-auth/react'
 import {
-  Box,
   Button,
   Card,
   CardContent,
@@ -15,7 +16,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Switch,
   Chip,
   CardHeader,
@@ -24,10 +24,10 @@ import {
   IconButton
 } from '@mui/material'
 
-import { saveShareData, deleteClinician } from '@/actions/patientSettings/userActions'
-import { prisma } from '@/prisma/client'
-import { getPatientClinicians } from '@/actions/patient/userActions'
 import { toast } from 'react-toastify'
+
+import { saveShareData, deleteClinician } from '@/actions/patientSettings/userActions'
+import { getPatientClinicians } from '@/actions/patient/userActions'
 
 export interface ClinicianData {
   id: string
@@ -56,6 +56,7 @@ const LinkedCliniciansCard = ({ className = '' }: Props) => {
       if (!session?.user?.id) {
         setError('User not authenticated')
         setLoading(false)
+
         return
       }
 

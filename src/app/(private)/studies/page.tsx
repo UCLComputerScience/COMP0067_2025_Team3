@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 
 // auth
 import { getServerSession } from 'next-auth'
+
+import { Role } from '@prisma/client'
+
 import { authOptions } from '@/libs/auth'
 
 // prisma
@@ -27,9 +30,10 @@ const Page = async () => {
     }
   })
 
-  if (!user?.agreedForResearch) {
+  if (session.user.role === Role.PATIENT && !user?.agreedForResearch) {
     redirect('/home')
   }
+
   return <Studies />
 }
 

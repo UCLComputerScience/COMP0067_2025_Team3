@@ -1,12 +1,16 @@
 // components
+import { getServerSession } from 'next-auth'
+
+import type { ApplicationStatus} from '@prisma/client';
+
+import { Role } from '@prisma/client'
+
 import AllStudyListTable from '@/components/all-study-list-table'
 
 // auth
-import { getServerSession } from 'next-auth'
 import { authOptions } from '@/libs/auth'
 
 // prisma
-import { ApplicationStatus, Role } from '@prisma/client'
 
 // server actions
 import { getAllApplications, getAllApprovedApplications } from '@/actions/application/applicationActions'
@@ -40,6 +44,7 @@ const Studies = async () => {
 
   if (userRole === Role.ADMIN) {
     rawApplications = await getAllApplications()
+
     const adminApplications = (rawApplications || []).map(app => ({
       id: app.id || 0,
       title: app.title || '',
@@ -54,6 +59,7 @@ const Studies = async () => {
     return <AllStudyListTable rows={adminApplications} userRole={Role.ADMIN} />
   } else if (userRole === Role.PATIENT) {
     rawApplications = await getAllApprovedApplications(session?.user.id)
+
     const patientApplications = (rawApplications || []).map(app => ({
       id: app.id || 0,
       title: app.title || '',

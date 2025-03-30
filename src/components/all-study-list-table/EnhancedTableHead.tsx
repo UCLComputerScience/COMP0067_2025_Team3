@@ -1,7 +1,9 @@
-import { TableHead, TableRow, TableCell, Checkbox, TableSortLabel, Box } from '@mui/material'
+import { TableHead, TableRow, TableCell, TableSortLabel, Box } from '@mui/material'
 import { visuallyHidden } from '@mui/utils'
-import { Order } from '.'
+
 import { Role } from '@prisma/client'
+
+import type { Order } from '.'
 
 interface HeadCell {
   disablePadding: boolean
@@ -18,6 +20,7 @@ const allHeadCells: readonly HeadCell[] = [
     numeric: false,
     disablePadding: true,
     label: 'Title'
+
     // No roles specified means visible to all roles
   },
   {

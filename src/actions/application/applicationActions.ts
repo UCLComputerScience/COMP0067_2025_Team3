@@ -1,7 +1,8 @@
 'use server'
 
-import { prisma } from '@/prisma/client'
 import { ApplicationStatus } from '@prisma/client'
+
+import { prisma } from '@/prisma/client'
 
 export const getAllApplications = async () => {
   try {
@@ -17,7 +18,9 @@ export const getAllApplications = async () => {
         userId: true
       }
     })
-    return applications
+
+    
+return applications
   } catch (error) {
     console.error('Error getting all applications:', error)
   }
@@ -64,6 +67,7 @@ export const getAllApprovedApplications = async (currentPatientId?: string) => {
     return transformedApplications
   } catch (error) {
     console.error('Error getting all approved applications:', error)
+
     // Best practice: Rethrow or return a proper error response
     throw new Error('Failed to fetch approved applications')
   }

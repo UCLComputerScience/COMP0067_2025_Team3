@@ -209,4 +209,5 @@ const StudyDetails = () => {
 }
 
 export default StudyDetails
+
 // export default StudyDetails

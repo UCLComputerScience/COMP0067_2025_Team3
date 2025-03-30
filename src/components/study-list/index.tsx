@@ -108,6 +108,7 @@ const StudyList = ({ researcherId, view = 'researcher' }: Props) => {
             <StudyItem key={index} item={item} handleDelete={handleDelete} researcherId={researcherId as string} />
           ))
         ) : (
+
           // make it looks better
           <Typography className='flex md:flex-row md:justify-between gap-4 p-4 rounded bg-actionHover'>
             No studies found. Please add a study to proceed.

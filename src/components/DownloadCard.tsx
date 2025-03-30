@@ -31,6 +31,8 @@ import { valibotResolver } from '@hookform/resolvers/valibot'
 // component
 import { toast } from 'react-toastify'
 
+import { useSession } from 'next-auth/react'
+
 import DateRangePicker from './DateRangePicker'
 import LabeledCheckbox from './LabeledCheckbox'
 
@@ -44,7 +46,6 @@ import {
 import { downloadFile } from '@/utils/downloadUtils'
 import Link from './Link'
 import { getApplicationBasicInfoByResearcherId } from '@/actions/researcher/applicationAction'
-import { useSession } from 'next-auth/react'
 
 interface Props {
   dataAccess: {
@@ -84,14 +85,19 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
   const [studyBasicInfo, setStudyBasicInfo] = useState<any>(null)
 
   useEffect(() => {
+    if (!session || !session.user) {
+      return
+    }
+
     const getStudyBasicInfo = async () => {
-      const basicInfo = await getApplicationBasicInfoByResearcherId(session?.user.id!)
+      const basicInfo = await getApplicationBasicInfoByResearcherId(session.user.id!)
 
       console.log(basicInfo)
       setStudyBasicInfo(basicInfo)
     }
 
     getStudyBasicInfo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const hasValidAccess = useMemo(() => {
@@ -159,7 +165,11 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
 
       console.log('request data:', requestData)
 
-      const questionnaireResult = await generateQuestionnaireResponseExport(requestData, studyBasicInfo?.id!)
+      if (!studyBasicInfo || !studyBasicInfo.id) {
+        return
+      }
+
+      const questionnaireResult = await generateQuestionnaireResponseExport(requestData, studyBasicInfo.id)
 
       if (questionnaireResult.message) {
         toast.warn(questionnaireResult.message)
@@ -171,7 +181,11 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
       }
 
       if (data.demographicDataAccess.length > 0) {
-        const demographicResult = await generatePatientDemographicDataExport(requestData, studyBasicInfo?.id!)
+        if (!studyBasicInfo || !studyBasicInfo.id) {
+          return
+        }
+
+        const demographicResult = await generatePatientDemographicDataExport(requestData, studyBasicInfo.id)
 
         if (demographicResult.message) {
           toast.warn(demographicResult.message)

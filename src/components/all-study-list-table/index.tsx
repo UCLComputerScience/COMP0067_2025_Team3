@@ -1,6 +1,9 @@
 'use client'
 
 import * as React from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -9,12 +12,14 @@ import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 
-import { Card, CardContent, CardHeader, Chip, IconButton, Toolbar, Typography } from '@mui/material'
-import { EnhancedTableHead } from './EnhancedTableHead'
-import { PatientApplicationListType, ResearcherApplicationListType } from '@/views/Studies'
+import { Card, CardContent, CardHeader, Chip, IconButton } from '@mui/material'
+
 import { ApplicationStatus, Role } from '@prisma/client'
+
 import { capitalize } from 'lodash'
-import { useRouter } from 'next/navigation'
+
+import { EnhancedTableHead } from './EnhancedTableHead'
+import type { PatientApplicationListType, ResearcherApplicationListType } from '@/views/Studies'
 
 export type Order = 'asc' | 'desc'
 
@@ -51,6 +56,7 @@ export default function AllStudyListTable({ rows, userRole }: AllStudyListTableP
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: string) => {
     if (rows.length > 0 && property in rows[0]) {
       const isAsc = orderBy === property && order === 'asc'
+
       setOrder(isAsc ? 'desc' : 'asc')
       setOrderBy(property)
     }
@@ -69,6 +75,7 @@ export default function AllStudyListTable({ rows, userRole }: AllStudyListTableP
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1))
     }
+
     setSelected(newSelected)
   }
 

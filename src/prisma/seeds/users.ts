@@ -153,6 +153,7 @@ export async function initialiseUsersAndResponses() {
   })
 
   const patientInfo1Data = generateRandomPatientInfo(patient1SubmissionUuid1)
+
   const patientInfo1 = await prisma.patientInfo.create({
     data: {
       ...patientInfo1Data,

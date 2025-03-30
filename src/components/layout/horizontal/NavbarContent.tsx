@@ -1,6 +1,8 @@
 'use client'
 
 // Third-party Imports
+import { useEffect, useState } from 'react'
+
 import Image from 'next/image'
 
 import { usePathname } from 'next/navigation'
@@ -26,7 +28,6 @@ import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
-import { useEffect, useState } from 'react'
 import { getPatientAgreedToResearch } from '@/actions/patient/consentActions'
 
 const NavbarContent = () => {
@@ -43,6 +44,7 @@ const NavbarContent = () => {
     const fetchResearchConsent = async () => {
       if (userRole === Role.PATIENT && userId) {
         const consent = await getPatientAgreedToResearch(userId)
+
         setAgreedToResearch(consent)
       }
     }
@@ -95,7 +97,9 @@ const NavbarContent = () => {
   }
 
   const menuItems = getMenuItems()
-  return (
+
+  
+return (
     <div
       className={classnames(horizontalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}
     >

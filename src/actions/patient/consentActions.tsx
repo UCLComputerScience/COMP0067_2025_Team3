@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+
 import { prisma } from '@/prisma/client'
 
 export async function updatePatientAgreedToResearch(patientId: string, agreedForResearch: boolean) {

@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-
 import { Role } from '@prisma/client'
 
 import { getServerSession } from 'next-auth'

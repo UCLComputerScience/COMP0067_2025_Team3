@@ -132,6 +132,7 @@ export async function getApplicationBasicInfoByResearcherId(userId: string) {
     }
   } catch (error) {
     console.error(`Cannot find application for researcher with ID ${userId}`, error)
+
     // Return a default value in case of error
     return {
       id: null,

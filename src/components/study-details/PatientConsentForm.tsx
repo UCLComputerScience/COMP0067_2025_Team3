@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardActions, FormControlLabel, Switch, Button, Typography } from '@mui/material'
 import { toast } from 'react-toastify'
+
 import DialogsAlert from '../DialogsAlert'
 
 import { updatePatientStudyConsent, getPatientConsentStatus } from '@/actions/patient/consentActions'
@@ -27,6 +29,7 @@ const PatientConsentForm = ({ studyId }: PatientConsentFormProps) => {
       try {
         setInitializing(true)
         const status = await getPatientConsentStatus(session.user.id, studyId)
+
         setHasConsented(status.hasConsented)
         setOriginalConsent(status.hasConsented)
       } catch (error) {
@@ -53,10 +56,12 @@ const PatientConsentForm = ({ studyId }: PatientConsentFormProps) => {
   const handleSave = async () => {
     if (!session?.user?.id) {
       toast.error('You must be logged in to update consent')
-      return
+      
+return
     }
 
     setLoading(true)
+
     try {
       const result = await updatePatientStudyConsent(session.user.id, studyId, hasConsented)
 

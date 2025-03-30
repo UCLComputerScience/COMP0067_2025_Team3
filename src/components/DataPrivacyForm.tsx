@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { useSession } from 'next-auth/react'
 import { Card, FormGroup, FormControlLabel, Switch, Button, CardContent, CardHeader, CardActions } from '@mui/material'
 import { toast } from 'react-toastify'
+
 import { getPatientAgreedToResearch, updatePatientAgreedToResearch } from '@/actions/patient/consentActions'
 
 const DataPrivacyForm = () => {
@@ -17,6 +19,7 @@ const DataPrivacyForm = () => {
       if (session?.user?.id) {
         try {
           const consent = await getPatientAgreedToResearch(session.user.id)
+
           setAgreedForResearch(consent)
           setOriginalConsent(consent)
         } catch (error) {
@@ -37,12 +40,14 @@ const DataPrivacyForm = () => {
 
       if (!session?.user?.id) {
         toast.error('You must be logged in to update your data privacy settings')
-        return
+        
+return
       }
 
       if (agreedForResearch === originalConsent) {
         setLoading(false)
-        return
+        
+return
       }
 
       const result = await updatePatientAgreedToResearch(session.user.id, !!agreedForResearch)
