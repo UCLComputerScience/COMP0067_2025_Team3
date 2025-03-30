@@ -101,12 +101,14 @@ export async function getApplicationBasicInfoByResearcherId(userId: string) {
       },
       select: {
         id: true,
-        title: true,
-        _count: {
-          select: {
-            patientConsents: true
-          }
-        }
+        title: true
+      }
+    })
+
+    const consentCount = await prisma.studyConsent.count({
+      where: {
+        applicationId: application?.id,
+        hasConsented: true
       }
     })
 
@@ -118,10 +120,15 @@ export async function getApplicationBasicInfoByResearcherId(userId: string) {
       }
     }
 
+    const result = {
+      ...application,
+      numPatientConsent: consentCount
+    }
+
     return {
-      id: application.id,
-      title: application.title,
-      numPatientConsent: application._count.patientConsents
+      id: result.id,
+      title: result.title,
+      numPatientConsent: result.numPatientConsent
     }
   } catch (error) {
     console.error(`Cannot find application for researcher with ID ${userId}`, error)

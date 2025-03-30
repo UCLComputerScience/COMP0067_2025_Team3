@@ -86,6 +86,8 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
   useEffect(() => {
     const getStudyBasicInfo = async () => {
       const basicInfo = await getApplicationBasicInfoByResearcherId(session?.user.id!)
+
+      console.log(basicInfo)
       setStudyBasicInfo(basicInfo)
     }
 

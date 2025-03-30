@@ -53,8 +53,14 @@ export default function AuthGuard({ children }: ChildrenType) {
 
     if (userRole !== Role.ADMIN && userRole !== Role.RESEARCHER && pathName.includes('study-application')) {
       router.push('/home')
-      
-return
+
+      return
+    }
+
+    if (userRole !== Role.ADMIN && userRole !== Role.PATIENT && pathName.includes('studies')) {
+      router.push('/home')
+
+      return
     }
 
     setIsLoading(false)
