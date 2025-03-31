@@ -19,7 +19,7 @@ import { toast } from 'react-toastify'
 
 // Form validation
 import { useForm, Controller } from 'react-hook-form'
-import { object, string, pipe, nonEmpty, email, optional, date } from 'valibot'
+import { object, string, pipe, nonEmpty, email, optional, date, regex } from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
 // User actions
@@ -45,7 +45,12 @@ const patientUserSchema = object({
   firstName: pipe(string(), nonEmpty('First name is required')),
   lastName: pipe(string(), nonEmpty('Last name is required')),
   email: pipe(string(), nonEmpty('Email is required'), email('Please enter a valid email address')),
-  phoneNumber: pipe(optional(string(), '')),
+  phoneNumber: optional(
+    pipe(
+      string(),
+      regex(/^[+\d ]*$/, 'Invalid phone number. Only numbers, spaces, and "+" are allowed.')
+    )
+  ),
   address: pipe(optional(string(), '')),
   hospitalNumber: pipe(optional(string(), '')),
   dateOfBirth: optional(date())

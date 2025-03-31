@@ -10,6 +10,8 @@ import { useState, useEffect, useRef } from 'react'
 
 import { useRouter } from 'next/navigation'
 
+import { toast } from 'react-toastify'
+
 import {
   Box,
   Button,
@@ -28,8 +30,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
-  Alert
+  IconButton
 } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
@@ -51,6 +52,12 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   const saveButtonRef = useRef<HTMLButtonElement | null>(null)
   const [openModal, setOpenModal] = useState(false)
   const [clinicianError, setClinicianError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (clinicianError) {
+      toast.error(clinicianError);
+    }
+  }, [clinicianError]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value })
@@ -110,7 +117,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
         const save = await saveNewClinician(selectedClinician.id, id.id)
 
         if (save.success) {
-          alert('Clinician added successfully')
+          toast.success('Clinician added successfully')
           router.push('/my-profile/')
         } else {
           // console.error("Error changing password.");
@@ -120,7 +127,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
         // console.log("Selected Clinician:", selectedClinician);
       } catch (error) {
         // console.error('Failed to save changes:', error);
-        alert('Error saving changes.')
+        toast.error('Error saving changes.')
       }
     } else {
       console.log('No clinician selected')
@@ -166,12 +173,12 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
           throw new Error('Failed to send the invitation')
         }
 
-        alert('Invitation sent successfully')
+        toast.success('Invitation sent successfully')
         handleCloseModal()
         console.log('Invitation:', message)
       } catch (error) {
         console.error('Failed to send invitation:', error)
-        alert('Failed to send the invitation.')
+        toast.error('Failed to send the invitation.')
       }
     } else {
       console.log("Please enter you clinician's email before sending the message.")
@@ -181,12 +188,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
       <Card sx={{ width: 2000, p: 3 }}>
-        {/* Error */}
-        {clinicianError && <Alert severity='error'>{clinicianError}</Alert>}
-
-        {/* <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')} startIcon={<i className='ri-arrow-drop-left-line' />}>
-                Back
-        </Button> */}
         <IconButton color='secondary' onClick={() => router.push('/my-profile')}>
           <i className='ri-arrow-drop-left-line' />
         </IconButton>

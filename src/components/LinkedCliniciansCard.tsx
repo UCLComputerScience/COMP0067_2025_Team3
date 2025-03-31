@@ -21,11 +21,11 @@ import {
   CardHeader,
   CardActions,
   CircularProgress,
-  IconButton
 } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
+import DialogsAlert from '@/components/DialogsAlert'
 import { saveShareData, deleteClinician } from '@/actions/patientSettings/userActions'
 import { getPatientClinicians } from '@/actions/patient/userActions'
 
@@ -139,12 +139,6 @@ const LinkedCliniciansCard = ({ className = '' }: Props) => {
     }
   }
 
-  const confirmDelete = (clinicianId: string) => {
-    if (window.confirm('Are you sure you want to delete this clinician?')) {
-      handleDelete(clinicianId)
-    }
-  }
-
   if (loading) {
     return (
       <Card className={`w-full ${className}`}>
@@ -220,9 +214,15 @@ const LinkedCliniciansCard = ({ className = '' }: Props) => {
                       />
                     </TableCell>
                     <TableCell>
-                      <IconButton onClick={() => confirmDelete(clinician.id)}>
-                        <i className='ri-delete-bin-7-line' />
-                      </IconButton>
+                    <DialogsAlert
+                          triggerButtonLabel='Delete'
+                          triggerButtonColor = 'secondary'
+                          dialogTitle="Confirm"
+                          dialogText="Are you sure you want to delete this relationship with a clinician?"
+                          confirmButtonLabel="Yes, Delete"
+                          cancelButtonLabel="Cancel"
+                          onConfirm={() => handleDelete(clinician.id)}
+                        />
                     </TableCell>
                   </TableRow>
                 ))

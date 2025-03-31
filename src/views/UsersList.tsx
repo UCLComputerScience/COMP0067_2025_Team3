@@ -2,6 +2,8 @@
 
 'use client'
 
+import * as React from 'react'
+
 // React imports
 import { useState } from 'react'
 
@@ -18,6 +20,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Chip,
   FormControl,
@@ -43,6 +46,9 @@ const UsersList = ({ users }: Props) => {
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = React.useState(0)
+  const [rowsPerPage, setRowsPerPage] = React.useState(5)
+  const [rows] = React.useState<Users[]>(users)
 
   // Filter users based on selected filters and search query
   const filteredUsers = users.filter(user => {
@@ -78,6 +84,23 @@ const UsersList = ({ users }: Props) => {
       //   return <i className='ri-folder-settings-line' style={{ color: 'black' }}></i>
     }
   }
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  // Avoid a layout jump when reaching the last page with empty rows.
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
+
+  const visibleRows = React.useMemo(
+    () => [...rows].slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [page, rowsPerPage, filteredUsers]
+  )
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -160,7 +183,7 @@ const UsersList = ({ users }: Props) => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((u, index) => (
+                  visibleRows.map((u, index) => (
                     <TableRow key={index}>
                       <TableCell>
                         {u.firstName} {u.lastName}
@@ -183,9 +206,29 @@ const UsersList = ({ users }: Props) => {
                     </TableRow>
                   ))
                 )}
+                {emptyRows > 0 && (
+                  <TableRow
+                    style={{
+                      height: 53 * emptyRows
+                    }}
+                  >
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
+          </Box>
+          <Box sx={{display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 5 }}>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component='div'
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Box>
       </Card>
     </Box>
