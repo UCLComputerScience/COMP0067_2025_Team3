@@ -72,16 +72,6 @@ const DataAccessCard = ({ data, view = 'researcher' }: Props) => {
                 <Typography variant='h6' sx={{ mb: 2 }}>
                   Demographic Data
                 </Typography>
-                {/* {DATA_ACCESS_ATTRIBUTES.demographic.map(label => (
-              <LabeledCheckbox
-                key={label}
-                label={label}
-                value={label}
-                name={label}
-                checked={hasAccess && checkedDemographicFields.includes(label)}
-                disable={true}
-              />
-            ))} */}
 
                 <div className='flex flex-col gap-1'>
                   {checkedDemographicFields.map((label, key) => {
@@ -99,16 +89,7 @@ const DataAccessCard = ({ data, view = 'researcher' }: Props) => {
                 <Typography variant='h6' sx={{ mb: 2 }}>
                   Spider Questionnaire
                 </Typography>
-                {/* {DATA_ACCESS_ATTRIBUTES.questionnaire.map(label => (
-              <LabeledCheckbox
-                key={label}
-                label={label}
-                value={label}
-                name={label}
-                checked={hasAccess && checkedQuestionnaireFields.includes(label)}
-                disable={true}
-              />
-            ))} */}
+
                 <div className='flex flex-col gap-1'>
                   {checkedQuestionnaireFields.map((label, key) => {
                     return (

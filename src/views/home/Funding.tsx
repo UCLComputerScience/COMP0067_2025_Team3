@@ -43,7 +43,7 @@ const Funding = () => {
             />
           </Grid2>
           <Grid2>
-            <Box component='img' src='/images/ppef.png' alt='PPEF' sx={{ width: 161, height: 88 }} />
+            <Box component='img' src='/images/PPEF.png' alt='PPEF' sx={{ width: 161, height: 88 }} />
           </Grid2>
         </Grid2>
         <Typography variant='body1' align={'center'} sx={{ padding: 15 }}>

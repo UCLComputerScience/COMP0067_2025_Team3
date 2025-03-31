@@ -38,6 +38,7 @@ model User {
   hospitalNumber    String?
   patientInfo       PatientInfo[]
   responses         Response[]
+  studyConsents     StudyConsent[]
 
   // other attributes
   createdAt DateTime      @default(now())
@@ -85,6 +86,22 @@ model ClinicianPatient {
   @@id([patientId, clinicianId])
 }
 
+model StudyConsent {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient   User   @relation(fields: [patientId], references: [id])
+  patientId String @db.Uuid
+
+  application   Application @relation(fields: [applicationId], references: [id])
+  applicationId Int
+
+  hasConsented Boolean @default(false)
+
+  @@unique([patientId, applicationId])
+}
+
 model Question {
   id       Int     @id @default(autoincrement())
   question String
@@ -105,8 +122,8 @@ model Response {
   question   Question @relation(fields: [questionId], references: [id])
   questionId Int
 
-  score Int
-  label String
+  score  Int
+  label  String
   domain String
 
   submissionId String
@@ -131,36 +148,38 @@ model Application {
   // admin message
   adminMessage String?
 
-  // temp, eventually stored in the cloud service, and stored the path here
+  // stored the paths
   documents Document[]
 
   // datafields application
   demographicDataAccess DataField[]
-  questionnaireAccess DataField[]
+  questionnaireAccess   DataField[]
+
+  patientConsents StudyConsent[]
 }
 
 model Document {
   id            Int         @id @default(autoincrement())
   createdAt     DateTime    @default(now())
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade) 
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   applicationId Int
 
   documentPath String
 }
 
 model DataAccessPermission {
-  id           Int    @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   // Change to one-to-one relationship
-  
+
   researcher   User   @relation(fields: [researcherId], references: [id])
-  researcherId String @unique @db.Uuid  // Add @unique constraint here
+  researcherId String @unique @db.Uuid // Add @unique constraint here
 
   dataFields DataField[]
-  hasAccess Boolean     @default(false)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  startFrom DateTime
-  expiresAt DateTime
+  hasAccess  Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  startFrom  DateTime
+  expiresAt  DateTime
 }
 
 enum Role {

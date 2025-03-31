@@ -152,6 +152,15 @@ export async function initialiseUsersAndResponses() {
     }
   })
 
+  const patientInfo1Data = generateRandomPatientInfo(patient1SubmissionUuid1)
+
+  const patientInfo1 = await prisma.patientInfo.create({
+    data: {
+      ...patientInfo1Data,
+      userId: patient1.id
+    }
+  })
+
   const clinician1 = await prisma.user.create({
     data: {
       email: 'clinician1@mail.com',
@@ -183,24 +192,6 @@ export async function initialiseUsersAndResponses() {
       firstName: 'admin1',
       lastName: 'admin1',
       role: Role.ADMIN
-    }
-  })
-
-  const patientInfo1 = await prisma.patientInfo.create({
-    data: {
-      userId: patient1.id,
-      submissionId: patient1SubmissionUuid1,
-      age: 21,
-      sex: 'intersex',
-      gender: 'Prefer not to say',
-      isSexMatchingGender: false,
-      ethnicity: 'Asian/Asian British',
-      residenceCountry: 'United Kingdom',
-      education: 'college or university',
-      activityLevel: 'not very active',
-      weeklyExerciseMinutes: 30,
-      diagnosis: 'Hypermobility Spectrum Disorder',
-      diagnosedBy: 'General Practitioner'
     }
   })
 

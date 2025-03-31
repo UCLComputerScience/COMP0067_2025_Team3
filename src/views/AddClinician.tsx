@@ -34,7 +34,7 @@ import {
 import Grid from '@mui/material/Grid2'
 
 import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions'
-import type { AllClinicians, PatientId } from '@/app/(private)/my-profile/patient-settings/add-clinician/page'
+import type { AllClinicians, PatientId } from '@/app/(private)/my-profile/add-clinician/page'
 
 interface Props {
   id: PatientId
@@ -111,7 +111,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
         if (save.success) {
           alert('Clinician added successfully')
-          router.push('/my-profile/patient-settings')
+          router.push('/my-profile/')
         } else {
           // console.error("Error changing password.");
           setClinicianError(save.message)
@@ -187,20 +187,17 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
         {/* <Button variant='outlined' color='secondary' onClick={() => router.push('/my-profile/patient-settings')} startIcon={<i className='ri-arrow-drop-left-line' />}>
                 Back
         </Button> */}
-        <IconButton
-            color='secondary'
-            onClick={() => router.push('/my-profile/patient-settings')}
-            >
-            <i className='ri-arrow-drop-left-line' />
+        <IconButton color='secondary' onClick={() => router.push('/my-profile')}>
+          <i className='ri-arrow-drop-left-line' />
         </IconButton>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-        <Typography variant='h5' gutterBottom>
+          <Typography variant='h5' gutterBottom>
             Link a Clinician
-        </Typography>
-        <Typography color='secondary' variant='body2'>
+          </Typography>
+          <Typography color='secondary' variant='body2'>
             Link your clinicians to share your data with them
-        </Typography>
+          </Typography>
         </Box>
 
         {/* Search Grid */}
@@ -252,16 +249,16 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
             </Grid>
 
             {/* Search Button */}
-              <Grid size={{ xs: 6 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
-                  <Button variant='contained' onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
-                    Search
-                  </Button>
-                  <Button variant='outlined' color='secondary' onClick={handleReset}>
-                    Reset
-                  </Button>
-                </Box>
-              </Grid>
+            <Grid size={{ xs: 6 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+                <Button variant='contained' onClick={handleSearch} startIcon={<i className='ri-search-line' />}>
+                  Search
+                </Button>
+                <Button variant='outlined' color='secondary' onClick={handleReset}>
+                  Reset
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
 
           {/* Clinician List */}
@@ -370,12 +367,12 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                   </Dialog>
                 </Typography>
               </Grid>
-            {/* Save and Cancel Buttons */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
+              {/* Save and Cancel Buttons */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 3 }}>
                 <Button variant='contained' color='primary' onClick={handleClinicianSave} ref={saveButtonRef}>
-                Save
+                  Save
                 </Button>
-            </Box>
+              </Box>
             </>
           )}
         </CardContent>

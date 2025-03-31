@@ -52,7 +52,10 @@ export const getEarlisetResponseDate = async () => {
   return date?.createdAt
 }
 
-export const generateQuestionnaireResponseExport = async (requestData: RequestData): Promise<ExportResult> => {
+export const generateQuestionnaireResponseExport = async (
+  requestData: RequestData,
+  studyId: number
+): Promise<ExportResult> => {
   const fetchResponses = async (isLongitudinal: boolean) => {
     const baseWhere = {
       createdAt: {
@@ -60,7 +63,13 @@ export const generateQuestionnaireResponseExport = async (requestData: RequestDa
         lte: requestData.endDate
       },
       user: {
-        agreedForResearch: true
+        agreedForResearch: true,
+        studyConsents: {
+          some: {
+            applicationId: studyId,
+            hasConsented: true
+          }
+        }
       }
     }
 
@@ -150,7 +159,10 @@ export const generateQuestionnaireResponseExport = async (requestData: RequestDa
   }
 }
 
-export const generatePatientDemographicDataExport = async (requestData: RequestData): Promise<ExportResult> => {
+export const generatePatientDemographicDataExport = async (
+  requestData: RequestData,
+  studyId: number
+): Promise<ExportResult> => {
   const selectedFields = requestData.demographicFields.reduce(
     (acc, field) => {
       if (demographicFieldsMapping[field]) {
@@ -165,7 +177,13 @@ export const generatePatientDemographicDataExport = async (requestData: RequestD
   const demographicInfos = await prisma.patientInfo.findMany({
     where: {
       user: {
-        agreedForResearch: true
+        agreedForResearch: true,
+        studyConsents: {
+          some: {
+            applicationId: studyId,
+            hasConsented: true
+          }
+        }
       }
     },
     select: {
@@ -176,6 +194,16 @@ export const generatePatientDemographicDataExport = async (requestData: RequestD
       ...selectedFields
     }
   })
+
+  if (demographicInfos.length === 0) {
+    return {
+      message:
+        'No demographic information found. This may be because no patients have agreed to participate in the study yet.',
+      data: '',
+      mimeType: '',
+      fileExtension: ''
+    }
+  }
 
   const formattedDemographicInfos = demographicInfos.map(demo => ({
     ...demo,

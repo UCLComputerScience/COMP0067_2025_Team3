@@ -1,8 +1,9 @@
 'use client'
 
-// MUI
+// react
 import { useState, useEffect, useMemo } from 'react'
 
+// MUI
 import {
   Button,
   Card,
@@ -21,8 +22,6 @@ import {
 } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-// react
-
 // Form validation
 import { useForm, Controller } from 'react-hook-form'
 import { object, string, array, date } from 'valibot'
@@ -31,6 +30,8 @@ import { valibotResolver } from '@hookform/resolvers/valibot'
 
 // component
 import { toast } from 'react-toastify'
+
+import { useSession } from 'next-auth/react'
 
 import DateRangePicker from './DateRangePicker'
 import LabeledCheckbox from './LabeledCheckbox'
@@ -44,6 +45,7 @@ import {
 } from '@/actions/researcher/downloadActions'
 import { downloadFile } from '@/utils/downloadUtils'
 import Link from './Link'
+import { getApplicationBasicInfoByResearcherId } from '@/actions/researcher/applicationAction'
 
 interface Props {
   dataAccess: {
@@ -75,13 +77,29 @@ const downloadFormSchema = object({
   exportFormat: string()
 })
 
-// Define the form values type
 export type DownloadFormValues = InferInput<typeof downloadFormSchema>
 
 const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
+  const [studyBasicInfo, setStudyBasicInfo] = useState<any>(null)
 
-  // Check if data access is valid (hasAccess is true and not expired)
+  useEffect(() => {
+    if (!session || !session.user) {
+      return
+    }
+
+    const getStudyBasicInfo = async () => {
+      const basicInfo = await getApplicationBasicInfoByResearcherId(session.user.id!)
+
+      console.log(basicInfo)
+      setStudyBasicInfo(basicInfo)
+    }
+
+    getStudyBasicInfo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const hasValidAccess = useMemo(() => {
     if (!dataAccess || !dataAccess.hasAccess) return false
 
@@ -91,7 +109,6 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     return now < expiryDate
   }, [dataAccess])
 
-  // Convert dataFields to human-readable format using the mapping functions
   const accessibleFields = useMemo(() => {
     if (!dataAccess || !dataAccess.dataFields) return { demographic: [], questionnaire: [] }
 
@@ -101,7 +118,6 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     }
   }, [dataAccess])
 
-  // Initialise form with react-hook-form
   const {
     control,
     handleSubmit,
@@ -114,7 +130,6 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     mode: 'onChange'
   })
 
-  // Initialise form with pre-selected values based on what user has access to
   useEffect(() => {
     if (hasValidAccess && accessibleFields.questionnaire.length > 0) {
       reset({
@@ -125,7 +140,6 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasValidAccess, accessibleFields, reset])
 
-  // Function to check if a specific field should be disabled
   const isFieldDisabled = (fieldName: string, fieldType: 'demographic' | 'questionnaire') => {
     if (!hasValidAccess) return true
 
@@ -151,7 +165,11 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
 
       console.log('request data:', requestData)
 
-      const questionnaireResult = await generateQuestionnaireResponseExport(requestData)
+      if (!studyBasicInfo || !studyBasicInfo.id) {
+        return
+      }
+
+      const questionnaireResult = await generateQuestionnaireResponseExport(requestData, studyBasicInfo.id)
 
       if (questionnaireResult.message) {
         toast.warn(questionnaireResult.message)
@@ -163,15 +181,22 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
       }
 
       if (data.demographicDataAccess.length > 0) {
-        const demographicResult = await generatePatientDemographicDataExport(requestData)
+        if (!studyBasicInfo || !studyBasicInfo.id) {
+          return
+        }
 
-        await downloadFile(
-          demographicResult,
-          `demographic_data_${new Date().toISOString().split('T')[0]}.${demographicResult.fileExtension}`
-        )
+        const demographicResult = await generatePatientDemographicDataExport(requestData, studyBasicInfo.id)
+
+        if (demographicResult.message) {
+          toast.warn(demographicResult.message)
+        } else {
+          await downloadFile(
+            demographicResult,
+            `demographic_data_${new Date().toISOString().split('T')[0]}.${demographicResult.fileExtension}`
+          )
+          toast.success('Data export completed successfully!')
+        }
       }
-
-      toast.success('Data export completed successfully!')
     } catch (error) {
       console.error('Error exporting data:', error)
       toast.error('An error occurred while exporting data')
@@ -180,7 +205,6 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     }
   }
 
-  // Get current values from form
   const currentQuestionnaireType = watch('questionnaireType')
   const selectedDemographicFields = watch('demographicDataAccess')
 
@@ -188,8 +212,14 @@ const DownloadCard = ({ dataAccess, defaultFormValues }: Props) => {
     <Card className='w-full'>
       <CardHeader
         title='Download Data'
-        subheader='Download the spider questionnaire data for your research.'
-        className='pbe-4'
+        subheader={
+          studyBasicInfo
+            ? studyBasicInfo.title && studyBasicInfo.numPatientConsent >= 0
+              ? `Download the Spider Questionnaire data for your research project, "${studyBasicInfo.title}". Currently, ${studyBasicInfo.numPatientConsent} participants have agreed to share their data for your research.`
+              : 'Download the Spider Questionnaire data for your research project.'
+            : 'Loading data...'
+        }
+        className='pb-4'
       />
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent>

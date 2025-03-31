@@ -17,7 +17,7 @@ import { useSession } from 'next-auth/react'
 
 import { toast } from 'react-toastify'
 
-import { deleteApplicationById, getApplications } from '@/actions/researcher/applicationAction'
+import { deleteApplicationById, getApplicationsByResearcherId } from '@/actions/researcher/applicationAction'
 
 import StudyItem from './StudyItem'
 
@@ -61,7 +61,7 @@ const StudyList = ({ researcherId, view = 'researcher' }: Props) => {
     const fetchStudies = async () => {
       try {
         const userId = researcherId ? researcherId : (session?.user.id as string)
-        const fetchedStudies = await getApplications(userId)
+        const fetchedStudies = await getApplicationsByResearcherId(userId)
 
         const mappedData: StudyListType[] = fetchedStudies.map(item => ({
           id: item.id,
