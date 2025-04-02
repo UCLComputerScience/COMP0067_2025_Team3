@@ -101,17 +101,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
 
       setData(updated)
 
-      const newValues = Object.fromEntries(
-        updated.map(d => [
-          d.subject,
-          {
-            domain: 'Perceived Spidergram',
-            label: d.subject,
-            score: d.value,
-            questionId: 32
-          }
-        ])
-      )
+      const newValues = Object.fromEntries(updated.map(d => [d.subject, { score: d.value }]))
 
       onUpdate(newValues)
     } else {

@@ -91,15 +91,9 @@ const Questionnaire = () => {
       }
     })
 
-    //const result = await submitResponses(allFormattedAnswers)
+    console.log('Formatted Answers:', allFormattedAnswers)
 
-    /*if (!result.success) {
-      console.error('Error submitting responses:', result.error)
-
-      return
-    }
-
-    console.log('✅ Submitted successfully:', result)*/
+    const result = await submitResponses(allFormattedAnswers)
   }
 
   const getStepContent = () => {

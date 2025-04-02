@@ -266,6 +266,14 @@ async function initialiseQuestions() {
     }
   })
 
+  const PS = await prisma.question.create({
+    data: {
+      question: 'Mark on the diagram below how much you feel your symptoms have affected you in the past month.',
+      domain: 'Perceived Spidergram',
+      code: 'PS'
+    }
+  })
+
   console.log(
     NMSK1,
     NMSK2,
@@ -297,7 +305,8 @@ async function initialiseQuestions() {
     ANX3,
     DEP1,
     DEP2,
-    DEP3
+    DEP3,
+    PS
   )
 }
 

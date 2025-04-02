@@ -14,13 +14,11 @@ interface ResponseData {
 export async function submitResponses(responses: ResponseData[]) {
   try {
     await prisma.response.createMany({
-      data: responses
+      data: responses,
+      skipDuplicates: true
     })
-
-    return { success: true }
   } catch (error) {
-    console.error(' Failed to save responses:', error)
-
-    return { success: false, error: 'Database error' }
+    console.error('Error submitting responses:', error)
+    throw new Error('Failed to submit responses')
   }
 }
