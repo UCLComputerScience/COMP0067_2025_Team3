@@ -12,6 +12,8 @@ import type { InferInput } from 'valibot'
 
 import { object, minLength, string, pipe, nonEmpty, array, file, date } from 'valibot'
 
+import { useSession } from 'next-auth/react'
+
 import {
   Box,
   Typography,
