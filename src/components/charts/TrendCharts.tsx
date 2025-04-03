@@ -22,9 +22,15 @@ interface DomainData {
   total: number
 }
 
+const parseDate = (dateStr: string) => {
+  const [month, day, year] = dateStr.split('/').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 const convertToDomainData = (data: DataEntry) => {
   return Object.entries(data)
     .filter(([key]) => key !== 'subject')
+    .sort(([dateA], [dateB]) => parseDate(dateA).getTime() - parseDate(dateB).getTime())
     .map(([date, total]) => ({
       date,
       total: total as number
@@ -91,7 +97,9 @@ const TrendCharts = ({ data = demoData }: Props) => {
   }, [data])
 
   useEffect(() => {
-    const currKeys = Object.keys(data[0]).filter(e => e !== 'subject')
+    const currKeys = Object.keys(data[0])
+      .filter(e => e !== 'subject')
+      .sort((a, b) => parseDate(a).getTime() - parseDate(b).getTime())
 
     setKeys(currKeys)
   }, [data])
@@ -107,6 +115,18 @@ const TrendCharts = ({ data = demoData }: Props) => {
       console.warn('No matching subject found')
     }
   }, [selectedDomainIndex, data, options])
+
+  const getSortedDataForRadarChart = () => {
+    return data.map(entry => {
+      const sortedEntry = { subject: entry.subject } as DataEntry
+
+      keys.forEach(key => {
+        sortedEntry[key] = entry[key]
+      })
+
+      return sortedEntry
+    })
+  }
 
   return (
     <>
@@ -124,7 +144,7 @@ const TrendCharts = ({ data = demoData }: Props) => {
               />
             </Grid2>
             <Grid2 size={7}>
-              <RechartsRadarChart legend={false} data={data} />
+              <RechartsRadarChart legend={false} data={getSortedDataForRadarChart()} />
             </Grid2>
             <Grid2 size={5}>
               <RechartsBarChart legend={false} data={domainData} />

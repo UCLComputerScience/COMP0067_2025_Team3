@@ -1,9 +1,12 @@
 'use client'
 
+// react
 import * as React from 'react'
 
+// next
 import { useRouter } from 'next/navigation'
 
+// MUI
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -13,8 +16,11 @@ import TableRow from '@mui/material/TableRow'
 import Checkbox from '@mui/material/Checkbox'
 import { Card, IconButton } from '@mui/material'
 
+// Components
 import EnhancedTableToolbar from './EnhancedTableToolbar'
 import EnhancedTableHead from './EnhancedTableHead'
+
+// utils
 import { getComparator } from './tableSortHelper'
 import type { Data } from '@/app/(private)/my-records/page'
 
@@ -27,7 +33,7 @@ interface Props {
   handleDisplayDataOnClick: (numSelected: number) => void
 }
 
-const formatDate = (dateInput: string | Date): string => {
+export const formatDate = (dateInput: string | Date): string => {
   const date = dateInput instanceof Date ? dateInput : new Date(dateInput)
 
   if (isNaN(date.getTime())) {
@@ -52,6 +58,10 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
   const [rows] = React.useState<Data[]>(data)
+
+  const selectedRecords = React.useMemo(() => {
+    return rows.filter(row => selected.includes(row.submissionId))
+  }, [rows, selected])
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === 'asc'
@@ -108,7 +118,11 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
 
   return (
     <Card>
-      <EnhancedTableToolbar numSelected={selected.length} handleDisplayDataOnClick={handleDisplayDataOnClick} />
+      <EnhancedTableToolbar
+        numSelected={selected.length}
+        handleDisplayDataOnClick={handleDisplayDataOnClick}
+        selectedRecords={selectedRecords}
+      />
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby='tableTitle' size='medium'>
           <EnhancedTableHead
@@ -147,10 +161,6 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
                   <TableCell component='th' id={labelId} scope='row' padding='none'>
                     {formatDate(row.date)}
                   </TableCell>
-                  {/* <TableCell align='right'>{row.date}</TableCell> */}
-                  {/* <TableCell align='right'>{row.fat}</TableCell>
-                  <TableCell align='right'>{row.carbs}</TableCell>
-                  <TableCell align='right'>{row.protein}</TableCell> */}
                   <TableCell align='right'>
                     <IconButton
                       aria-label='view single record'

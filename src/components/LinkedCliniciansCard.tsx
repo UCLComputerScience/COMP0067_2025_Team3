@@ -20,7 +20,7 @@ import {
   Chip,
   CardHeader,
   CardActions,
-  CircularProgress,
+  CircularProgress
 } from '@mui/material'
 
 import { toast } from 'react-toastify'
@@ -166,7 +166,10 @@ const LinkedCliniciansCard = ({ className = '' }: Props) => {
 
   return (
     <Card className={`w-full ${className}`}>
-      <CardHeader title='Linked Clinicians' />
+      <CardHeader
+        title='Linked Clinicians'
+        subheader='Linking to your clinicians allows you to share data with them, and you can revoke access at any time.'
+      />
       <CardContent>
         <TableContainer component={Card} sx={{ border: 'none', boxShadow: 0 }}>
           <Table>
@@ -214,15 +217,15 @@ const LinkedCliniciansCard = ({ className = '' }: Props) => {
                       />
                     </TableCell>
                     <TableCell>
-                    <DialogsAlert
-                          triggerButtonLabel='Delete'
-                          triggerButtonColor = 'secondary'
-                          dialogTitle="Confirm"
-                          dialogText="Are you sure you want to delete this relationship with a clinician?"
-                          confirmButtonLabel="Yes, Delete"
-                          cancelButtonLabel="Cancel"
-                          onConfirm={() => handleDelete(clinician.id)}
-                        />
+                      <DialogsAlert
+                        triggerButtonLabel='Delete'
+                        triggerButtonColor='secondary'
+                        dialogTitle='Confirm'
+                        dialogText='Are you sure you want to delete this relationship with a clinician?'
+                        confirmButtonLabel='Yes, Delete'
+                        cancelButtonLabel='Cancel'
+                        onConfirm={() => handleDelete(clinician.id)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))
@@ -230,13 +233,12 @@ const LinkedCliniciansCard = ({ className = '' }: Props) => {
             </TableBody>
           </Table>
         </TableContainer>
-
-        <CardActions>
-          <Button variant='contained' color='primary' onClick={() => router.push('/my-profile/add-clinician')}>
-            Add Clinician
-          </Button>
-        </CardActions>
       </CardContent>
+      <CardActions>
+        <Button variant='contained' color='primary' onClick={() => router.push('/my-profile/add-clinician')}>
+          Add Clinician
+        </Button>
+      </CardActions>
     </Card>
   )
 }
