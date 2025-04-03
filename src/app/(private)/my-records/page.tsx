@@ -2,8 +2,6 @@ import { redirect } from 'next/navigation'
 
 import { getServerSession } from 'next-auth'
 
-import { Role } from '@prisma/client'
-
 import { prisma } from '@/prisma/client'
 
 // Component

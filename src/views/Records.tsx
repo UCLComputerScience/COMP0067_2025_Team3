@@ -97,6 +97,7 @@ const Records = ({ data }: Props) => {
       toast.warn('Please select at least one questionnaire to display.')
     } else {
       const selectedData = transformData(data.filter(e => selected.includes(e.submissionId)))
+
       setChartData(selectedData)
     }
   }

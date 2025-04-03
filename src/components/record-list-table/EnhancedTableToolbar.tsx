@@ -1,5 +1,6 @@
-import { Toolbar, alpha, Typography, Button, CircularProgress } from '@mui/material'
 import { useState } from 'react'
+
+import { Toolbar, alpha, Typography, Button, CircularProgress } from '@mui/material'
 
 interface EnhancedTableToolbarProps {
   numSelected: number
@@ -26,10 +27,12 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
       for (let i = 0; i < selectedRecords.length; i++) {
         const record = selectedRecords[i]
+
         setExportProgress(Math.round((i / selectedRecords.length) * 100))
 
         try {
           const iframe = document.createElement('iframe')
+
           iframe.style.width = '1200px'
           iframe.style.height = '800px'
           iframe.style.position = 'absolute'
@@ -47,15 +50,19 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           await new Promise(r => setTimeout(r, 1500))
 
           const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document
+
           if (!iframeDocument) throw new Error('Could not access iframe document')
 
           const mainStyles = document.querySelectorAll('link[rel="stylesheet"], style')
+
           mainStyles.forEach(style => {
             const styleClone = style.cloneNode(true)
+
             iframeDocument.head.appendChild(styleClone)
           })
 
           const fontStyle = document.createElement('style')
+
           fontStyle.textContent = `
             /* Ensure fonts are properly loaded in the iframe */
             @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
@@ -79,15 +86,18 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           await new Promise(r => setTimeout(r, 200))
 
           const contentElement = iframeDocument.querySelector('.p-8.space-y-6') as HTMLElement
+
           if (!contentElement) throw new Error('Content element not found')
 
           const noPrintElements = contentElement.querySelectorAll('.no-print')
+
           noPrintElements.forEach(el => {
             ;(el as HTMLElement).style.display = 'none'
           })
 
           if (selectedRecords.length > 1) {
             const header = document.createElement('div')
+
             header.style.padding = '10px'
             header.style.marginBottom = '15px'
             header.style.backgroundColor = '#F4F5FA'
@@ -101,6 +111,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           }
 
           const allElements = contentElement.querySelectorAll('*')
+
           allElements.forEach(el => {
             if (el instanceof HTMLElement) {
               el.style.fontFamily = 'Outfit, Arial, sans-serif'
@@ -115,6 +126,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             allowTaint: true,
             onclone: clonedDoc => {
               const elements = clonedDoc.querySelectorAll('*')
+
               elements.forEach(el => {
                 if (el instanceof HTMLElement) {
                   el.style.fontFamily = 'Outfit, Arial, sans-serif'
@@ -145,6 +157,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           if (selectedRecords.length > 1 && contentElement.firstChild) {
             contentElement.removeChild(contentElement.firstChild)
           }
+
           document.body.removeChild(iframe)
         } catch (error) {
           console.error(`Error exporting record ${record.submissionId}:`, error)

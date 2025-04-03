@@ -24,7 +24,9 @@ interface DomainData {
 
 const parseDate = (dateStr: string) => {
   const [month, day, year] = dateStr.split('/').map(Number)
-  return new Date(year, month - 1, day)
+
+  
+return new Date(year, month - 1, day)
 }
 
 const convertToDomainData = (data: DataEntry) => {

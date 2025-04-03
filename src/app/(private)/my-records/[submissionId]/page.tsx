@@ -2,10 +2,11 @@
 import { notFound } from 'next/navigation'
 
 // Prisma
+import { capitalize } from 'lodash'
+
 import { prisma } from '@/prisma/client'
 
 import SingleRecord from '@/views/SingleRecord'
-import { capitalize } from 'lodash'
 
 interface PageProps {
   params: Promise<{

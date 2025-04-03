@@ -1,5 +1,5 @@
 import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import { jsPDF } from 'jspdf'
 
 interface ExportToPdfOptions {
   filename?: string
@@ -46,6 +46,7 @@ export const exportToPdf = async (
     onProgress?.(0.1)
 
     const noPrintElements = element.querySelectorAll('.no-print')
+
     noPrintElements.forEach(el => {
       ;(el as HTMLElement).style.display = 'none'
     })
@@ -85,6 +86,7 @@ export const exportToPdf = async (
     return Promise.resolve()
   } catch (error) {
     console.error('PDF export failed:', error)
+
     return Promise.reject(error)
   }
 }

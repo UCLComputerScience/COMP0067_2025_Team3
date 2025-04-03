@@ -1,5 +1,8 @@
 'use client'
 
+// react
+import { useRef, useState } from 'react'
+
 // MUI
 import {
   Card,
@@ -21,9 +24,6 @@ import {
 
 // Style
 import '@fontsource/outfit'
-
-// react
-import { useRef, useState } from 'react'
 
 // component
 import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart'
@@ -59,6 +59,7 @@ const Result = ({ data = [], domainData = [], date, patientName }: Props) => {
     if (!contentRef.current) return
 
     setIsExporting(true)
+
     try {
       await exportToPdf(contentRef.current, {
         filename: `results-${date}.pdf`,
