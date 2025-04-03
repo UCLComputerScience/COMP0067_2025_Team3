@@ -16,7 +16,7 @@ const headCells: readonly HeadCell[] = [
   {
     id: 'date',
     numeric: false,
-    disablePadding: true,
+    disablePadding: false,
     label: 'Date'
   }
 ]
@@ -73,6 +73,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell></TableCell>
       </TableRow>
     </TableHead>
   )

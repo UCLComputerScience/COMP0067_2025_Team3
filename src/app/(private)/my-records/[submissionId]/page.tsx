@@ -2,9 +2,11 @@
 import { notFound } from 'next/navigation'
 
 // Prisma
+import { capitalize } from 'lodash'
+
 import { prisma } from '@/prisma/client'
 
-import Record from '@/views/SingleRecord'
+import SingleRecord from '@/views/SingleRecord'
 
 interface PageProps {
   params: Promise<{
@@ -12,7 +14,7 @@ interface PageProps {
   }>
 }
 
-const getRecords = async (submissionId: string) => {   
+const getRecords = async (submissionId: string) => {
   const records = await prisma.response.findMany({
     where: { submissionId },
     select: {
@@ -23,6 +25,28 @@ const getRecords = async (submissionId: string) => {
   })
 
   return records
+}
+
+const getPatientFullName = async (submissionId: string) => {
+  const names = await prisma.response.findFirst({
+    where: {
+      submissionId
+    },
+    select: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true
+        }
+      }
+    }
+  })
+
+  if (!names) {
+    return ''
+  }
+
+  return `${capitalize(names.user.firstName)} ${capitalize(names.user.lastName)}`
 }
 
 const calculateScores = (records: { score: number; domain: string }[]) => {
@@ -40,13 +64,14 @@ const calculateScores = (records: { score: number; domain: string }[]) => {
   return Object.entries(domainScores).map(([domain, { total, count }]) => ({
     domain,
     totalScore: total,
-    averageScore: total / count
+    averageScore: Number((total / count).toFixed(2))
   }))
 }
 
 const Page = async ({ params }: PageProps) => {
   const { submissionId } = await params
   const records = await getRecords(submissionId)
+  const patientName = await getPatientFullName(submissionId)
 
   if (!records || records.length === 0) {
     notFound()
@@ -59,10 +84,10 @@ const Page = async ({ params }: PageProps) => {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
-  });
+  })
 
   // Pass user data to the client component
-  return <Record data={scores} date={formattedDate} />
+  return <SingleRecord data={scores} date={formattedDate} patientName={patientName} />
 }
 
 export default Page
