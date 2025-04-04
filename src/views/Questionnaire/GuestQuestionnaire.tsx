@@ -60,7 +60,7 @@ const Questionnaire = () => {
 
   const HandleSubmit = () => {
     console.log('Answers', answers)
-    router.push('/result')
+    router.push(`/result?data=${encodeURIComponent(JSON.stringify(answers))}`)
   }
 
   const getStepContent = () => {
