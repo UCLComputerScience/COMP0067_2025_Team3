@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, Box, Button } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
-const SECTIONS = [
+const domains = [
   'Neuromusculoskeletal',
   'Pain',
   'Fatigue',
@@ -36,7 +36,7 @@ const MAX_VALUE = 100
 const GRID_LEVELS = 10
 const TICK_VALUES = Array.from({ length: GRID_LEVELS }, (_, i) => (i + 1) * 10)
 
-const initialData = SECTIONS.map((label, i) => ({ subject: label, value: 0, id: 1000 + i }))
+const initialData = domains.map((label, i) => ({ subject: label, value: 0, id: 1000 + i }))
 
 export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit }: PerceivedSpidergramProps) {
   const [data, setData] = useState(initialData)
@@ -85,11 +85,11 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
     const angleDeg = (Math.atan2(-dy, dx) * 180) / Math.PI
     const angle = (angleDeg + 360) % 360
 
-    const sectionAngle = 360 / SECTIONS.length
+    const sectionAngle = 360 / domains.length
     let closestAxisIndex = 0
     let minAxisDiff = Infinity
 
-    for (let i = 0; i < SECTIONS.length; i++) {
+    for (let i = 0; i < domains.length; i++) {
       const axisAngle = sectionAngle * i
       const diff = Math.abs(axisAngle - angle)
       const wrappedDiff = Math.min(diff, 360 - diff)
@@ -164,7 +164,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
 
     const previewDot = hoveredPoint
       ? (() => {
-          const angle = (360 / SECTIONS.length) * hoveredPoint.axisIndex
+          const angle = (360 / domains.length) * hoveredPoint.axisIndex
           const r = ringLevels.find(r => r.value === hoveredPoint.value)?.radius || 0
           const x = cx + r * Math.cos(-angle * RADIAN)
           const y = cy + r * Math.sin(-angle * RADIAN)
