@@ -93,7 +93,7 @@ const Questionnaire = () => {
 
     console.log('Formatted Answers:', allFormattedAnswers)
 
-    const result = await submitResponses(allFormattedAnswers)
+    await submitResponses(allFormattedAnswers)
   }
 
   const getStepContent = () => {

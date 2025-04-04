@@ -13,6 +13,8 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardHeader, Box, Button } from '@mui/material'
 
+import { toast } from 'react-toastify'
+
 const SECTIONS = [
   'Neuromusculoskeletal',
   'Pain',
@@ -24,18 +26,24 @@ const SECTIONS = [
   'Depression'
 ]
 
+interface PerceivedSpidergramProps {
+  values: Record<string, { score: number }>
+  onUpdate: (values: Record<string, { score: number }>) => void
+  onBack: () => void
+  onSubmit: () => void
+}
 const MAX_VALUE = 100
 const GRID_LEVELS = 10
 const TICK_VALUES = Array.from({ length: GRID_LEVELS }, (_, i) => (i + 1) * 10)
 
 const initialData = SECTIONS.map((label, i) => ({ subject: label, value: 0, id: 1000 + i }))
 
-export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit }) {
+export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit }: PerceivedSpidergramProps) {
   const [data, setData] = useState(initialData)
-  const [hoveredPoint, setHoveredPoint] = useState(null)
+  const [hoveredPoint, setHoveredPoint] = useState<{ axisIndex: number; value: number } | null>(null)
 
   useEffect(() => {
-    const mappedData = initialData.map((item, i) => ({
+    const mappedData = initialData.map(item => ({
       ...item,
       value: values[item.subject]?.score || 0
     }))
@@ -43,7 +51,28 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
     setData(mappedData)
   }, [values])
 
-  const handleInteraction = (e, isClick = false) => {
+  interface InteractionEvent extends React.MouseEvent<HTMLDivElement> {
+    currentTarget: HTMLDivElement
+  }
+
+  interface RingLevel {
+    radius: number
+    value: number
+  }
+
+  const handleSubmitWithValidation = () => {
+    const allSpiderGramValues = data.map(d => d.value)
+    const allSet = allSpiderGramValues.every(value => value > 0)
+    const noneSet = allSpiderGramValues.every(value => value === 0)
+
+    if (allSet || noneSet) {
+      onSubmit()
+    } else {
+      toast.error('Please set all values or none')
+    }
+  }
+
+  const handleInteraction = (e: InteractionEvent, isClick: boolean = false): void => {
     const rect = e.currentTarget.getBoundingClientRect()
     const mouseX = e.clientX - rect.left
     const mouseY = e.clientY - rect.top
@@ -77,7 +106,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
 
     const radius = Math.min(rect.width, rect.height) * 0.45
 
-    const ringLevels = Array.from({ length: GRID_LEVELS }, (_, i) => {
+    const ringLevels: RingLevel[] = Array.from({ length: GRID_LEVELS }, (_, i) => {
       const r = ((i + 1) / GRID_LEVELS) * radius
       const value = (i + 1) * 10
 
@@ -109,7 +138,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
     }
   }
 
-  const CustomOverlay = ({ width, height }) => {
+  const CustomOverlay = ({ width, height }: { width: number; height: number }) => {
     const RADIAN = Math.PI / 180
     const cx = width / 2
     const cy = height / 2
@@ -178,7 +207,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
           <Button variant='outlined' onClick={onBack}>
             Back
           </Button>
-          <Button variant='contained' onClick={onSubmit}>
+          <Button variant='contained' onClick={handleSubmitWithValidation}>
             Submit
           </Button>
         </Box>
