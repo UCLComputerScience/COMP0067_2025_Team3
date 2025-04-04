@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 
+import { useRouter } from 'next/navigation'
+
 import { Stepper, Step, StepLabel, Typography, Box } from '@mui/material'
-import { v4 as uuidv4 } from 'uuid'
 
 import PatientInfoForm from '@/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
 import StepperCustomDot from '@/components/stepper-dot'
@@ -41,9 +42,9 @@ const stepperStyle = {
 }
 
 const Questionnaire = () => {
+  const router = useRouter()
   const [activeStep, setActiveStep] = useState<number>(0)
   const [answers, setAnswers] = useState<Record<string, Record<number | string, any>>>({})
-  const [submissionId] = useState(uuidv4())
 
   const currentDomain = domainMap[activeStep]
 
@@ -57,32 +58,9 @@ const Questionnaire = () => {
   const handleNext = () => setActiveStep(prev => prev + 1)
   const handlePrev = () => setActiveStep(prev => (prev > 0 ? prev - 1 : 0))
 
-  const handleSubmit = async () => {
-    const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
-      if (domain === 'Spidergram') {
-        return Object.entries(questionSet).map(([label, entry]: [string, any]) => ({
-          questionId: 32,
-          score: entry.score,
-          label,
-          domain: 'Perceived Spidergram',
-          submissionId
-        }))
-      } else {
-        return Object.entries(questionSet).map(([questionId, value]) => {
-          const score = Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
-
-          return {
-            questionId: Number(questionId),
-            score,
-            label: String(score),
-            domain,
-            submissionId
-          }
-        })
-      }
-    })
-
-    console.log('Formatted Answers:', allFormattedAnswers)
+  const HandleSubmit = () => {
+    console.log('Answers', answers)
+    router.push('/result')
   }
 
   const getStepContent = () => {
@@ -96,7 +74,7 @@ const Questionnaire = () => {
           values={answers['Spidergram'] || {}}
           onUpdate={updated => handleUpdate('Spidergram', updated)}
           onBack={handlePrev}
-          onSubmit={handleSubmit}
+          onSubmit={HandleSubmit}
         />
       )
     }
