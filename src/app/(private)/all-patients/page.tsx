@@ -39,12 +39,12 @@ const Page: React.FC = () => {
   }, [])
 
   if (!clinicianId) {
-    return <div className="p-4">Loading...</div>
+    return <div className='p-4'>Loading...</div>
   }
 
   return (
-    <div className="p-4">
-      <div className="border border-gray-200 rounded-lg shadow-sm">
+    <div className='p-4'>
+      <div>
         <ClinicianPatientList clinicianId={clinicianId} />
       </div>
     </div>
@@ -52,5 +52,3 @@ const Page: React.FC = () => {
 }
 
 export default Page
-
-
