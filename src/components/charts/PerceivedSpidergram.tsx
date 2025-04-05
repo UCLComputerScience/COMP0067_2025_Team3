@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Customized
 } from 'recharts'
-import { Card, CardContent, CardHeader, Box, Button } from '@mui/material'
+import { Card, CardContent, Typography, Box, Button } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
@@ -185,33 +185,48 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
   }
 
   return (
-    <Card sx={{ maxWidth: 1000, mx: 'auto', mt: 2, mb: 2 }}>
-      <CardHeader title='Mark on the diagram below how much you feel your symptoms have affected you in the past month' />
-      <CardContent>
-        <Box
-          sx={{ width: '100%', aspectRatio: '4 / 3', display: 'flex', justifyContent: 'center', position: 'relative' }}
-          onClick={e => handleInteraction(e, true)}
-          onMouseMove={e => handleInteraction(e)}
-        >
-          <ResponsiveContainer width='100%' height='100%'>
-            <RadarChart cx='50%' cy='50%' outerRadius='90%' data={data}>
-              <PolarGrid gridType='polygon' />
-              <PolarAngleAxis dataKey='subject' />
-              <PolarRadiusAxis angle={90} domain={[0, MAX_VALUE]} ticks={TICK_VALUES} />
-              <Tooltip formatter={val => (typeof val === 'number' && val > 0 ? val : 'Click axis to set')} />
-              <Customized component={CustomOverlay} />
-            </RadarChart>
-          </ResponsiveContainer>
-        </Box>
-        <Box display='flex' justifyContent='space-between' mt={3}>
-          <Button variant='outlined' onClick={onBack}>
-            Back
-          </Button>
-          <Button variant='contained' onClick={handleSubmitWithValidation}>
-            Submit
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
+    <>
+      <Typography sx={{ fontFamily: 'Outfit', fontSize: '48px', fontWeight: 600, lineHeight: '68px', padding: '20px' }}>
+        {'Perceived Spidergram'}
+      </Typography>
+      <Typography
+        sx={{ fontFamily: 'Inter', fontSize: '24px', fontWeight: 400, lineHeight: '28px', paddingBottom: '79px' }}
+      >
+        Mark on the graph how much these symptoms have impacted your daily life during the past ONE month. (Optional)
+      </Typography>
+      <Card sx={{ maxWidth: 1000, mx: 'auto', mt: 2, mb: 2 }}>
+        <CardContent>
+          <Box
+            sx={{
+              width: '100%',
+              aspectRatio: '4 / 3',
+              display: 'flex',
+              justifyContent: 'center',
+              position: 'relative'
+            }}
+            onClick={e => handleInteraction(e, true)}
+            onMouseMove={e => handleInteraction(e)}
+          >
+            <ResponsiveContainer width='100%' height='100%'>
+              <RadarChart cx='50%' cy='50%' outerRadius='90%' data={data}>
+                <PolarGrid gridType='polygon' />
+                <PolarAngleAxis dataKey='subject' />
+                <PolarRadiusAxis angle={90} domain={[0, MAX_VALUE]} ticks={TICK_VALUES} />
+                <Tooltip formatter={val => (typeof val === 'number' && val > 0 ? val : 'Click axis to set')} />
+                <Customized component={CustomOverlay} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </Box>
+          <Box display='flex' justifyContent='space-between' mt={3}>
+            <Button variant='outlined' onClick={onBack}>
+              Back
+            </Button>
+            <Button variant='contained' onClick={handleSubmitWithValidation}>
+              Submit
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+    </>
   )
 }
