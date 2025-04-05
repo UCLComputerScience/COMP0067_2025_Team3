@@ -59,8 +59,29 @@ const Questionnaire = () => {
   const handlePrev = () => setActiveStep(prev => (prev > 0 ? prev - 1 : 0))
 
   const HandleSubmit = () => {
-    console.log('Answers', answers)
-    router.push(`/result?data=${encodeURIComponent(JSON.stringify(answers))}`)
+    // Calculate the average score for each domain
+    const allFormattedAnswers = Object.entries(answers).map(([domain, questionSet]) => {
+      // Calculate the average score for other domains
+      const scores = Object.values(questionSet).map(value =>
+        Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+      )
+
+      const totalScore = scores.reduce((sum, score) => sum + score, 0)
+      const averageScore = scores.length > 0 ? totalScore / scores.length : 0
+
+      return {
+        domain,
+        averageScore: Math.round(averageScore) // Round to nearest integer if needed
+      }
+    })
+
+    // Flatten the array (Spidergram returns an array, others return objects)
+    const formattedAnswers = allFormattedAnswers.flat()
+
+    console.log('Formatted Answers:', formattedAnswers)
+
+    // Send the formatted answers to the result page
+    router.push(`/result?data=${encodeURIComponent(JSON.stringify(formattedAnswers))}`)
   }
 
   const getStepContent = () => {
