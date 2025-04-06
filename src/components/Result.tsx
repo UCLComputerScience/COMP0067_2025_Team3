@@ -65,13 +65,15 @@ const Result = ({ data = [], domainData = [], perceivedSpidergramData = [], date
 
     return {
       ...entry,
-      perceived: matchingPerceivedData?.value ?? ''
+      'Perceived score': matchingPerceivedData?.value ?? ''
     }
   })
 
   console.log(filteredData[0])
   console.log(perceivedSpidergramData[0])
   console.log('merged data: ', mergedData)
+
+  const ifPerceivedExists = mergedData.every(item => item['Perceived score'] !== '')
 
   //console.log('perceviedSpidergamValues', perceivedSpidergamValues)
 
@@ -87,12 +89,14 @@ const Result = ({ data = [], domainData = [], perceivedSpidergramData = [], date
           <Button variant='contained' color='primary' startIcon={<i className='ri-download-2-fill' />}>
             Export
           </Button>
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={showPerceived} onChange={handleSwitchChange} />}
-              label='Display perceived spidergram'
-            />
-          </FormGroup>
+          {ifPerceivedExists && (
+            <FormGroup>
+              <FormControlLabel
+                control={<Switch checked={showPerceived} onChange={handleSwitchChange} />}
+                label='Display perceived spidergram'
+              />
+            </FormGroup>
+          )}
         </Box>
       </Box>
       {!showPerceived && <RechartsRadarChart legend={false} data={filteredData} />}
