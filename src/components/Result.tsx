@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { useRef, useState } from 'react';
+import { useRef, useState } from 'react'
 
 import {
   Card,
@@ -18,91 +18,90 @@ import {
   TableHead,
   TableRow,
   Paper
-} from '@mui/material';
+} from '@mui/material'
 
-import '@fontsource/outfit';
+import '@fontsource/outfit'
 
-import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart';
-import { exportToPdf } from '@/utils/pdfUtils';
+import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart'
+import { exportToPdf } from '@/utils/pdfUtils'
 
 interface DataEntry {
-  subject: string;
-  [date: string]: string | number;
+  subject: string
+  [date: string]: string | number
 }
 
 interface PerceivedSpidergramData {
-  subject: string;
-  value: number;
+  subject: string
+  value: number
 }
 
 interface DomainScore {
-  domain: string;
-  totalScore: number;
-  averageScore: number;
+  domain: string
+  totalScore: number
+  averageScore: number
 }
 
 interface Props {
-  data?: DataEntry[];
-  domainData?: DomainScore[];
-  perceivedSpidergramData?: PerceivedSpidergramData[];
-  date: string;
-  patientName?: string;
+  data?: DataEntry[]
+  domainData?: DomainScore[]
+  perceivedSpidergramData?: PerceivedSpidergramData[]
+  date: string
+  patientName?: string
 }
 
-const Result = ({
-  data = [],
-  domainData = [],
-  perceivedSpidergramData = [],
-  date,
-  patientName
-}: Props) => {
-  const rowNumbers = [5, 4, 3, 3, 4, 4, 3, 3];
-  const [showPerceived, setShowPerceived] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
+const Result = ({ data = [], domainData = [], perceivedSpidergramData = [], date, patientName }: Props) => {
+  const rowNumbers = [5, 4, 3, 3, 4, 4, 3, 3]
+  const [showPerceived, setShowPerceived] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   // Filter out the perceived spidergram item (it's merged manually)
-  const filteredData = data.filter(item => item.subject !== 'Perceived Spidergram');
+  const filteredData = data.filter(item => item.subject !== 'Perceived Spidergram')
 
   // Handle PDF export
   const handleExport = async () => {
-    if (!contentRef.current) return;
+    if (!contentRef.current) return
 
-    setIsExporting(true);
+    setIsExporting(true)
 
     try {
       await exportToPdf(contentRef.current, {
         filename: `results-${date}.pdf`,
         orientation: 'portrait',
         onComplete: () => setIsExporting(false)
-      });
+      })
     } catch (error) {
-      console.error('Export failed:', error);
-      setIsExporting(false);
+      console.error('Export failed:', error)
+      setIsExporting(false)
     }
-  };
+  }
 
   // Handle toggle switch
   const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setShowPerceived(event.target.checked);
-  };
+    setShowPerceived(event.target.checked)
+  }
 
   // Merge perceived data into filteredData
   const mergedData = filteredData.map(entry => {
-    const subject = entry.subject.toLowerCase().trim();
+    const subject = entry.subject.toLowerCase().trim()
 
-    const match = perceivedSpidergramData.find(
-      item => item.subject.toLowerCase().trim() === subject
-    );
+    const match = perceivedSpidergramData.find(item => item.subject.toLowerCase().trim() === subject)
 
-    
-return {
+    return {
       ...entry,
       'Perceived score': match?.value ?? ''
-    };
-  });
+    }
+  })
 
-  const ifPerceivedExists = mergedData.every(item => item['Perceived score'] !== '');
+  const ifPerceivedExists = mergedData.every(item => item['Perceived score'] !== '')
+
+  if (data.length === 0 || filteredData.length === 0) {
+    return (
+      <div className='text-secondary text-center mb-4'>
+        The required data is incomplete or unavailable at this time.
+      </div>
+    )
+  }
 
   return (
     <div className='p-8 space-y-6' ref={contentRef}>
@@ -184,7 +183,7 @@ return {
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default Result;
+export default Result

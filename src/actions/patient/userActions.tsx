@@ -40,8 +40,8 @@ export async function getPatientClinicians(patientId: string) {
     }
   } catch (error) {
     console.error('Error fetching patient clinicians:', error)
-    
-return {
+
+    return {
       success: false,
       data: [],
       message: 'Failed to fetch clinicians'

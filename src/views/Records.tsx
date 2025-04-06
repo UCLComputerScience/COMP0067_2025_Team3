@@ -6,13 +6,15 @@ import { Box } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
-import type { Data } from '@/app/(private)/my-records/page'
+import type { Data } from '@/types/RecordTypes'
 import TrendCharts from '@/components/charts/TrendCharts'
 import RecordListTable from '@/components/record-list-table'
 import { formatDate } from '@/utils/dateUtils'
 
 interface Props {
   data: Data[]
+  isShowRecordList?: boolean
+  isTrendChartVertical?: boolean
 }
 
 type DataItem = {
@@ -80,7 +82,7 @@ const capitalizeFirstLetter = (str: string): string => {
   return str.replace(/([A-Z])/g, ' $1').replace(/^./, str[0].toUpperCase())
 }
 
-const Records = ({ data }: Props) => {
+const Records = ({ data, isShowRecordList = true, isTrendChartVertical = false }: Props) => {
   const [selected, setSelected] = React.useState<readonly string[]>([])
   const [chartData, setChartData] = React.useState<TransformedDataItem[]>()
 
@@ -104,15 +106,17 @@ const Records = ({ data }: Props) => {
 
   return (
     <>
-      <Box component='div' sx={{ mb: 6 }}>
-        <TrendCharts data={chartData} />
+      <Box component='div' sx={{ mb: 4 }}>
+        <TrendCharts data={chartData} isVertical={isTrendChartVertical} />
       </Box>
-      <RecordListTable
-        data={data}
-        selected={selected}
-        setSelected={setSelected}
-        handleDisplayDataOnClick={handleDisplayDataOnClick}
-      />
+      {isShowRecordList && (
+        <RecordListTable
+          data={data}
+          selected={selected}
+          setSelected={setSelected}
+          handleDisplayDataOnClick={handleDisplayDataOnClick}
+        />
+      )}
     </>
   )
 }
