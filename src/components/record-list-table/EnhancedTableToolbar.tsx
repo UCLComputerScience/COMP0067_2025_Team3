@@ -1,17 +1,23 @@
 import { useState } from 'react'
 
+import { useSession } from 'next-auth/react'
+
 import { Toolbar, alpha, Typography, Button, CircularProgress } from '@mui/material'
+import { Role } from '@prisma/client'
 
 interface EnhancedTableToolbarProps {
   numSelected: number
   handleDisplayDataOnClick: (numSelected: number) => void
-  selectedRecords: any[] // Replace 'any' with your record type
+  selectedRecords: any[]
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
+  const { data: session } = useSession()
   const { numSelected, handleDisplayDataOnClick, selectedRecords } = props
   const [isExporting, setIsExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState(0)
+
+  const userRole = session?.user.role
 
   const handleDownloadReport = async () => {
     if (numSelected === 0 || isExporting) return
@@ -44,7 +50,27 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           await new Promise<void>((resolve, reject) => {
             iframe.onload = () => resolve()
             iframe.onerror = () => reject(new Error(`Failed to load record ${record.submissionId}`))
-            iframe.src = `/my-records/${record.submissionId}`
+            iframe.src = (() => {
+              if (userRole === Role.PATIENT) {
+                return `/my-records/${record.submissionId}`
+              } else if (userRole === Role.CLINICIAN) {
+                if (!record.patientId) {
+                  const currentPath = window.location.pathname
+                  const patientPathMatch = currentPath.match(/\/all-patients\/([^\/]+)/)
+
+                  if (patientPathMatch) {
+                    return `/all-patients/${patientPathMatch[1]}/records/${record.submissionId}`
+                  } else {
+                    console.error('Cannot determine patientId for record:', record)
+                    throw new Error('Patient ID not found for record')
+                  }
+                }
+                return `/all-patients/${record.patientId}/records/${record.submissionId}`
+              } else {
+                console.error('Unsupported user role for PDF generation:', userRole)
+                throw new Error('Unsupported user role for PDF generation')
+              }
+            })()
           })
 
           await new Promise(r => setTimeout(r, 1500))
@@ -95,12 +121,20 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             ;(el as HTMLElement).style.display = 'none'
           })
 
+          const pdfBackground =
+            getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-background-default').trim() ||
+            '#ffffff'
+
+          const boxBackground =
+            getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-customColors-bodyBg').trim() ||
+            '#ffffff'
+
           if (selectedRecords.length > 1) {
             const header = document.createElement('div')
 
             header.style.padding = '10px'
             header.style.marginBottom = '15px'
-            header.style.backgroundColor = '#F4F5FA'
+            header.style.backgroundColor = boxBackground
             header.style.borderRadius = '4px'
             header.style.fontFamily = 'Outfit, Arial, sans-serif' // Explicitly set font
             header.innerHTML = `
@@ -120,7 +154,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
           const canvas = await html2canvas(contentElement, {
             scale: 2,
-            backgroundColor: '#ffffff',
+            backgroundColor: pdfBackground,
             logging: false,
             useCORS: true,
             allowTaint: true,
@@ -151,6 +185,9 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
           const imgX = (pdfWidth - imgWidth * ratio) / 2
           const imgY = 0
+
+          mainPdf.setFillColor(pdfBackground)
+          mainPdf.rect(0, 0, pdfHeight, pdfHeight, 'F')
 
           mainPdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
 

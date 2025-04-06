@@ -5,6 +5,7 @@ import * as React from 'react'
 
 // next
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 // MUI
 import Table from '@mui/material/Table'
@@ -22,7 +23,8 @@ import EnhancedTableHead from './EnhancedTableHead'
 
 // utils
 import { getComparator } from './tableSortHelper'
-import type { Data } from '@/app/(private)/my-records/page'
+import type { Data } from '@/types/RecordTypes'
+import { Role } from '@prisma/client'
 
 export type Order = 'asc' | 'desc'
 
@@ -52,6 +54,8 @@ export const formatDate = (dateInput: string | Date): string => {
 
 const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick }: Props) => {
   const router = useRouter()
+  const { data: session } = useSession()
+
   const [order, setOrder] = React.useState<Order>('desc')
   const [orderBy, setOrderBy] = React.useState<keyof Data>('date')
   const [page, setPage] = React.useState(0)
@@ -108,7 +112,6 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
     setPage(0)
   }
 
-  // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
 
   const visibleRows = React.useMemo(
@@ -116,8 +119,24 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
     [order, orderBy, page, rowsPerPage, rows]
   )
 
+  const handleRecordClick = (submissionId: string) => (event: React.MouseEvent) => {
+    event.stopPropagation()
+
+    if (session?.user.role === Role.CLINICIAN) {
+      const currentPath = window.location.pathname
+      const patientPathMatch = currentPath.match(/\/all-patients\/([^\/]+)/)
+
+      if (patientPathMatch) {
+        const patientId = patientPathMatch[1]
+        router.push(`/all-patients/${patientId}/records/${submissionId}`)
+      }
+    } else {
+      router.push(`/my-records/${submissionId}`)
+    }
+  }
+
   return (
-    <Card>
+    <Card className='w-full'>
       <EnhancedTableToolbar
         numSelected={selected.length}
         handleDisplayDataOnClick={handleDisplayDataOnClick}
@@ -165,7 +184,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
                     <IconButton
                       aria-label='view single record'
                       size='large'
-                      onClick={() => router.push(`/my-records/${row.submissionId}`)}
+                      onClick={handleRecordClick(row.submissionId)}
                       sx={{ mr: 2 }}
                     >
                       <i className='ri-eye-line' />
