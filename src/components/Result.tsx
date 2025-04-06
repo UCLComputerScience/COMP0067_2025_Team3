@@ -1,9 +1,7 @@
-'use client'
+'use client';
 
-// react
-import { useRef, useState } from 'react'
+import { useRef, useState } from 'react';
 
-// MUI
 import {
   Card,
   CardContent,
@@ -20,57 +18,91 @@ import {
   TableHead,
   TableRow,
   Paper
-} from '@mui/material'
+} from '@mui/material';
 
-// Style
-import '@fontsource/outfit'
+import '@fontsource/outfit';
 
-// component
-import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart'
-
-// utils
-import { exportToPdf } from '@/utils/pdfUtils'
+import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart';
+import { exportToPdf } from '@/utils/pdfUtils';
 
 interface DataEntry {
-  subject: string
-  [date: string]: string | number
+  subject: string;
+  [date: string]: string | number;
+}
+
+interface PerceivedSpidergramData {
+  subject: string;
+  value: number;
 }
 
 interface DomainScore {
-  domain: string
-  totalScore: number
-  averageScore: number
+  domain: string;
+  totalScore: number;
+  averageScore: number;
 }
 
 interface Props {
-  data?: DataEntry[]
-  domainData?: DomainScore[]
-  date: string
-  patientName?: string
+  data?: DataEntry[];
+  domainData?: DomainScore[];
+  perceivedSpidergramData?: PerceivedSpidergramData[];
+  date: string;
+  patientName?: string;
 }
 
-const Result = ({ data = [], domainData = [], date, patientName }: Props) => {
-  const rowNumbers = [5, 4, 3, 3, 4, 4, 3, 3]
-  const [showPerceived, setShowPerceived] = useState(false)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [isExporting, setIsExporting] = useState(false)
+const Result = ({
+  data = [],
+  domainData = [],
+  perceivedSpidergramData = [],
+  date,
+  patientName
+}: Props) => {
+  const rowNumbers = [5, 4, 3, 3, 4, 4, 3, 3];
+  const [showPerceived, setShowPerceived] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
+  // Filter out the perceived spidergram item (it's merged manually)
+  const filteredData = data.filter(item => item.subject !== 'Perceived Spidergram');
+
+  // Handle PDF export
   const handleExport = async () => {
-    if (!contentRef.current) return
+    if (!contentRef.current) return;
 
-    setIsExporting(true)
+    setIsExporting(true);
 
     try {
       await exportToPdf(contentRef.current, {
         filename: `results-${date}.pdf`,
         orientation: 'portrait',
         onComplete: () => setIsExporting(false)
-      })
+      });
     } catch (error) {
-      console.error('Export failed:', error)
-      setIsExporting(false)
+      console.error('Export failed:', error);
+      setIsExporting(false);
     }
-  }
+  };
+
+  // Handle toggle switch
+  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setShowPerceived(event.target.checked);
+  };
+
+  // Merge perceived data into filteredData
+  const mergedData = filteredData.map(entry => {
+    const subject = entry.subject.toLowerCase().trim();
+
+    const match = perceivedSpidergramData.find(
+      item => item.subject.toLowerCase().trim() === subject
+    );
+
+    
+return {
+      ...entry,
+      'Perceived score': match?.value ?? ''
+    };
+  });
+
+  const ifPerceivedExists = mergedData.every(item => item['Perceived score'] !== '');
 
   return (
     <div className='p-8 space-y-6' ref={contentRef}>
@@ -96,16 +128,19 @@ const Result = ({ data = [], domainData = [], date, patientName }: Props) => {
           >
             {isExporting ? 'Exporting...' : 'Export'}
           </Button>
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={showPerceived} onChange={e => setShowPerceived(e.target.checked)} />}
-              label='Display perceived spidergram'
-            />
-          </FormGroup>
+          {ifPerceivedExists && (
+            <FormGroup>
+              <FormControlLabel
+                control={<Switch checked={showPerceived} onChange={handleSwitchChange} />}
+                label='Display perceived spidergram'
+              />
+            </FormGroup>
+          )}
         </Box>
       </Box>
 
-      <RechartsRadarChart legend={false} data={data} />
+      {!showPerceived && <RechartsRadarChart legend={false} data={filteredData} />}
+      {showPerceived && <RechartsRadarChart legend={false} data={mergedData} />}
 
       <Card>
         <CardContent>
@@ -118,7 +153,9 @@ const Result = ({ data = [], domainData = [], date, patientName }: Props) => {
                   <TableCell align='right' sx={{ fontFamily: 'Outfit' }}>
                     Total
                   </TableCell>
-                  <TableCell align='right'></TableCell>
+                  <TableCell align='right' sx={{ fontFamily: 'Outfit' }}>
+                    Total/{rowNumbers[0]}:
+                  </TableCell>
                   <TableCell align='right' sx={{ fontFamily: 'Outfit' }}>
                     Average
                   </TableCell>
@@ -147,7 +184,7 @@ const Result = ({ data = [], domainData = [], date, patientName }: Props) => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default Result
+export default Result;

@@ -1,22 +1,15 @@
+// Updated QuestionPage.tsx with lifted state
 'use client'
 import { useEffect, useState } from 'react'
-import * as React from 'react'
 
-import { useRouter } from 'next/navigation'
-
-import { v4 as uuidv4 } from 'uuid'
-import { Button, Grid2, Typography, Box, Tooltip } from '@mui/material'
+import { Button, Grid2, Typography, Box } from '@mui/material'
 import { safeParse } from 'valibot'
-import { useSession } from 'next-auth/react'
-
 import { toast } from 'react-toastify'
 
-import { submitResponses } from '@/actions/submit-response/submission-action'
 import { fetchQuestionsByDomain } from '@/actions/questionnaire/userAction'
 import styles from './styles.module.css'
 import Question from '@/components/Questionnaire-pages/Question/Question'
 import {
-  QuestionnaireSchema,
   NeuromusculoskeletalSchema,
   PainSchema,
   FatigueSchema,
@@ -30,6 +23,8 @@ import '@fontsource/inter'
 
 interface QuestionPageProps {
   domain: string
+  answers: Record<number, string | string[]>
+  onUpdate: (updated: Record<number, string | string[]>) => void
   handleNext: () => void
   handlePrev: () => void
 }
@@ -41,18 +36,8 @@ interface QuestionType {
   note: string | null
 }
 
-export default function QuestionPage({ domain, handleNext, handlePrev }: QuestionPageProps) {
-  const router = useRouter()
-  const { data: session } = useSession()
-  const userRole = session?.user?.role || 'GUEST'
-  let userId = ''
-
-  if (session) {
-    userId = session.user.id
-  }
-
+export default function QuestionPage({ domain, answers, onUpdate, handleNext, handlePrev }: QuestionPageProps) {
   const [questions, setQuestions] = useState<QuestionType[]>([])
-  const [answers, setAnswers] = useState<Record<string, Record<number, string | string[]>>>({})
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -68,227 +53,54 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
     fetchQuestions()
   }, [domain])
 
-  // Handle the checkboxes for question 19
-  const handleCheckboxChange = (domain: string, id: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (id: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
+    const current = Array.isArray(answers[id]) ? (answers[id] as string[]) : []
+    const updated = current.includes(value) ? current.filter(v => v !== value) : [...current, value]
 
-    setAnswers(prev => {
-      const domainAnswers = prev[domain] || {}
-      const current = Array.isArray(domainAnswers[id]) ? domainAnswers[id] : []
-
-      const updated = current.includes(value) ? current.filter(v => v !== value) : [...current, value]
-
-      return {
-        ...prev,
-        [domain]: {
-          ...domainAnswers,
-          [id]: updated
-        }
-      }
-    })
+    onUpdate({ ...answers, [id]: updated })
   }
 
-  // Handle the radio buttons throughout
-  const handleRadioChange = (domain: string, id: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRadioChange = (id: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
 
-    setAnswers(prev => {
-      const domainAnswers = prev[domain] || {}
-
-      return {
-        ...prev,
-        [domain]: {
-          ...domainAnswers,
-          [id]: value
-        }
-      }
-    })
+    onUpdate({ ...answers, [id]: value })
   }
 
   const validatePage = () => {
-    switch (domain) {
-      case 'Neuromusculoskeletal':
-        const nmskResult = safeParse(NeuromusculoskeletalSchema, answers[domain])
-
-        if (nmskResult.success) {
-          console.log('Success!', nmskResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', nmskResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Pain':
-        const painResult = safeParse(PainSchema, answers[domain])
-
-        if (painResult.success) {
-          console.log('Success!', painResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', painResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Fatigue':
-        const fatigueResult = safeParse(FatigueSchema, answers[domain])
-
-        if (fatigueResult.success) {
-          console.log('Success!', fatigueResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', fatigueResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Gastrointestinal':
-        const gastrointestinalResult = safeParse(GastrointestinalSchema, answers[domain])
-
-        if (gastrointestinalResult.success) {
-          console.log('Success!', gastrointestinalResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', gastrointestinalResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Cardiac Dysautonomia':
-        const cardiacDysautonomiaResult = safeParse(CardiacDysautonomiaSchema, answers[domain])
-
-        if (cardiacDysautonomiaResult.success) {
-          console.log('Success!', cardiacDysautonomiaResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', cardiacDysautonomiaResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Urogenital':
-        const urogenitalResult = safeParse(UrogenitalSchema, answers[domain])
-
-        if (urogenitalResult.success) {
-          console.log('Success!', urogenitalResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', urogenitalResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Anxiety':
-        const anxietyResult = safeParse(AnxietySchema, answers[domain])
-
-        if (anxietyResult.success) {
-          console.log('Success!', anxietyResult.output)
-          handleNext()
-        } else {
-          console.log('Validation Errors:', anxietyResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
-
-      case 'Depression':
-        const depressionResult = safeParse(DepressionSchema, answers[domain])
-
-        if (depressionResult.success) {
-          console.log('Success!', depressionResult.output)
-          submitData()
-        } else {
-          console.log('Validation Errors:', depressionResult.issues)
-          toast.error('Please fill out all Questions')
-        }
-
-        break
+    const schemaMap = {
+      Neuromusculoskeletal: NeuromusculoskeletalSchema,
+      Pain: PainSchema,
+      Fatigue: FatigueSchema,
+      Gastrointestinal: GastrointestinalSchema,
+      'Cardiac Dysautonomia': CardiacDysautonomiaSchema,
+      Urogenital: UrogenitalSchema,
+      Anxiety: AnxietySchema,
+      Depression: DepressionSchema
     }
-  }
 
-  // Data submission function
-  const submitData = async () => {
-    const submissionId = uuidv4()
+    const schema = schemaMap[domain as keyof typeof schemaMap]
 
-    const flatAnswers = Object.values(answers).reduce((acc, domainObj) => {
-      return { ...acc, ...domainObj }
-    }, {})
+    if (!schema) return handleNext()
 
-    const validationResult = safeParse(QuestionnaireSchema, flatAnswers)
+    const result = safeParse(schema, answers)
 
-    if (validationResult.success) {
-      const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
-        return Object.entries(questionSet).map(([questionId, value]) => {
-          const score = Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
-
-          return {
-            userId,
-            domain,
-            questionId: Number(questionId),
-            score,
-            label: String(score),
-            submissionId
-          }
-        })
-      })
-
-      if (userRole === 'PATIENT') {
-        const result = await submitResponses(allFormattedAnswers)
-
-        if (result.success) {
-          toast.success('Successfully submitted responses, redirecting to records page')
-          setTimeout(() => {
-            router.push('/my-records')
-          }, 2000)
-        } else {
-          toast.error('Failed to submit responses')
-        }
-      } else if (userRole !== 'PATIENT') {
-        toast.success('Successfully submitted responses')
-        setTimeout(() => {
-          router.push('/home')
-        }, 2000)
-      }
+    if (result.success) {
+      console.log('Success!', result.output)
+      handleNext()
     } else {
-      toast.error('There is an issue with your questionnaire answers')
+      console.log('Validation Errors:', result.issues)
+      toast.error('Please fill out all Questions')
     }
-  }
-
-  // Submission logic
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    submitData()
   }
 
   return (
     <Box>
-      <Typography
-        sx={{
-          fontFamily: 'Outfit',
-          fontSize: '48px',
-          fontWeight: '600',
-          lineHeight: '68px',
-          padding: '20px'
-        }}
-      >
+      <Typography sx={{ fontFamily: 'Outfit', fontSize: '48px', fontWeight: 600, lineHeight: '68px', padding: '20px' }}>
         {domain}
       </Typography>
-
       <Typography
-        sx={{
-          fontFamily: 'Inter',
-          fontSize: '24px',
-          fontWeight: '400',
-          lineHeight: '28px',
-          paddingBottom: '79px'
-        }}
+        sx={{ fontFamily: 'Inter', fontSize: '24px', fontWeight: 400, lineHeight: '28px', paddingBottom: '79px' }}
       >
         How much have these symptoms impacted your daily life during the past ONE month?
       </Typography>
@@ -323,75 +135,34 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
         </Grid2>
       </Grid2>
 
-      <form onSubmit={handleSubmit}>
+      <form>
         {questions.map(q => (
           <div key={q.id}>
             {q.id === 19 && (
               <Grid2 container spacing={2}>
                 <Grid2 size={2}></Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>
-                    In warm
-                    <br />
-                    environments(20)
-                  </Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>
-                    After a
-                    <br />
-                    meal (20)
-                  </Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>
-                    Right after
-                    <br />
-                    straining{' '}
-                    <Tooltip title={'e.g during or shortly after a toilet visit, lifting heavy items, ...)'}>
-                      <i className='   ri-information-line' />
-                    </Tooltip>{' '}
-                    (20)
-                  </Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>
-                    During or right
-                    <br />
-                    after physical
-                    <br />
-                    activity{' '}
-                    <Tooltip title={'e.g. walking, taking stairs, cycling, ...'}>
-                      <i className='   ri-information-line' />
-                    </Tooltip>{' '}
-                    (20)
-                  </Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>
-                    Other
-                    <br />
-                    20
-                  </Typography>
-                </Grid2>
+                {[
+                  'In warm\nenvironments(20)',
+                  'After a\nmeal (20)',
+                  'Right after\nstraining (20)',
+                  'During or right\nafter physical\nactivity (20)',
+                  'Other\n20'
+                ].map((label, idx) => (
+                  <Grid2 size={2} key={idx}>
+                    <Typography className={styles.options}>{label}</Typography>
+                  </Grid2>
+                ))}
               </Grid2>
             )}
 
             {q.id === 25 && (
               <Grid2 container spacing={2}>
                 <Grid2 size={2}></Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>Never (0)</Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>1-2 Times (33.3)</Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>3 Times (66.6)</Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Typography className={styles.options}>Over 3 times (100)</Typography>
-                </Grid2>
+                {['Never (0)', '1-2 Times (33.3)', '3 Times (66.6)', 'Over 3 times (100)'].map((label, idx) => (
+                  <Grid2 size={2} key={idx}>
+                    <Typography className={styles.options}>{label}</Typography>
+                  </Grid2>
+                ))}
                 <Grid2 size={2}></Grid2>
               </Grid2>
             )}
@@ -400,10 +171,8 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
               key={q.id}
               id={q.id}
               question={q.question}
-              selectedValue={q.id === 19 ? answers[domain]?.[q.id] || [] : answers[domain]?.[q.id] || ''}
-              onValueChange={e =>
-                q.id === 19 ? handleCheckboxChange(domain, q.id, e) : handleRadioChange(domain, q.id, e)
-              }
+              selectedValue={q.id === 19 ? answers[q.id] || [] : answers[q.id] || ''}
+              onValueChange={e => (q.id === 19 ? handleCheckboxChange(q.id, e) : handleRadioChange(q.id, e))}
               {...(q.note !== null ? { note: q.note } : {})}
             />
             <br />
@@ -417,15 +186,9 @@ export default function QuestionPage({ domain, handleNext, handlePrev }: Questio
             </Button>
           </Grid2>
           <Box display='flex' justifyContent='flex-end'>
-            {domain === 'Depression' ? (
-              <Button onClick={validatePage} variant='contained'>
-                Submit
-              </Button>
-            ) : (
-              <Button onClick={validatePage} variant='contained'>
-                Next
-              </Button>
-            )}
+            <Button onClick={validatePage} variant='contained'>
+              Next
+            </Button>
           </Box>
         </Grid2>
       </form>

@@ -20,13 +20,25 @@ const getRecords = async (submissionId: string) => {
     select: {
       score: true,
       domain: true,
-      createdAt: true
+      createdAt: true,
+      label: true
     }
   })
 
   return records
 }
 
+// From perceived-spidergram branch
+const getPerceivedSpidergramValues = (records: { score: number; domain: string; label: string }[]) => {
+  const perceivedSpidergramRecords = records.filter(record => record.domain === 'Perceived Spidergram')
+
+  return perceivedSpidergramRecords.map(record => ({
+    subject: record.label,
+    value: record.score
+  }))
+}
+
+// From main branch
 const getPatientFullName = async (submissionId: string) => {
   const names = await prisma.response.findFirst({
     where: {
@@ -70,13 +82,15 @@ const calculateScores = (records: { score: number; domain: string }[]) => {
 
 const Page = async ({ params }: PageProps) => {
   const { submissionId } = await params
+
   const records = await getRecords(submissionId)
-  const patientName = await getPatientFullName(submissionId)
 
   if (!records || records.length === 0) {
     notFound()
   }
 
+  const patientName = await getPatientFullName(submissionId)
+  const perceivedSpidergramValues = getPerceivedSpidergramValues(records)
   const scores = calculateScores(records)
   const submissionDate = records[0].createdAt
 
@@ -86,8 +100,14 @@ const Page = async ({ params }: PageProps) => {
     year: 'numeric'
   })
 
-  // Pass user data to the client component
-  return <SingleRecord data={scores} date={formattedDate} patientName={patientName} />
+  return (
+    <SingleRecord
+      data={scores}
+      date={formattedDate}
+      patientName={patientName}
+      perceivedSpidergramData={perceivedSpidergramValues}
+    />
+  )
 }
 
 export default Page
