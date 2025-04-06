@@ -1,7 +1,8 @@
 'use server'
 
-import { prisma } from '@/prisma/client'
 import { capitalize } from 'lodash'
+
+import { prisma } from '@/prisma/client'
 
 export async function getPatientFullNameByPatientId(patientId: string) {
   const name = await prisma.user.findUnique({

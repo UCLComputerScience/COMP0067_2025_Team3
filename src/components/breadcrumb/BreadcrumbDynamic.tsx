@@ -1,11 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { usePathname } from 'next/navigation'
+
 import { Breadcrumbs, Typography } from '@mui/material'
-import Link from '../Link'
 
 import { validate as uuidValidate } from 'uuid'
+
+import Link from '../Link'
+
 import { getPatientFullNameByPatientId, getRecordDateBySubmissionId } from '@/actions/breadcrumb/breadcrumbActions'
 
 const BreadcrumbDynamic = () => {
@@ -49,6 +53,7 @@ const BreadcrumbDynamic = () => {
   const fetchPatientData = async (patientId: string) => {
     try {
       const fullName = await getPatientFullNameByPatientId(patientId)
+
       setPatientNames(prev => ({
         ...prev,
         [patientId]: fullName
@@ -61,6 +66,7 @@ const BreadcrumbDynamic = () => {
   const fetchRecordData = async (submissionId: string) => {
     try {
       const recordDate = await getRecordDateBySubmissionId(submissionId)
+
       setRecordDates(prev => ({
         ...prev,
         [submissionId]: recordDate!
@@ -72,11 +78,13 @@ const BreadcrumbDynamic = () => {
 
   useEffect(() => {
     const pathNames = paths.split('/').filter(path => path)
+
     setClientPath(pathNames)
 
     const checkAndFetchData = (index: number, type: 'user' | 'record') => {
       if (pathNames.length > index) {
         const potentialId = pathNames[index]
+
         if (uuidValidate(potentialId)) {
           if (type === 'user' && !userNames[potentialId]) {
             fetchPatientData(potentialId)

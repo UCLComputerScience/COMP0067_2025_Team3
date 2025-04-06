@@ -1,11 +1,14 @@
 // next
 import { redirect } from 'next/navigation'
+
 import { getServerSession } from 'next-auth'
 
 // prisma
 import { Role } from '@prisma/client'
 
 // auth
+import Grid from '@mui/material/Grid2'
+
 import { authOptions } from '@/libs/auth'
 
 // actions
@@ -15,7 +18,6 @@ import { getResponseDataByUser } from '@/actions/records/recordAction'
 import Records from '@/views/Records'
 
 // MUI
-import Grid from '@mui/material/Grid2'
 import DemographyCard from '@/components/DemographyCard'
 import { prisma } from '@/prisma/client'
 import ViewMoreRecordsCard from '@/components/ViewMoreRecordsCard'

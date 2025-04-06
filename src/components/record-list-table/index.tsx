@@ -5,6 +5,7 @@ import * as React from 'react'
 
 // next
 import { useRouter } from 'next/navigation'
+
 import { useSession } from 'next-auth/react'
 
 // MUI
@@ -18,13 +19,14 @@ import Checkbox from '@mui/material/Checkbox'
 import { Card, IconButton } from '@mui/material'
 
 // Components
+import { Role } from '@prisma/client'
+
 import EnhancedTableToolbar from './EnhancedTableToolbar'
 import EnhancedTableHead from './EnhancedTableHead'
 
 // utils
 import { getComparator } from './tableSortHelper'
 import type { Data } from '@/types/RecordTypes'
-import { Role } from '@prisma/client'
 
 export type Order = 'asc' | 'desc'
 
@@ -128,6 +130,7 @@ const RecordListTable = ({ data, selected, setSelected, handleDisplayDataOnClick
 
       if (patientPathMatch) {
         const patientId = patientPathMatch[1]
+
         router.push(`/all-patients/${patientId}/records/${submissionId}`)
       }
     } else {

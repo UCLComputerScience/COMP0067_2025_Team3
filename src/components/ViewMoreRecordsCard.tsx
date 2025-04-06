@@ -1,7 +1,8 @@
 'use client'
 
-import { Button, Card, CardActions, CardHeader } from '@mui/material'
 import { useRouter } from 'next/navigation'
+
+import { Button, Card, CardActions, CardHeader } from '@mui/material'
 
 interface Props {
   patientId: string
@@ -9,7 +10,9 @@ interface Props {
 
 const ViewMoreRecordsCard = ({ patientId }: Props) => {
   const router = useRouter()
-  return (
+
+  
+return (
     <Card>
       <CardHeader title={'See more records'} />
       <CardActions>

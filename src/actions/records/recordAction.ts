@@ -1,9 +1,11 @@
 'use server'
 
-import { prisma } from '@/prisma/client'
-import { Data, SubmissionResult } from '@/types/RecordTypes'
-import { capitalize } from 'lodash'
 import { notFound } from 'next/navigation'
+
+import { capitalize } from 'lodash'
+
+import { prisma } from '@/prisma/client'
+import type { Data, SubmissionResult } from '@/types/RecordTypes'
 
 export const getResponseDataByUser = async (userId: string): Promise<Data[]> => {
   const responses = await prisma.response.groupBy({

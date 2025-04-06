@@ -43,16 +43,20 @@ const DemographyCard = ({ patientInfo }: DemographyCardProps) => {
       </Card>
     )
   }
+
   const formatDate = (date?: Date | null) => {
     if (!date) return 'Not provided'
-    return new Date(date).toLocaleDateString()
+    
+return new Date(date).toLocaleDateString()
   }
 
   const displayValue = (value: any) => {
     if (value === null || value === undefined || value === '') {
       return 'Not provided'
     }
-    return value.toString()
+
+    
+return value.toString()
   }
 
   const personalFields = [

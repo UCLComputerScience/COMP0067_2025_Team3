@@ -90,7 +90,9 @@ const TrendCharts = ({ data = demoData, isVertical = false }: Props) => {
 
   const getChartDirection = (isRadarChart: boolean) => {
     const chartSize = isRadarChart ? 7 : 5
-    return isVertical ? { xs: 12 } : { xs: 12, md: chartSize }
+
+    
+return isVertical ? { xs: 12 } : { xs: 12, md: chartSize }
   }
 
   useEffect(() => {

@@ -65,7 +65,9 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                     throw new Error('Patient ID not found for record')
                   }
                 }
-                return `/all-patients/${record.patientId}/records/${record.submissionId}`
+
+                
+return `/all-patients/${record.patientId}/records/${record.submissionId}`
               } else {
                 console.error('Unsupported user role for PDF generation:', userRole)
                 throw new Error('Unsupported user role for PDF generation')
