@@ -1,10 +1,9 @@
-'use client'
-
 // MUI
 import { notFound } from 'next/navigation'
 
 // Prisma
 import { capitalize } from 'lodash'
+
 import { prisma } from '@/prisma/client'
 
 import SingleRecord from '@/views/SingleRecord'
@@ -85,6 +84,7 @@ const Page = async ({ params }: PageProps) => {
   const { submissionId } = await params
 
   const records = await getRecords(submissionId)
+
   if (!records || records.length === 0) {
     notFound()
   }
@@ -111,4 +111,3 @@ const Page = async ({ params }: PageProps) => {
 }
 
 export default Page
-
