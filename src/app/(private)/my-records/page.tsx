@@ -2,8 +2,6 @@ import { redirect } from 'next/navigation'
 
 import { getServerSession } from 'next-auth'
 
-import { Role } from '@prisma/client'
-
 import { prisma } from '@/prisma/client'
 
 // Component
@@ -60,7 +58,7 @@ const getResponseDataByUser = async (userId: string) => {
     }
 
     groupedResults[result.submissionId].domains[result.domain] = {
-      averageScore: result._avg.score!
+      averageScore: Number(result._avg.score!.toFixed(2))
     }
   })
 
@@ -87,15 +85,8 @@ const getResponseDataByUser = async (userId: string) => {
 const Page = async () => {
   const session = await getServerSession(authOptions)
 
-  // debug, and secure the end point and remove this later.
-  console.log('session:', session)
-
   if (!session?.user?.id) {
     redirect('/not-found')
-  }
-
-  if (session.user.role != Role.PATIENT) {
-    // forbidden()
   }
 
   const data = await getResponseDataByUser(session.user.id)

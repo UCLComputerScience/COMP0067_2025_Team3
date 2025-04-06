@@ -1,21 +1,30 @@
-'use client'
+'use client';
 
-import Result from '@/components/Result'
+import Result from '@/components/Result';
 
-interface RecordProps {
-  data: { domain: string; totalScore: number; averageScore: number }[]
-  date: string
-  PerceivedSpidergramData: any // Replace 'any' with the correct type if known
+interface SingleRecordProps {
+  data: { domain: string; totalScore: number; averageScore: number }[];
+  date: string;
+  perceivedSpidergramData?: any; // Replace 'any' with a proper type if available
+  patientName?: string;
 }
 
-const Record = ({ data, date, PerceivedSpidergramData }: RecordProps) => {
+const SingleRecord = ({ data, date, perceivedSpidergramData, patientName }: SingleRecordProps) => {
   // Convert to the expected format
   const formattedData = data.map(({ domain, averageScore }) => ({
     subject: domain,
     [date]: averageScore
-  }))
+  }));
 
-  return <Result data={formattedData} domainData={data} date={date} perceivedSpidergramData={PerceivedSpidergramData} />
-}
+  return (
+    <Result
+      data={formattedData}
+      domainData={data}
+      date={date}
+      perceivedSpidergramData={perceivedSpidergramData}
+      patientName={patientName}
+    />
+  );
+};
 
-export default Record
+export default SingleRecord;

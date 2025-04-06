@@ -55,9 +55,9 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
   useEffect(() => {
     if (clinicianError) {
-      toast.error(clinicianError);
+      toast.error(clinicianError)
     }
-  }, [clinicianError]);
+  }, [clinicianError])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value })
@@ -227,6 +227,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                 <InputLabel>Organization</InputLabel>
                 <Select
                   name='organization'
+                  label='Organization'
                   value={searchCriteria.organization}
                   onChange={e => setSearchCriteria({ ...searchCriteria, organization: e.target.value })}
                 >

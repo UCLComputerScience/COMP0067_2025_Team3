@@ -33,7 +33,6 @@ type TransformedDataItem = {
   [date: string]: string | number
 }
 
-//TODO: sorted by date in asc order for better trend graph display.
 const transformData = (data: DataItem[]): TransformedDataItem[] => {
   const subjects: (keyof Omit<DataItem, 'submissionId' | 'date'>)[] = [
     'neuromusculoskeletal',
@@ -46,7 +45,6 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
     'depression'
   ]
 
-  // Group submissions by formatted date
   const groupedByDate: Record<string, DataItem[]> = {}
 
   data.forEach(item => {
@@ -66,7 +64,6 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
       const submissions = groupedByDate[formattedDate]
 
       submissions.forEach((item, index) => {
-        // Unique key if there are multiple submissions on the same date
         const uniqueKey = submissions.length > 1 ? `${formattedDate} - ${index + 1}` : formattedDate
 
         transformed[uniqueKey] = item[subject]
@@ -79,7 +76,6 @@ const transformData = (data: DataItem[]): TransformedDataItem[] => {
   return result
 }
 
-// Helper function to capitalize the first letter of each word in the subject, so work for
 const capitalizeFirstLetter = (str: string): string => {
   return str.replace(/([A-Z])/g, ' $1').replace(/^./, str[0].toUpperCase())
 }
@@ -97,6 +93,8 @@ const Records = ({ data }: Props) => {
   const handleDisplayDataOnClick = (numSelected: number) => {
     if (numSelected > 3) {
       toast.warn('You can display a maximum of 3 questionnaire data.')
+    } else if (numSelected === 0) {
+      toast.warn('Please select at least one questionnaire to display.')
     } else {
       const selectedData = transformData(data.filter(e => selected.includes(e.submissionId)))
 

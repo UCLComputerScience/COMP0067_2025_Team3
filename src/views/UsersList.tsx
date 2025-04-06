@@ -99,6 +99,7 @@ const UsersList = ({ users }: Props) => {
 
   const visibleRows = React.useMemo(
     () => [...rows].slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [page, rowsPerPage, filteredUsers]
   )
 
@@ -218,8 +219,8 @@ const UsersList = ({ users }: Props) => {
               </TableBody>
             </Table>
           </TableContainer>
-          </Box>
-          <Box sx={{display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 5 }}>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 5 }}>
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component='div'
