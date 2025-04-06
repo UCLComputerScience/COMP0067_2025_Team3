@@ -6,11 +6,16 @@ import { useRouter } from 'next/navigation'
 
 import { Stepper, Step, StepLabel, Typography, Box } from '@mui/material'
 
+import { safeParse } from 'valibot'
+
+import { toast } from 'react-toastify'
+
 import PatientInfoForm from '@/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
 import StepperCustomDot from '@/components/stepper-dot'
 import StepperWrapper from '@/@core/styles/stepper'
 import QuestionPage from '@/components/Questionnaire-pages/QuestionnairePage'
 import PerceivedSpidergram from '@/components/charts/PerceivedSpidergram'
+import { QuestionnaireSchema } from '@/actions/formValidation'
 
 const steps = [
   { title: 'Pain' },
@@ -59,29 +64,36 @@ const Questionnaire = () => {
   const handlePrev = () => setActiveStep(prev => (prev > 0 ? prev - 1 : 0))
 
   const HandleSubmit = () => {
-    // Calculate the average score for each domain
-    const allFormattedAnswers = Object.entries(answers).map(([domain, questionSet]) => {
-      // Calculate the average score for other domains
-      const scores = Object.values(questionSet).map(value =>
-        Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
-      )
+    // Validate answers using questionnaire schema
+    const submitAnswers = safeParse(QuestionnaireSchema, answers)
 
-      const totalScore = scores.reduce((sum, score) => sum + score, 0)
-      const averageScore = scores.length > 0 ? totalScore / scores.length : 0
+    if (submitAnswers.success) {
+      // Calculate the average score for each domain
+      const allFormattedAnswers = Object.entries(answers).map(([domain, questionSet]) => {
+        // Calculate the average score for other domains
+        const scores = Object.values(questionSet).map(value =>
+          Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+        )
 
-      return {
-        domain,
-        averageScore: Math.round(averageScore) // Round to nearest integer if needed
-      }
-    })
+        const totalScore = scores.reduce((sum, score) => sum + score, 0)
+        const averageScore = scores.length > 0 ? totalScore / scores.length : 0
 
-    // Flatten the array (Spidergram returns an array, others return objects)
-    const formattedAnswers = allFormattedAnswers.flat()
+        return {
+          domain,
+          averageScore: Math.round(averageScore) // Round to nearest integer if needed
+        }
+      })
 
-    console.log('Formatted Answers:', formattedAnswers)
+      // Flatten the array (Spidergram returns an array, others return objects)
+      const formattedAnswers = allFormattedAnswers.flat()
 
-    // Send the formatted answers to the result page
-    router.push(`/result?data=${encodeURIComponent(JSON.stringify(formattedAnswers))}`)
+      console.log('Formatted Answers:', formattedAnswers)
+
+      // Send the formatted answers to the result page
+      router.push(`/result?data=${encodeURIComponent(JSON.stringify(formattedAnswers))}`)
+    } else {
+      toast.error('Please fill all the required fields before submitting.')
+    }
   }
 
   const getStepContent = () => {
