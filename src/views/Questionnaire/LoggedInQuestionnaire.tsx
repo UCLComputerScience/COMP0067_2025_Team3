@@ -11,12 +11,15 @@ import { useSession } from 'next-auth/react'
 
 import { toast } from 'react-toastify'
 
+import { safeParse } from 'valibot'
+
 import PatientInfoForm from '@/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
 import StepperCustomDot from '@/components/stepper-dot'
 import StepperWrapper from '@/@core/styles/stepper'
 import QuestionPage from '@/components/Questionnaire-pages/QuestionnairePage'
 import PerceivedSpidergram from '@/components/charts/PerceivedSpidergram'
 import { submitResponses } from '@/actions/submit-response/submission-action'
+import { QuestionnaireSchema } from '@/actions/formValidation'
 
 const steps = [
   { title: 'Info' },
@@ -70,41 +73,48 @@ const Questionnaire = () => {
   const handlePrev = () => setActiveStep(prev => (prev > 0 ? prev - 1 : 0))
 
   const handleSubmit = async () => {
-    const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
-      if (domain === 'Spidergram') {
-        return Object.entries(questionSet).map(([label, entry]: [string, any]) => ({
-          userId,
-          questionId: 32,
-          score: entry.score,
-          label,
-          domain: 'Perceived Spidergram',
-          submissionId
-        }))
-      } else {
-        return Object.entries(questionSet).map(([questionId, value]) => {
-          const score = Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+    console.log('Submitting answers:', answers)
+    const submitAnswers = safeParse(QuestionnaireSchema, answers)
 
-          return {
+    if (submitAnswers.success) {
+      const allFormattedAnswers = Object.entries(answers).flatMap(([domain, questionSet]) => {
+        if (domain === 'Spidergram') {
+          return Object.entries(questionSet).map(([label, entry]: [string, any]) => ({
             userId,
-            questionId: Number(questionId),
-            score,
-            label: String(score),
-            domain,
+            questionId: 32,
+            score: entry.score,
+            label,
+            domain: 'Perceived Spidergram',
             submissionId
-          }
-        })
+          }))
+        } else {
+          return Object.entries(questionSet).map(([questionId, value]) => {
+            const score = Array.isArray(value) ? value.length * 20 : isNaN(Number(value)) ? 0 : Number(value)
+
+            return {
+              userId,
+              questionId: Number(questionId),
+              score,
+              label: String(score),
+              domain,
+              submissionId
+            }
+          })
+        }
+      })
+
+      console.log('Formatted Answers:', allFormattedAnswers)
+
+      try {
+        await submitResponses(allFormattedAnswers)
+        toast.success('Responses submitted successfully!')
+        router.push('/my-records')
+      } catch (error) {
+        console.error('Error submitting responses:', error)
+        toast.error('Error submitting responses. Please try again.')
       }
-    })
-
-    console.log('Formatted Answers:', allFormattedAnswers)
-
-    try {
-      await submitResponses(allFormattedAnswers)
-      toast.success('Responses submitted successfully!')
-      router.push('/my-records')
-    } catch (error) {
-      console.error('Error submitting responses:', error)
-      toast.error('Error submitting responses. Please try again.')
+    } else {
+      toast.error('Please fill all the required fields.')
     }
   }
 
