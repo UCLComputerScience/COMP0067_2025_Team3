@@ -2,6 +2,7 @@
 import { notFound } from 'next/navigation'
 
 // Prisma
+
 import { prisma } from '@/prisma/client'
 
 import Record from '@/views/SingleRecord'
@@ -12,17 +13,32 @@ interface PageProps {
   }>
 }
 
-const getRecords = async (submissionId: string) => {   
+const getRecords = async (submissionId: string) => {
   const records = await prisma.response.findMany({
     where: { submissionId },
     select: {
       score: true,
       domain: true,
-      createdAt: true
+      createdAt: true,
+      label: true
     }
   })
 
   return records
+}
+
+// Get perceived spidergram values and format them correctly
+
+const getPerceivedSpidergramValues = (records: { score: number; domain: string; label: string }[]) => {
+  const perceivedSpidergramRecords = records.filter(record => record.domain === 'Perceived Spidergram')
+
+  const formattedPerceivedSpidergramRecords = perceivedSpidergramRecords.map(record => ({
+    subject: record.label,
+    value: record.score
+  }))
+
+  return formattedPerceivedSpidergramRecords
+  console.log('Formatted Perceived Spidergram Records: ', formattedPerceivedSpidergramRecords)
 }
 
 const calculateScores = (records: { score: number; domain: string }[]) => {
@@ -48,6 +64,8 @@ const Page = async ({ params }: PageProps) => {
   const { submissionId } = await params
   const records = await getRecords(submissionId)
 
+  const perceivedSpidergramValues = getPerceivedSpidergramValues(records)
+
   if (!records || records.length === 0) {
     notFound()
   }
@@ -59,10 +77,10 @@ const Page = async ({ params }: PageProps) => {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
-  });
+  })
 
   // Pass user data to the client component
-  return <Record data={scores} date={formattedDate} />
+  return <Record data={scores} date={formattedDate} PerceivedSpidergramData={perceivedSpidergramValues} />
 }
 
 export default Page

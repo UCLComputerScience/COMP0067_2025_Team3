@@ -211,9 +211,9 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
               <RadarChart cx='50%' cy='50%' outerRadius='90%' data={data}>
                 <PolarGrid gridType='polygon' />
                 <PolarAngleAxis dataKey='subject' />
-                <PolarRadiusAxis angle={90} domain={[0, MAX_VALUE]} ticks={TICK_VALUES} />
+                <PolarRadiusAxis angle={90} domain={[0, MAX_VALUE]} ticks={TICK_VALUES as any} />
                 <Tooltip formatter={val => (typeof val === 'number' && val > 0 ? val : 'Click axis to set')} />
-                <Customized component={CustomOverlay} />
+                <Customized component={CustomOverlay as any} />
               </RadarChart>
             </ResponsiveContainer>
           </Box>
