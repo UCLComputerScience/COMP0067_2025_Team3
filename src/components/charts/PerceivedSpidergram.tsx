@@ -169,7 +169,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
           const x = cx + r * Math.cos(-angle * RADIAN)
           const y = cy + r * Math.sin(-angle * RADIAN)
 
-          return <circle cx={x} cy={y} r={6} fill='blue' stroke='white' strokeWidth={2} />
+          return <circle cx={x} cy={y} r={6} fill='#16B1FF' stroke='white' strokeWidth={2} />
         })()
       : null
 
@@ -177,8 +177,8 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
 
     return (
       <>
-        {filled && path && <path d={path} stroke='red' strokeWidth={2} fill='rgba(255,0,0,0.3)' />}
-        {points.map(([x, y], i) => (data[i].value > 0 ? <circle key={i} cx={x} cy={y} r={5} fill='red' /> : null))}
+        {filled && path && <path d={path} stroke='#8C57FF' strokeWidth={2} fill='#8C57FF' fillOpacity={0.4} />}
+        {points.map(([x, y], i) => (data[i].value > 0 ? <circle key={i} cx={x} cy={y} r={5} fill='#8C57FF' /> : null))}
         {previewDot}
       </>
     )
