@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-import { Card, CardContent, Grid2, Typography } from '@mui/material'
+import { Box, Card, CardContent, Grid2, Typography } from '@mui/material'
 
 import CustomLegend from './CustomLegend'
 import RechartsBarChart from './recharts/RechartsBarChart'
@@ -15,6 +15,7 @@ interface DataEntry {
 
 interface Props {
   data?: DataEntry[]
+  isVertical?: boolean
 }
 
 interface DomainData {
@@ -25,8 +26,7 @@ interface DomainData {
 const parseDate = (dateStr: string) => {
   const [month, day, year] = dateStr.split('/').map(Number)
 
-  
-return new Date(year, month - 1, day)
+  return new Date(year, month - 1, day)
 }
 
 const convertToDomainData = (data: DataEntry) => {
@@ -82,11 +82,18 @@ const demoData = [
   }
 ]
 
-const TrendCharts = ({ data = demoData }: Props) => {
+const TrendCharts = ({ data = demoData, isVertical = false }: Props) => {
   const [options, setOptions] = useState<string[]>(['Neuromusculoskeletal'])
   const [domainData, setDomainData] = useState<DomainData[]>([])
   const [selectedDomainIndex, setSelectedDomainIndex] = useState<number>(0)
   const [keys, setKeys] = useState<string[]>([])
+
+  const getChartDirection = (isRadarChart: boolean) => {
+    const chartSize = isRadarChart ? 7 : 5
+
+    
+return isVertical ? { xs: 12 } : { xs: 12, md: chartSize }
+  }
 
   useEffect(() => {
     setOptions(
@@ -135,22 +142,24 @@ const TrendCharts = ({ data = demoData }: Props) => {
       <Card>
         <CardContent>
           <Grid2 container>
-            <Grid2 size={7} sx={{ mb: 8 }}>
-              <Typography variant='h5'>Trend by Domains</Typography>
-            </Grid2>
-            <Grid2 size={5} sx={{ mb: 8 }}>
-              <SelectedMenu
-                options={options}
-                selectedIndex={selectedDomainIndex}
-                setSelectedIndex={setSelectedDomainIndex}
-              />
-            </Grid2>
-            <Grid2 size={7}>
+            <Grid2 size={getChartDirection(true)} sx={{ mb: 8 }}>
+              <Typography variant='h5' sx={{ mb: 8, pt: 2 }}>
+                Trend by Domains
+              </Typography>
               <RechartsRadarChart legend={false} data={getSortedDataForRadarChart()} />
             </Grid2>
-            <Grid2 size={5}>
+            <Grid2 size={getChartDirection(false)} sx={{ mb: 8 }}>
+              <Box sx={{ mb: 4 }}>
+                <SelectedMenu
+                  options={options}
+                  selectedIndex={selectedDomainIndex}
+                  setSelectedIndex={setSelectedDomainIndex}
+                />
+              </Box>
+
               <RechartsBarChart legend={false} data={domainData} />
             </Grid2>
+
             <Grid2 size={12} sx={{ mt: 8 }}>
               <CustomLegend keys={keys} colors={['#16B1FF', '#8C57FF', '#56CA00']} />
             </Grid2>

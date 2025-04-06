@@ -24,13 +24,17 @@ export const exportToPdf = async (
   options: ExportToPdfOptions = {}
 ): Promise<void> => {
   try {
+    const pdfBackground =
+      getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-background-default').trim() ||
+      '#ffffff'
+
     const {
       filename = 'export.pdf',
       orientation = 'portrait',
       unit = 'mm',
       format = 'a4',
       quality = 0.95,
-      background = '#ffffff',
+      background = pdfBackground,
       scale = 2,
       onProgress,
       onComplete
@@ -75,6 +79,9 @@ export const exportToPdf = async (
     const imgY = 0
 
     onProgress?.(0.75)
+
+    pdf.setFillColor(background)
+    pdf.rect(0, 0, pdfHeight, pdfHeight, 'F')
 
     pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
 

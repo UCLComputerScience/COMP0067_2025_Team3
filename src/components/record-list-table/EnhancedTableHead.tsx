@@ -3,7 +3,7 @@ import { TableHead, TableRow, TableCell, Checkbox, TableSortLabel, Box } from '@
 import { visuallyHidden } from '@mui/utils'
 
 import type { Order } from '.'
-import type { Data } from '@/app/(private)/my-records/page'
+import type { Data } from '@/types/RecordTypes'
 
 interface HeadCell {
   disablePadding: boolean

@@ -3,22 +3,20 @@
 // React Imports
 import { useState, useEffect } from 'react'
 
+// Next.js Imports
 import { useParams } from 'next/navigation'
 
 import { useSession } from 'next-auth/react'
-
-// Next.js Imports
 
 // MUI (Material-UI) Imports
 import { Card, CardHeader, CardContent, Typography, CardActions, Button } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-// Actions
+// Prisma
 import { ApplicationStatus, Role } from '@prisma/client'
 
+// Actions
 import { getApplicationById } from '@/actions/researcher/applicationAction'
-
-// Prisma
 
 // Utility Functions
 import type { FormValues } from '@/components/DataAccessApplicationForm'

@@ -13,111 +13,109 @@ type PatientFilters = {
 }
 
 export async function getPatients(filters: PatientFilters, clinicianId: string) {
-    const { patientName, email, patientLink, page = 1, pageSize = 10 } = filters
-    
-    try {
-      const skip = (page - 1) * pageSize
-      
-      const orConditions: Array<{ [key: string]: any }> = []
-      
-      if (patientName) {
+  const { patientName, email, patientLink, page = 1, pageSize = 10 } = filters
 
-        const searchTerms = patientName.trim().split(/\s+/);
-        
-        if (searchTerms.length > 1) {
+  try {
+    const skip = (page - 1) * pageSize
 
-          orConditions.push({
-            OR: [
-              { firstName: { contains: patientName, mode: 'insensitive' } },
-              { lastName: { contains: patientName, mode: 'insensitive' } },
-              {
-                AND: [
-                  { firstName: { contains: searchTerms[0], mode: 'insensitive' } },
-                  { lastName: { contains: searchTerms[1], mode: 'insensitive' } }
-                ]
-              }
-            ]
-          });
-        } else {
-          orConditions.push({
-            OR: [
-              { firstName: { contains: patientName, mode: 'insensitive' } },
-              { lastName: { contains: patientName, mode: 'insensitive' } }
-            ]
-          });
-        }
-      }
-      
-      if (email) {
-        orConditions.push({ email: { contains: email, mode: 'insensitive' } })
-      }
-      
-      const clinicianPatients = await prisma.clinicianPatient.findMany({
-        where: {
-          clinicianId,
-          status: patientLink ? { equals: patientLink } : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
-          ...(orConditions.length > 0 && {
-            patient: {
-              OR: orConditions
+    const orConditions: Array<{ [key: string]: any }> = []
+
+    if (patientName) {
+      const searchTerms = patientName.trim().split(/\s+/)
+
+      if (searchTerms.length > 1) {
+        orConditions.push({
+          OR: [
+            { firstName: { contains: patientName, mode: 'insensitive' } },
+            { lastName: { contains: patientName, mode: 'insensitive' } },
+            {
+              AND: [
+                { firstName: { contains: searchTerms[0], mode: 'insensitive' } },
+                { lastName: { contains: searchTerms[1], mode: 'insensitive' } }
+              ]
             }
-          })
-        },
-        select: {
-          patientId: true,
-          status: true,
-          patient: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-              dateOfBirth: true
-            }
-          }
-        },
-        skip,
-        take: pageSize
-      })
-      
-      const total = await prisma.clinicianPatient.count({
-        where: {
-          clinicianId,
-          status: patientLink ? { equals: patientLink } : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
-          ...(orConditions.length > 0 && {
-            patient: {
-              OR: orConditions
-            }
-          })
-        }
-      })
-      
-      const patients = clinicianPatients.map(cp => ({
-        id: cp.patient.id,
-        name: `${cp.patient.firstName} ${cp.patient.lastName}`,
-        firstName: cp.patient.firstName,
-        lastName: cp.patient.lastName,
-        email: cp.patient.email,
-        dateOfBirth: cp.patient.dateOfBirth?.toISOString().split('T')[0] || '',
-        patientLink: cp.status
-      }))
-      
-      return {
-        patients,
-        total,
-        page,
-        pageSize
+          ]
+        })
+      } else {
+        orConditions.push({
+          OR: [
+            { firstName: { contains: patientName, mode: 'insensitive' } },
+            { lastName: { contains: patientName, mode: 'insensitive' } }
+          ]
+        })
       }
-    } catch (error) {
-      console.error('Failed to obtain patient data:', error)
-      throw new Error('Failed to obtain patient data')
     }
-  }
 
-export async function updatePatientLink(
-  clinicianId: string,
-  patientId: string,
-  status: RelationshipStatus
-) {
+    if (email) {
+      orConditions.push({ email: { contains: email, mode: 'insensitive' } })
+    }
+
+    const clinicianPatients = await prisma.clinicianPatient.findMany({
+      where: {
+        clinicianId,
+        status: patientLink
+          ? { equals: patientLink }
+          : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
+        ...(orConditions.length > 0 && {
+          patient: {
+            OR: orConditions
+          }
+        })
+      },
+      select: {
+        patientId: true,
+        status: true,
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            dateOfBirth: true
+          }
+        }
+      },
+      skip,
+      take: pageSize
+    })
+
+    const total = await prisma.clinicianPatient.count({
+      where: {
+        clinicianId,
+        status: patientLink
+          ? { equals: patientLink }
+          : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
+        ...(orConditions.length > 0 && {
+          patient: {
+            OR: orConditions
+          }
+        })
+      }
+    })
+
+    const patients = clinicianPatients.map(cp => ({
+      id: cp.patient.id,
+      name: `${cp.patient.firstName} ${cp.patient.lastName}`,
+      firstName: cp.patient.firstName,
+      lastName: cp.patient.lastName,
+      email: cp.patient.email,
+      dateOfBirth: cp.patient.dateOfBirth?.toISOString().split('T')[0] || '',
+      patientLink: cp.status
+    }))
+
+    return {
+      patients,
+      total,
+      page,
+      pageSize
+    }
+  } catch (error) {
+    console.error('Failed to obtain patient data:', error)
+    throw new Error('Failed to obtain patient data')
+  }
+}
+
+export async function updatePatientLink(clinicianId: string, patientId: string, status: RelationshipStatus) {
   try {
     const existingRelation = await prisma.clinicianPatient.findUnique({
       where: {
@@ -157,41 +155,41 @@ export async function updatePatientLink(
 }
 
 export const deletePatientLink = async (clinicianId: string, patientId: string) => {
-    'use server';
-    
-    try {
-      const deletedLink = await prisma.clinicianPatient.delete({
-        where: {
-          patientId_clinicianId: {
-            patientId,
-            clinicianId
-          }
+  'use server'
+
+  try {
+    const deletedLink = await prisma.clinicianPatient.delete({
+      where: {
+        patientId_clinicianId: {
+          patientId,
+          clinicianId
         }
-      });
-      
-      return { success: true, data: deletedLink };
-    } catch (error) {
-      console.error('Error deleting patient link:', error);
-      throw new Error('Failed to delete patient link');
-    }
-  };
-  
-  export const deleteManyPatientLinks = async (clinicianId: string, patientIds: string[]) => {
-    'use server';
-    
-    try {
-      const result = await prisma.clinicianPatient.deleteMany({
-        where: {
-          clinicianId,
-          patientId: {
-            in: patientIds
-          }
+      }
+    })
+
+    return { success: true, data: deletedLink }
+  } catch (error) {
+    console.error('Error deleting patient link:', error)
+    throw new Error('Failed to delete patient link')
+  }
+}
+
+export const deleteManyPatientLinks = async (clinicianId: string, patientIds: string[]) => {
+  'use server'
+
+  try {
+    const result = await prisma.clinicianPatient.deleteMany({
+      where: {
+        clinicianId,
+        patientId: {
+          in: patientIds
         }
-      });
-      
-      return { success: true, deletedCount: result.count };
-    } catch (error) {
-      console.error('Error deleting multiple patient links:', error);
-      throw new Error('Failed to delete patient links');
-    }
-  };
+      }
+    })
+
+    return { success: true, deletedCount: result.count }
+  } catch (error) {
+    console.error('Error deleting multiple patient links:', error)
+    throw new Error('Failed to delete patient links')
+  }
+}

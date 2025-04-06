@@ -34,17 +34,22 @@ import {
 
 import { RelationshipStatus } from '@prisma/client'
 
-import { getPatients, updatePatientLink, deletePatientLink, deleteManyPatientLinks } from '@/actions/clinician-patientlist/PatientListAction'
+import {
+  getPatients,
+  updatePatientLink,
+  deletePatientLink,
+  deleteManyPatientLinks
+} from '@/actions/clinician-patientlist/PatientListAction'
 
 type Patient = {
-    id: string
-    name: string
-    firstName?: string
-    lastName?: string
-    email: string
-    dateOfBirth: string
-    patientLink: RelationshipStatus | null
-  }
+  id: string
+  name: string
+  firstName?: string
+  lastName?: string
+  email: string
+  dateOfBirth: string
+  patientLink: RelationshipStatus | null
+}
 
 type PatientData = {
   patients: Patient[]
@@ -68,23 +73,19 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
   const [selectAll, setSelectAll] = useState(false)
   const [selectedPatients, setSelectedPatients] = useState<string[]>([])
   const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv')
-  
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedPatient, setSelectedPatient] = useState<string>('');
-  
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [selectedPatient, setSelectedPatient] = useState<string>('')
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
       try {
-
         const result = await getPatients(filters, clinicianId)
 
         setData(result)
         setError(null)
-        
 
         console.log('Fetch patient data with filters:', filters)
       } catch (err) {
@@ -101,11 +102,11 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     value: string | RelationshipStatus | undefined
   ) => {
     console.log(`Filter changed: ${key} = ${value}`)
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }))
+    setFilters(prev => ({ ...prev, [key]: value, page: 1 }))
   }
 
   const handlePageChange = (newPage: number) => {
-    setFilters((prev) => ({ ...prev, page: newPage }))
+    setFilters(prev => ({ ...prev, page: newPage }))
   }
 
   const handlePatientLinkChange = async (patientId: string, status: string) => {
@@ -122,48 +123,43 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
       setError('Failed to update the patient link')
     }
   }
-  
 
   const handleDeletePatientLinks = async () => {
     try {
-      setError("Deletion request being processed...");
-  
+      setError('Deletion request being processed...')
+
       if (selectedPatients.length === 1) {
-
-        await deletePatientLink(clinicianId, selectedPatients[0]);
+        await deletePatientLink(clinicianId, selectedPatients[0])
       } else {
-        await deleteManyPatientLinks(clinicianId, selectedPatients);
+        await deleteManyPatientLinks(clinicianId, selectedPatients)
       }
-      
-      const result = await getPatients(filters, clinicianId);
 
-      setData(result);
-      
- 
-      setSelectedPatients([]);
-      setSelectAll(false);
-      
-      setDeleteDialogOpen(false);
-   
-      setError(null);
+      const result = await getPatients(filters, clinicianId)
+
+      setData(result)
+
+      setSelectedPatients([])
+      setSelectAll(false)
+
+      setDeleteDialogOpen(false)
+
+      setError(null)
     } catch (err) {
-      console.error('Error deleting patient links:', err);
-      setError('Fail to delete the patient link information. Try it again.');
+      console.error('Error deleting patient links:', err)
+      setError('Fail to delete the patient link information. Try it again.')
     }
-  };
+  }
 
   const handleExport = async () => {
     try {
       if (!data) return
 
-      const selectedData = data.patients.filter((p) => selectedPatients.includes(p.id))
+      const selectedData = data.patients.filter(p => selectedPatients.includes(p.id))
 
       if (exportFormat === 'csv') {
         const headers = ['Name', 'Email', 'Date of Birth', 'Patient Link']
 
-        const rows = selectedData.map((p) =>
-          [p.name, p.email, p.dateOfBirth, p.patientLink ?? ''].join(',')
-        )
+        const rows = selectedData.map(p => [p.name, p.email, p.dateOfBirth, p.patientLink ?? ''].join(','))
 
         const csvContent = [headers.join(','), ...rows].join('\n')
         const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -184,12 +180,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         doc.setFontSize(16)
         doc.text('Patient List', 14, 20)
 
-        const tableData = selectedData.map((p) => [
-          p.name,
-          p.email,
-          p.dateOfBirth,
-          p.patientLink?.toUpperCase() ?? ''
-        ])
+        const tableData = selectedData.map(p => [p.name, p.email, p.dateOfBirth, p.patientLink?.toUpperCase() ?? ''])
 
         autoTable(doc, {
           startY: 30,
@@ -217,7 +208,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
     if (selectAll) {
       setSelectedPatients([])
     } else {
-      setSelectedPatients(data?.patients.map((patient) => patient.id) || [])
+      setSelectedPatients(data?.patients.map(patient => patient.id) || [])
     }
 
     setSelectAll(!selectAll)
@@ -225,13 +216,18 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
 
   const handleSelectPatient = (patientId: string) => {
     if (selectedPatients.includes(patientId)) {
-      setSelectedPatients(selectedPatients.filter((id) => id !== patientId))
+      setSelectedPatients(selectedPatients.filter(id => id !== patientId))
     } else {
       setSelectedPatients([...selectedPatients, patientId])
     }
   }
 
-  if (error) return <Typography color="error" sx={{ p: 4 }}>{error}</Typography>
+  if (error)
+    return (
+      <Typography color='error' sx={{ p: 4 }}>
+        {error}
+      </Typography>
+    )
   if (!data) return <Typography sx={{ p: 4 }}>Loading...</Typography>
 
   const totalPages = Math.ceil(data.total / data.pageSize)
@@ -248,83 +244,78 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         return 'secondary'
     }
   }
-  
+
   const displayedPatients = data.patients.filter(patient => {
-    if (!filters.patientName) return true;
-  
-    const searchInput = filters.patientName.trim().toLowerCase();
-    const searchTerms = searchInput.split(/\s+/); 
-    
+    if (!filters.patientName) return true
+
+    const searchInput = filters.patientName.trim().toLowerCase()
+    const searchTerms = searchInput.split(/\s+/)
+
     if (patient.firstName && patient.lastName) {
-      const firstName = patient.firstName.toLowerCase();
-      const lastName = patient.lastName.toLowerCase();
-      const fullName = `${firstName} ${lastName}`.toLowerCase();
-      
+      const firstName = patient.firstName.toLowerCase()
+      const lastName = patient.lastName.toLowerCase()
+      const fullName = `${firstName} ${lastName}`.toLowerCase()
+
       if (fullName.includes(searchInput)) {
-        return true;
+        return true
       }
-      
+
       if (searchTerms.length > 1) {
-        const firstTermMatchesFirstName = firstName.includes(searchTerms[0]);
-        const secondTermMatchesLastName = lastName.includes(searchTerms[1]);
+        const firstTermMatchesFirstName = firstName.includes(searchTerms[0])
+        const secondTermMatchesLastName = lastName.includes(searchTerms[1])
 
         if (firstTermMatchesFirstName && secondTermMatchesLastName) {
-          return true;
+          return true
         }
       }
-      
-      return searchTerms.some(term => 
-        firstName.includes(term) || lastName.includes(term)
-      );
+
+      return searchTerms.some(term => firstName.includes(term) || lastName.includes(term))
     }
-    
-    const patientName = patient.name.toLowerCase();
-    
+
+    const patientName = patient.name.toLowerCase()
+
     if (patientName.includes(searchInput)) {
-      return true;
+      return true
     }
-    
-    return searchTerms.some(term => patientName.includes(term));
-  });
+
+    return searchTerms.some(term => patientName.includes(term))
+  })
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
       <Card sx={{ width: 2000, p: 3 }}>
         {/* Filters */}
-        <Typography variant="body2">Filters</Typography>
+        <Typography variant='body2'>Filters</Typography>
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
           <TextField
             fullWidth
-            label="Patient"
+            label='Patient'
             value={filters.patientName}
-            onChange={(e) => handleFilterChange('patientName', e.target.value)}
-            variant="outlined"
-            size="small"
+            onChange={e => handleFilterChange('patientName', e.target.value)}
+            variant='outlined'
+            size='small'
           />
           <TextField
             fullWidth
-            label="Email"
+            label='Email'
             value={filters.email}
-            onChange={(e) => handleFilterChange('email', e.target.value)}
-            variant="outlined"
-            size="small"
+            onChange={e => handleFilterChange('email', e.target.value)}
+            variant='outlined'
+            size='small'
           />
-          <FormControl fullWidth variant="outlined" size="small">
-            <InputLabel id="patient-link-label">Patient Link</InputLabel>
+          <FormControl fullWidth variant='outlined' size='small'>
+            <InputLabel id='patient-link-label'>Patient Link</InputLabel>
             <Select
-              labelId="patient-link-label"
-              label="Patient link"
+              labelId='patient-link-label'
+              label='Patient link'
               value={filters.patientLink ?? 'all'}
-              onChange={(e) => {
+              onChange={e => {
                 const value = e.target.value
 
-                handleFilterChange(
-                  'patientLink',
-                  value === 'all' ? undefined : (value as RelationshipStatus)
-                )
+                handleFilterChange('patientLink', value === 'all' ? undefined : (value as RelationshipStatus))
               }}
             >
-              <MenuItem value="all">All</MenuItem>
+              <MenuItem value='all'>All</MenuItem>
               <MenuItem value={RelationshipStatus.PENDING}>Pending</MenuItem>
               <MenuItem value={RelationshipStatus.CONNECTED}>Connected</MenuItem>
             </Select>
@@ -334,42 +325,42 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         {/* Export and Delete Buttons */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 5, mb: 2 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Checkbox 
-              checked={selectAll} 
-              onChange={handleSelectAll} 
+            <Checkbox
+              checked={selectAll}
+              onChange={handleSelectAll}
               sx={{ visibility: data.patients.length > 0 ? 'visible' : 'hidden' }}
             />
-            <Typography variant="body2">
-              {selectedPatients.length > 0 ? 
-                `Selected ${selectedPatients.length} patient${selectedPatients.length > 1 ? 's' : ''}` : 
-                ''}
+            <Typography variant='body2'>
+              {selectedPatients.length > 0
+                ? `Selected ${selectedPatients.length} patient${selectedPatients.length > 1 ? 's' : ''}`
+                : ''}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Button
-              variant="contained"
-              color="error"
+              variant='contained'
+              color='error'
               onClick={() => setDeleteDialogOpen(true)}
               disabled={selectedPatients.length === 0}
-              size="small"
+              size='small'
             >
               Delete
             </Button>
             <Select
               value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf')}
-              size="small"
-              variant="outlined"
+              onChange={e => setExportFormat(e.target.value as 'csv' | 'pdf')}
+              size='small'
+              variant='outlined'
             >
-              <MenuItem value="csv">CSV</MenuItem>
-              <MenuItem value="pdf">PDF</MenuItem>
+              <MenuItem value='csv'>CSV</MenuItem>
+              <MenuItem value='pdf'>PDF</MenuItem>
             </Select>
             <Button
-              variant="contained"
-              color="primary"
+              variant='contained'
+              color='primary'
               onClick={handleExport}
               disabled={selectedPatients.length === 0}
-              size="small"
+              size='small'
             >
               Export
             </Button>
@@ -385,7 +376,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell width="5%">
+                    <TableCell width='5%'>
                       <Checkbox checked={selectAll} onChange={handleSelectAll} />
                     </TableCell>
                     <TableCell>PATIENT</TableCell>
@@ -395,7 +386,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {displayedPatients.map((patient) => (
+                  {displayedPatients.map(patient => (
                     <TableRow key={patient.id}>
                       <TableCell>
                         <Checkbox
@@ -404,10 +395,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
                         />
                       </TableCell>
                       <TableCell>
-                        <Link
-                          href={`/all-patients/${patient.id}/records`}
-                          style={{ color: '#7B61FF', textDecoration: 'none' }}
-                        >
+                        <Link href={`/all-patients/${patient.id}`} style={{ color: '#7B61FF', textDecoration: 'none' }}>
                           {patient.name}
                         </Link>
                       </TableCell>
@@ -415,20 +403,20 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
                       <TableCell>{patient.dateOfBirth}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Chip 
-                            label={patient.patientLink || 'Not Set'} 
-                            variant="tonal" 
-                            color={getLinkStatusColor(patient.patientLink)} 
+                          <Chip
+                            label={patient.patientLink || 'Not Set'}
+                            variant='tonal'
+                            color={getLinkStatusColor(patient.patientLink)}
                           />
-                          <IconButton 
-                            color="secondary" 
-                            onClick={(event) => {
-                              setAnchorEl(event.currentTarget);
-                              setSelectedPatient(patient.id);
+                          <IconButton
+                            color='secondary'
+                            onClick={event => {
+                              setAnchorEl(event.currentTarget)
+                              setSelectedPatient(patient.id)
                             }}
-                            size="small"
+                            size='small'
                           >
-                            <i className="ri-pencil-line" />
+                            <i className='ri-pencil-line' />
                           </IconButton>
                         </Box>
                       </TableCell>
@@ -443,93 +431,82 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         {/* Pagination */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2">Rows per page:</Typography>
+            <Typography variant='body2'>Rows per page:</Typography>
             <Select
               value={filters.pageSize}
-              onChange={(e) =>
-                setFilters((prev) => ({
+              onChange={e =>
+                setFilters(prev => ({
                   ...prev,
                   pageSize: Number(e.target.value),
                   page: 1
                 }))
               }
-              variant="outlined"
-              size="small"
+              variant='outlined'
+              size='small'
             >
               <MenuItem value={10}>10</MenuItem>
               <MenuItem value={20}>20</MenuItem>
               <MenuItem value={50}>50</MenuItem>
             </Select>
-            <Typography variant="body2">
+            <Typography variant='body2'>
               {data.total > 0 ? `${startRow}-${endRow} of ${data.total}` : '0 of 0'}
             </Typography>
-            <IconButton
-              onClick={() => handlePageChange(data.page - 1)}
-              disabled={data.page === 1}
-              size="small"
-            >
-              <i className="ri-arrow-left-s-line" />
+            <IconButton onClick={() => handlePageChange(data.page - 1)} disabled={data.page === 1} size='small'>
+              <i className='ri-arrow-left-s-line' />
             </IconButton>
             <IconButton
               onClick={() => handlePageChange(data.page + 1)}
               disabled={data.page === totalPages || data.total === 0}
-              size="small"
+              size='small'
             >
-              <i className="ri-arrow-right-s-line" />
+              <i className='ri-arrow-right-s-line' />
             </IconButton>
           </Box>
         </Box>
-        
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-        >
-          <MenuItem 
+
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+          <MenuItem
             onClick={() => {
-              handlePatientLinkChange(selectedPatient, RelationshipStatus.CONNECTED);
-              setAnchorEl(null);
+              handlePatientLinkChange(selectedPatient, RelationshipStatus.CONNECTED)
+              setAnchorEl(null)
             }}
           >
             Connected
           </MenuItem>
-          <MenuItem 
+          <MenuItem
             onClick={() => {
-              handlePatientLinkChange(selectedPatient, RelationshipStatus.PENDING);
-              setAnchorEl(null);
+              handlePatientLinkChange(selectedPatient, RelationshipStatus.PENDING)
+              setAnchorEl(null)
             }}
           >
             Pending
           </MenuItem>
         </Menu>
-        
+
         {/* Delete*/}
         <Dialog
-            open={deleteDialogOpen}
-            onClose={() => setDeleteDialogOpen(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            >
-            <DialogTitle id="alert-dialog-title">
-                Delete
-            </DialogTitle>
-            <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                {selectedPatients.length > 1 
-                    ? `Do you want to delete the selected ${selectedPatients.length} patient links? This action cannot be undone.`
-                    : 'Do I want to delete the selected patient links? This action cannot be undone.'
-                }
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
-                Cancel
-                </Button>
-                <Button onClick={handleDeletePatientLinks} color="error" autoFocus>
-                Delete
-                </Button>
-            </DialogActions>
-            </Dialog>
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          aria-labelledby='alert-dialog-title'
+          aria-describedby='alert-dialog-description'
+        >
+          <DialogTitle id='alert-dialog-title'>Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText id='alert-dialog-description'>
+              {selectedPatients.length > 1
+                ? `Do you want to delete the selected ${selectedPatients.length} patient links? This action cannot be undone.`
+                : 'Do I want to delete the selected patient links? This action cannot be undone.'}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)} color='primary'>
+              Cancel
+            </Button>
+            <Button onClick={handleDeletePatientLinks} color='error' autoFocus>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Card>
     </Box>
   )

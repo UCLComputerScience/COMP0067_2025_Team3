@@ -1,75 +1,35 @@
-
+// next
 import { redirect } from 'next/navigation'
 
 import { getServerSession } from 'next-auth'
 
+// prisma
 import { Role } from '@prisma/client'
 
+// auth
 import { authOptions } from '@/libs/auth'
 
-import { prisma } from '@/prisma/client'
+// actions
+import { getResponseDataByUser } from '@/actions/records/recordAction'
 
+// component
 import Records from '@/views/Records'
 
 interface PageProps {
   params: Promise<{ patientId: string }>
 }
 
-const getResponseDataByUser = async (userId: string) => {
-  const responses = await prisma.response.groupBy({
-    by: ['domain', 'submissionId'],
-    where: { userId },
-    _avg: { score: true },
-    _min: { createdAt: true }
-  })
-
-  const groupedResults: Record<string, any> = {}
-
-  responses.forEach((res) => {
-    const { submissionId, domain, _avg, _min } = res
-
-    if (!groupedResults[submissionId]) {
-      groupedResults[submissionId] = {
-        createdAt: _min.createdAt!,
-        domains: {}
-      }
-    }
-
-    groupedResults[submissionId].domains[domain] = {
-      averageScore: _avg.score!
-    }
-  })
-
-  return Object.entries(groupedResults)
-    .map(([submissionId, submission]) => ({
-      submissionId,
-      date: submission.createdAt,
-      neuromusculoskeletal: submission.domains['Neuromusculoskeletal']?.averageScore,
-      pain: submission.domains['Pain']?.averageScore,
-      fatigue: submission.domains['Fatigue']?.averageScore,
-      gastrointestinal: submission.domains['Gastrointestinal']?.averageScore,
-      cardiacDysautonomia: submission.domains['Cardiac Dysautonomia']?.averageScore,
-      urogenital: submission.domains['Urogenital']?.averageScore,
-      anxiety: submission.domains['Anxiety']?.averageScore,
-      depression: submission.domains['Depression']?.averageScore
-    }))
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-}
-
 export default async function Page({ params }: PageProps) {
-
   const resolvedParams = await params
   const patientId = resolvedParams.patientId
-  
+
   const session = await getServerSession(authOptions)
 
   if (!session?.user || session.user.role !== Role.CLINICIAN) {
     redirect('/not-found')
   }
-  
+
   const data = await getResponseDataByUser(patientId)
 
   return <Records data={data} />
 }
-
-
