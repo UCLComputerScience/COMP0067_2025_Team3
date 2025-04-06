@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+
 import {
   Card,
   CardContent,
@@ -68,6 +69,7 @@ const Result = ({
     if (!contentRef.current) return;
 
     setIsExporting(true);
+
     try {
       await exportToPdf(contentRef.current, {
         filename: `results-${date}.pdf`,
@@ -88,10 +90,13 @@ const Result = ({
   // Merge perceived data into filteredData
   const mergedData = filteredData.map(entry => {
     const subject = entry.subject.toLowerCase().trim();
+
     const match = perceivedSpidergramData.find(
       item => item.subject.toLowerCase().trim() === subject
     );
-    return {
+
+    
+return {
       ...entry,
       'Perceived score': match?.value ?? ''
     };
