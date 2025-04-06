@@ -2,10 +2,14 @@
 
 import { useState } from 'react'
 
+import { useRouter } from 'next/navigation'
+
 import { Stepper, Step, StepLabel, Typography, Box } from '@mui/material'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useSession } from 'next-auth/react'
+
+import { toast } from 'react-toastify'
 
 import PatientInfoForm from '@/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
 import StepperCustomDot from '@/components/stepper-dot'
@@ -46,6 +50,7 @@ const stepperStyle = {
 }
 
 const Questionnaire = () => {
+  const router = useRouter()
   const { data: session } = useSession()
   const userId = session?.user?.id || ''
   const [activeStep, setActiveStep] = useState<number>(0)
@@ -93,7 +98,14 @@ const Questionnaire = () => {
 
     console.log('Formatted Answers:', allFormattedAnswers)
 
-    await submitResponses(allFormattedAnswers)
+    try {
+      await submitResponses(allFormattedAnswers)
+      toast.success('Responses submitted successfully!')
+      router.push('/my-records')
+    } catch (error) {
+      console.error('Error submitting responses:', error)
+      toast.error('Error submitting responses. Please try again.')
+    }
   }
 
   const getStepContent = () => {
