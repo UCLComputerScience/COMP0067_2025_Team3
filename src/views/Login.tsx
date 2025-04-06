@@ -38,8 +38,6 @@ const LoginV2 = ({ mode }: { mode: string }) => {
   // Hooks
   const router = useRouter()
 
-  // const { settings } = useSettings()
-
   // Email validation function
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -119,7 +117,6 @@ const LoginV2 = ({ mode }: { mode: string }) => {
           router.push('/admin-allusers')
           break
         default:
-          // Default redirect path
           router.push('/home')
       }
     }
@@ -132,7 +129,7 @@ const LoginV2 = ({ mode }: { mode: string }) => {
           {' '}
           <Logo />
         </Link>
-        <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] border border-divider rounded-lg p-6 shadow-sm bg-backgroundPaper'>
+        <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] border border-divider rounded-lg p-6 bg-backgroundPaper'>
           <Typography variant='h4' className='text-center'>{`Log in`}</Typography>
           <form onSubmit={handleLogin} className='flex flex-col gap-5'>
             <TextField
