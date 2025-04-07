@@ -1,9 +1,16 @@
-import ResetPasswordPage from '@views/ResetPassword';
+import ResetPasswordPage from '@views/ResetPassword'
 
-export default function ResetPassword({
-  params: { token },
-}: {
-  params: { token: string };
-}) {
-  return <ResetPasswordPage token={token} />;
+interface PageProps {
+  params: Promise<{
+    token: string
+  }>
 }
+
+const Page = async ({ params }: PageProps) => {
+  const { token } = await params
+
+  
+return <ResetPasswordPage token={token} />
+}
+
+export default Page
