@@ -7,7 +7,7 @@ interface PageProps {
 }
 
 const ResetPassword = async ({ params }: PageProps) => {
-  const { token } = await params;
+  const { token } = params;
 
   return <ResetPasswordPage token={token} />
 }
