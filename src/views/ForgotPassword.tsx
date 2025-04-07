@@ -3,10 +3,6 @@
 // React Imports
 import { useState } from 'react'
 
-import { sendPasswordReset } from '@/actions/email/sendReset';
-
-// Next Imports
-import { useRouter } from 'next/navigation'
 
 import { toast } from 'react-toastify'
 
@@ -15,14 +11,14 @@ import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 
+import { sendPasswordReset } from '@/actions/email/sendReset';
 
 // Component Imports
 import Link from '@components/Link'
 import Logo from '@components/layout/shared/Logo'
 
-const ForgotPassword = ({ mode }: { mode: string }) => {
+const ForgotPassword = () => {
     const [email, setEmail] = useState('')
-    const [status, setStatus] = useState('');
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newEmail = e.target.value
@@ -33,6 +29,7 @@ const ForgotPassword = ({ mode }: { mode: string }) => {
 
     const handleSubmit = async () => {
         const result = await sendPasswordReset(email);
+
         if (result?.success) {
             toast.success('Reset link sent successfully. Check your inbox.')
         } else {
