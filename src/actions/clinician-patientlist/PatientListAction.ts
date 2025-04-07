@@ -53,6 +53,7 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
     const clinicianPatients = await prisma.clinicianPatient.findMany({
       where: {
         clinicianId,
+        agreedToShareData: true,
         status: patientLink
           ? { equals: patientLink }
           : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
@@ -65,6 +66,7 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
       select: {
         patientId: true,
         status: true,
+        agreedToShareData: true,
         patient: {
           select: {
             id: true,
@@ -82,6 +84,7 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
     const total = await prisma.clinicianPatient.count({
       where: {
         clinicianId,
+        agreedToShareData: true,
         status: patientLink
           ? { equals: patientLink }
           : { in: [RelationshipStatus.PENDING, RelationshipStatus.CONNECTED] },
@@ -100,7 +103,8 @@ export async function getPatients(filters: PatientFilters, clinicianId: string) 
       lastName: cp.patient.lastName,
       email: cp.patient.email,
       dateOfBirth: cp.patient.dateOfBirth?.toISOString().split('T')[0] || '',
-      patientLink: cp.status
+      patientLink: cp.status,
+      agreedToShareData: cp.agreedToShareData 
     }))
 
     return {
@@ -151,6 +155,27 @@ export async function updatePatientLink(clinicianId: string, patientId: string, 
   } catch (error) {
     console.error('Failed to update patient link:', error)
     throw new Error('Failed to update patient link')
+  }
+}
+
+export async function updateAgreedToShareData(clinicianId: string, patientId: string, agreed: boolean) {
+  try {
+    await prisma.clinicianPatient.update({
+      where: {
+        patientId_clinicianId: {
+          patientId,
+          clinicianId
+        }
+      },
+      data: {
+        agreedToShareData: agreed
+      }
+    })
+    
+return { success: true }
+  } catch (error) {
+    console.error('Failed to update agreed to share data:', error)
+    throw new Error('Failed to update agreed to share data')
   }
 }
 

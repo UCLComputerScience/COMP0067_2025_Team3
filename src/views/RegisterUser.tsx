@@ -55,6 +55,7 @@ export interface AccountDetailsForm {
   dateOfBirth?: string
   address?: string
   phoneNumber?: string
+  hospitalNumber?: string 
   registrationNumber?: string
   institution?: string
   profession?: string
@@ -68,6 +69,7 @@ interface FormErrors {
   dateOfBirth?: string
   address?: string
   phoneNumber?: string
+  hospitalNumber?: string 
   registrationNumber?: string
   institution?: string
   profession?: string
@@ -75,6 +77,7 @@ interface FormErrors {
 interface DuplicateCheckResult {
   emailExists: boolean
   phoneExists: boolean
+  hospitalNumberExists: boolean
   registrationNumberExists: boolean
 }
 
@@ -96,6 +99,7 @@ export const Register = () => {
   const [isAddressFocused, setIsAddressFocused] = useState(false)
   const [isPasswordFocused, setIsPasswordFocused] = useState(false)
   const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState(false)
+  const [isHospitalNumberFocused, setIsHospitalNumberFocused] = useState(false)
   const [isRegistrationNumberFocused, setIsRegistrationNumberFocused] = useState(false)
   const [isInstitutionFocused, setIsInstitutionFocused] = useState(false)
   const [isProfessionFocused, setIsProfessionFocused] = useState(false)
@@ -104,6 +108,13 @@ export const Register = () => {
   const validatePhoneNumber = (phoneNumber: string): boolean => {
     return /^\d{10,}$/.test(phoneNumber)
   }
+
+  const validateHospitalNumber = (hospitalNumber: string): boolean => {
+    const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{7}$/;
+
+    
+return regex.test(hospitalNumber);
+  };
 
   const validatePassword = (password: string): { isValid: boolean; errorMessage: string } => {
     const requirements = [
@@ -143,6 +154,7 @@ export const Register = () => {
     dateOfBirth: '',
     address: '',
     phoneNumber: '',
+    hospitalNumber: '', 
     registrationNumber: '',
     institution: '',
     profession: ''
@@ -157,6 +169,7 @@ export const Register = () => {
     dateOfBirth: '',
     address: '',
     phoneNumber: '',
+    hospitalNumber: '',
     registrationNumber: '',
     institution: '',
     profession: ''
@@ -165,11 +178,11 @@ export const Register = () => {
   const router = useRouter()
 
   // Define debouncedCheckDuplicates
-  const debouncedCheckDuplicates = useCallback((email: string, phoneNumber: string, registrationNumber: string) => {
+  const debouncedCheckDuplicates = useCallback((email: string, phoneNumber: string, registrationNumber: string,hospitalNumber: string) => {
     const checkDuplicates = debounce(async () => {
-      if (email.trim() || phoneNumber.trim() || registrationNumber.trim()) {
+      if (email.trim() || phoneNumber.trim() || registrationNumber.trim() || hospitalNumber.trim()) {
         try {
-          const result: DuplicateCheckResult = await checkUserDuplicates(email, phoneNumber, registrationNumber)
+          const result: DuplicateCheckResult = await checkUserDuplicates(email, phoneNumber, registrationNumber,hospitalNumber)
 
           setFormErrors(prev => {
             const newErrors = { ...prev }
@@ -184,6 +197,10 @@ export const Register = () => {
 
             if (result.registrationNumberExists) {
               newErrors.registrationNumber = 'The Registration Number already exists'
+            }
+
+            if (result.hospitalNumberExists) {
+              newErrors.hospitalNumber = 'The Hospital Number already exists'
             }
 
             return newErrors
@@ -293,6 +310,20 @@ export const Register = () => {
       errors.dateOfBirth = ''
     }
 
+    if (shouldValidateField('hospitalNumber') && accountType === 'patient') {
+      if (!formData.hospitalNumber?.trim()) {
+        errors.hospitalNumber = 'The hospital number is required';
+      } else if (!validateHospitalNumber(formData.hospitalNumber)) {
+        errors.hospitalNumber = 'Please enter the  valid format.)';
+      } else if (errors.hospitalNumber && !errors.hospitalNumber.includes('already exists')) {
+        errors.hospitalNumber = '';
+      }
+      
+      isValid = isValid && !errors.hospitalNumber;
+    } else {
+      errors.hospitalNumber = '';
+    }
+
     if (shouldValidateField('registrationNumber') && accountType === 'clinician') {
       if (!formData.registrationNumber?.trim()) {
         errors.registrationNumber = 'Registration number is required'
@@ -331,6 +362,7 @@ export const Register = () => {
       const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement
       const addressInput = document.querySelector('input[name="address"]') as HTMLInputElement
       const phoneNumberInput = document.querySelector('input[name="phoneNumber"]') as HTMLInputElement
+      const hospitalNumberInput = document.querySelector('input[name="hospitalNumber"]') as HTMLInputElement
       const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement
       const confirmPasswordInput = document.querySelector('input[name="confirmPassword"]') as HTMLInputElement
 
@@ -357,6 +389,11 @@ export const Register = () => {
       if (phoneNumberInput?.value) {
         setFormData(prev => ({ ...prev, phoneNumber: phoneNumberInput.value }))
         setTouchedFields(prev => ({ ...prev, phoneNumber: true }))
+      }
+
+      if (hospitalNumberInput?.value) {
+        setFormData(prev => ({ ...prev, hospitalNumber: hospitalNumberInput.value }))
+        setTouchedFields(prev => ({ ...prev, hospitalNumber: true }))
       }
 
       if (passwordInput?.value) {
@@ -415,6 +452,16 @@ export const Register = () => {
         }
       }
 
+      if (fieldName === 'hospitalNumber' && accountType === 'patient') {
+        if (!value.trim()) {
+          newErrors.hospitalNumber = 'The hospital number is required';
+        } else if (!validateHospitalNumber(value)) {
+          newErrors.hospitalNumber = 'Please enter the valid format)';
+        } else if (newErrors.hospitalNumber && !newErrors.hospitalNumber.includes('already exists')) {
+          newErrors.hospitalNumber = '';
+        }
+      }
+
       if (fieldName === 'registrationNumber' && accountType === 'clinician') {
         if (!value.trim()) {
           newErrors.registrationNumber = 'Registration number is required'
@@ -466,24 +513,53 @@ export const Register = () => {
           debouncedCheckDuplicates(
             formData.email || '',
             value,
-            accountType === 'clinician' ? formData.registrationNumber || '' : ''
+            accountType === 'clinician' ? formData.registrationNumber || '' : '',
+            accountType === 'patient' ? formData.hospitalNumber || '' : ''
           )
         }
       }
+
+    } else if (name === 'hospitalNumber') {
+      console.log('Processing hospital number input')
+    
+      if (value && !validateHospitalNumber(value)) {
+        console.log('Hospital number validation failed in handleInputChange')
+        setFormErrors(prev => ({ ...prev, hospitalNumber: 'Please enter the valid foramt' }))
+      } else {
+        console.log('Hospital number validation passed in handleInputChange')
+        setFormErrors(prev => {
+          if (prev.hospitalNumber && !prev.hospitalNumber.includes('already exists')) {
+            return { ...prev, hospitalNumber: '' }
+          }
+    
+          return prev
+        })
+    
+        if (value) {
+          debouncedCheckDuplicates(
+            formData.email || '',
+            formData.phoneNumber || '',
+            accountType === 'clinician' ? formData.registrationNumber || '' : '',
+            value
+          )
+        }
+      }
+
     } else if (name === 'confirmPassword') {
       if (formData.password && value !== formData.password) {
         setFormErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match' }))
       } else {
         setFormErrors(prev => ({ ...prev, confirmPassword: '' }))
       }
-    } else if (name === 'email' || name === 'phoneNumber' || name === 'registrationNumber') {
+    } else if (name === 'email' || name === 'phoneNumber' || name === 'registrationNumber' || name === 'hospitalNumber') {
       if (value.trim() === '') {
         setFormErrors(prev => ({ ...prev, [name]: '' }))
       } else {
         debouncedCheckDuplicates(
           name === 'email' ? value : formData.email || '',
           name === 'phoneNumber' ? value : formData.phoneNumber || '',
-          name === 'registrationNumber' ? value : formData.registrationNumber || ''
+          name === 'registrationNumber' ? value : formData.registrationNumber || '',
+          name === 'hospitalNumber' ? value : formData.hospitalNumber || ''
         )
       }
 
@@ -508,6 +584,7 @@ export const Register = () => {
         dateOfBirth: true,
         address: true,
         phoneNumber: true,
+        hospitalNumber: true,
         registrationNumber: true,
         institution: true,
         profession: true
@@ -779,6 +856,28 @@ export const Register = () => {
           />
         </Grid>
         {accountType === 'patient' && (
+        <>
+          <Grid item xs={12}>
+            <TextField
+              label='Hospital Number'
+              name='hospitalNumber'
+              autoComplete='off'
+              fullWidth
+              variant='outlined'
+              value={formData.hospitalNumber}
+              onChange={handleInputChange}
+              onBlur={() => {
+                setTouchedFields(prev => ({ ...prev, hospitalNumber: true }))
+                validateForm('hospitalNumber')
+                setIsHospitalNumberFocused(!!formData.hospitalNumber)
+              }}
+              error={!!formErrors.hospitalNumber}
+              helperText={formErrors.hospitalNumber}
+              InputLabelProps={{ shrink: isHospitalNumberFocused || !!formData.hospitalNumber }}
+              onFocus={() => setIsHospitalNumberFocused(true)}
+              sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+            />
+          </Grid>
           <Grid item xs={12}>
             <DateOfBirthPicker
               value={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
@@ -795,7 +894,8 @@ export const Register = () => {
               helperText={formErrors.dateOfBirth}
             />
           </Grid>
-        )}
+        </>
+      )}
         {accountType === 'clinician' && (
           <>
             <Grid item xs={12}>

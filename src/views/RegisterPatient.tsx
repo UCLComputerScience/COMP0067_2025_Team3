@@ -78,6 +78,7 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
           dateOfBirth: formData.dateOfBirth || '',
           address: formData.address,
           phoneNumber: fullPhoneNumber,
+          hospitalNumber: formData.hospitalNumber,
           registrationNumber: '',
           profession: '',
           institution: '',

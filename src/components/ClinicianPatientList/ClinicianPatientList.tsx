@@ -49,6 +49,7 @@ type Patient = {
   email: string
   dateOfBirth: string
   patientLink: RelationshipStatus | null
+  agreedToShareData: boolean 
 }
 
 type PatientData = {
@@ -157,9 +158,15 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
       const selectedData = data.patients.filter(p => selectedPatients.includes(p.id))
 
       if (exportFormat === 'csv') {
-        const headers = ['Name', 'Email', 'Date of Birth', 'Patient Link']
+        const headers = ['Name', 'Email', 'Date of Birth', 'Patient Link', 'Agreed To Share Data']
 
-        const rows = selectedData.map(p => [p.name, p.email, p.dateOfBirth, p.patientLink ?? ''].join(','))
+        const rows = selectedData.map(p => [
+          p.name, 
+          p.email, 
+          p.dateOfBirth, 
+          p.patientLink ?? '',
+          p.agreedToShareData ? 'True' : 'False'
+        ].join(','))
 
         const csvContent = [headers.join(','), ...rows].join('\n')
         const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -180,11 +187,17 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         doc.setFontSize(16)
         doc.text('Patient List', 14, 20)
 
-        const tableData = selectedData.map(p => [p.name, p.email, p.dateOfBirth, p.patientLink?.toUpperCase() ?? ''])
+        const tableData = selectedData.map(p => [
+          p.name, 
+          p.email, 
+          p.dateOfBirth, 
+          p.patientLink?.toUpperCase() ?? '',
+          p.agreedToShareData ? 'Yes' : 'No'
+        ])
 
         autoTable(doc, {
           startY: 30,
-          head: [['Name', 'Email', 'Date of Birth', 'Patient Link']],
+          head: [['Name', 'Email', 'Date of Birth', 'Patient Link', 'Agreed To Share Data']],
           body: tableData,
           styles: { fontSize: 11 },
           headStyles: {
@@ -322,6 +335,8 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
           </FormControl>
         </Box>
 
+
+
         {/* Export and Delete Buttons */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 5, mb: 2 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -371,7 +386,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
         <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
           <TableContainer component={Paper} sx={{ boxShadow: 0, mb: 6 }}>
             {displayedPatients.length === 0 ? (
-              <Typography sx={{ p: 4, textAlign: 'center' }}>No related patients</Typography>
+              <Typography sx={{ p: 4, textAlign: 'center' }}>Relevant patients who did not consent to data sharing</Typography>
             ) : (
               <Table>
                 <TableHead>
