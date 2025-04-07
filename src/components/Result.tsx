@@ -103,6 +103,8 @@ const Result = ({ data = [], domainData = [], perceivedSpidergramData = [], date
     )
   }
 
+  console.log(data, domainData, perceivedSpidergramData, date, patientName)
+
   return (
     <div className='p-8 space-y-6' ref={contentRef}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
