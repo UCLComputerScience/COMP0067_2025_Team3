@@ -1,13 +1,13 @@
 import ResetPasswordPage from '@views/ResetPassword';
 
-const ResetPassword = async ({
-  params,
-}: {
-  params: { token: string };
-}) => {
-  const { token } = params;
+type Props = {
+  params: {
+    token: string;
+  };
+};
 
-  return <ResetPasswordPage token={token} />;
+const ResetPassword = async ({ params }: Props) => {
+  return <ResetPasswordPage token={params.token} />;
 };
 
 export default ResetPassword;
