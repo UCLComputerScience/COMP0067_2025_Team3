@@ -52,7 +52,11 @@
       "@utils/*": [
         "./src/utils/*"
       ]
-    }
+    },
+    "types": [
+      "next",
+      "node"
+    ]
   },
   "include": [
     "next.config.ts",
