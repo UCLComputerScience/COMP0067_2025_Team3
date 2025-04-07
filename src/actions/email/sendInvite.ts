@@ -21,9 +21,11 @@ export async function sendInviteEmail(email: string) {
     };
 
     await sgMail.send(msg);
-    return { success: true };
+    
+return { success: true };
   } catch (error: any) {
     console.error('[Invite Email Error]', error);
-    return { success: false, error: error.message };
+    
+return { success: false, error: error.message };
   }
 }

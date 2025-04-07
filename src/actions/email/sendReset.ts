@@ -1,12 +1,14 @@
 'use server';
 
+import crypto from 'crypto';
+
 import sgMail from '@sendgrid/mail';
 
-import crypto from 'crypto';
+
+import bcrypt from 'bcryptjs';
 
 import { prisma } from '@/prisma/client';
 
-import bcrypt from 'bcryptjs';
 
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
@@ -17,6 +19,7 @@ export async function sendPasswordReset(email: string) {
     console.log('Checking for user with email:', email);
 
     const user = await prisma.user.findUnique({ where: { email } });
+
     if (!user) {
       console.warn('No user found with that email.');
       return { success: false, error: 'No user found with that email.' };
@@ -25,10 +28,8 @@ export async function sendPasswordReset(email: string) {
     const token = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    let updatedUser;
-
     try {
-      updatedUser = await prisma.user.update({
+      await prisma.user.update({
         where: { email },
         data: {
           passwordResetToken: hashedToken,
@@ -42,17 +43,21 @@ export async function sendPasswordReset(email: string) {
     }
 
     const resetLink = `localhost:3000/reset-password/${token}`;
+
     const msg = {
       to: email,
       from: process.env.SENDGRID_SENDER_EMAIL!,
       subject: 'Reset Your Password',
       html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link is valid for 15 minutes.</p>`,
     };
+
     await sgMail.send(msg);
-    return { success: true };
+    
+return { success: true };
   } catch (error: any) {
     console.error('Error in sendPasswordReset:', error);
-    return { success: false, error: error.message };
+    
+return { success: false, error: error.message };
   }
 }
 

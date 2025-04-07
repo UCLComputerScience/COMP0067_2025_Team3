@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 
 import { toast } from 'react-toastify'
 
-import { handleResetPassword, checkValidityToken } from '@/actions/email/sendReset';
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -16,14 +15,16 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 
 // Component Imports
-import Link from '@components/Link'
-import Logo from '@components/layout/shared/Logo'
 
 // Form validation
 import { useForm, Controller } from 'react-hook-form'
 import type { InferInput } from 'valibot'
 import { object, string, pipe, nonEmpty, minLength, regex } from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
+
+import Logo from '@components/layout/shared/Logo'
+import Link from '@components/Link'
+import { handleResetPassword, checkValidityToken } from '@/actions/email/sendReset';
 
 export type FormValues = InferInput<typeof passwordSchema>
 
@@ -58,7 +59,7 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) => {
   const {
       control,
       handleSubmit,
-      formState: { errors, isValid, isDirty }
+      formState: { errors }
     } = useForm<FormValues>({
       resolver: valibotResolver(passwordSchema),
       defaultValues: emptyFormDefaultValue
@@ -80,15 +81,19 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) => {
     };
 
     checkToken();
-    }, []);
+    }, [token]);
 
 
   const onSubmit = async ( token: string, newPassword: string, confirmNewPassword: string ) => {
     setLoading(true)
+
     if (!token || !newPassword || !confirmNewPassword) {
       toast.error('Please fill out both fields.');
-      return;
+      
+return;
     }
+
+
     // Check if passwords match
     if (newPassword !== confirmNewPassword) {
         toast.error('New password and confirmation do not match')
@@ -98,6 +103,7 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) => {
 
     try {
       const result = await handleResetPassword(token, newPassword);
+
       if (result.success) {
         toast.success('Password changed successfully');
         router.push('/login')
@@ -133,18 +139,6 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) => {
 
     return (
         <div className='flex bs-full justify-center'>
-            {/* <form
-        className='w-full'
-        onSubmit={e => {
-          e.preventDefault()
-
-          if (!isValid) {
-            toast.error('Oops! Some fields need attention. Please check your input and try again.')
-          }
-
-          handleSubmit(onSubmit)() */}
-        {/* }}
-      ></form> */}
         <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
             <Link className='absolute block-start-5 sm:block-start-[38px] inline-start-6 sm:inline-start-[38px]'>
             {' '}

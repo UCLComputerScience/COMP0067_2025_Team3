@@ -34,7 +34,7 @@ import {
 } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions'
+import { saveNewClinician } from '@/actions/patientSettings/userActions'
 import type { AllClinicians, PatientId } from '@/app/(private)/my-profile/add-clinician/page'
 
 import { sendInviteEmail } from '@/actions/email/sendInvite';
@@ -56,7 +56,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   const [clinicianError, setClinicianError] = useState<string | null>(null)
 
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('');
 
   useEffect(() => {
     if (clinicianError) {
