@@ -69,6 +69,7 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) => {
     const checkToken = async () => {
         if (typeof token !== 'string') {  
           setIsTokenValid(false);
+          
           return;
         }
 

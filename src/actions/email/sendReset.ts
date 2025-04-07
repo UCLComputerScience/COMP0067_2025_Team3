@@ -22,6 +22,7 @@ export async function sendPasswordReset(email: string) {
 
     if (!user) {
       console.warn('No user found with that email.');
+
       return { success: false, error: 'No user found with that email.' };
     }
 
@@ -39,6 +40,7 @@ export async function sendPasswordReset(email: string) {
 
     } catch (updateError: any) {
       console.error('Prisma update failed:', updateError);
+      
       return { success: false, error: 'Failed to update user in database.' };
     }
 
