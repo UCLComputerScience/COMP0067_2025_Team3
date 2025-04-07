@@ -34,8 +34,10 @@ import {
 } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import { saveNewClinician, sendInvitation } from '@/actions/patientSettings/userActions'
+import { saveNewClinician } from '@/actions/patientSettings/userActions'
 import type { AllClinicians, PatientId } from '@/app/(private)/my-profile/add-clinician/page'
+
+import { sendInviteEmail } from '@/actions/email/sendInvite';
 
 interface Props {
   id: PatientId
@@ -52,6 +54,8 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   const saveButtonRef = useRef<HTMLButtonElement | null>(null)
   const [openModal, setOpenModal] = useState(false)
   const [clinicianError, setClinicianError] = useState<string | null>(null)
+
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
     if (clinicianError) {
@@ -153,21 +157,10 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
     setSelectedClinician(null)
   }
 
-  const [message, setMessage] = useState({
-    email: '',
-    message:
-      'Dear clinician,\n\nYour patient would like to share their symptom data with you on our platform.\nRegister your account to view their spider-grams track their data.\n\nKind regards,\nThe Spider team'
-  })
-
-  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage({ ...message, [e.target.name]: e.target.value })
-    console.log('Invitation:', message)
-  }
-
   const handleSendInvitation = async () => {
-    if (message.email) {
+    if (email) {
       try {
-        const invite = await sendInvitation(message.email, message.message)
+        const invite = await sendInviteEmail(email)
 
         if (!invite.success) {
           throw new Error('Failed to send the invitation')
@@ -175,7 +168,6 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
         toast.success('Invitation sent successfully')
         handleCloseModal()
-        console.log('Invitation:', message)
       } catch (error) {
         console.error('Failed to send invitation:', error)
         toast.error('Failed to send the invitation.')
@@ -343,17 +335,8 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                           label='Email'
                           name='email'
                           fullWidth
-                          value={message.email}
-                          onChange={handleMessageChange}
-                        />
-                        <TextField
-                          label='Message'
-                          name='message'
-                          fullWidth
-                          multiline
-                          maxRows={10}
-                          value={message.message}
-                          onChange={handleMessageChange}
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
                         />
                       </Box>
                     </DialogContent>

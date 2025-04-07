@@ -45,6 +45,10 @@ model User {
   role      Role          @default(PATIENT)
   status    AccountStatus @default(ACTIVE)
 
+    // resetting password
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
   // relationships
   clinicianPatients ClinicianPatient[] @relation("PatientToClinician")
   patientClinicians ClinicianPatient[] @relation("ClinicianToPatient")
