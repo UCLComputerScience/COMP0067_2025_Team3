@@ -1,4 +1,5 @@
-import { NextPage } from 'next';
+import type { NextPage } from 'next';
+
 import ResetPasswordPage from '@views/ResetPassword';
 
 type Props = {
