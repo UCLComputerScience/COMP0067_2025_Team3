@@ -11,7 +11,7 @@ export interface Clinician { id: string;firstName: string;lastName: string;insti
 
 interface DataPrivacyFormData {researchConsent: boolean;clinicianAccess: boolean;selectedClinicians: Clinician[];}
 
-export interface RegisterUserData { firstName: string; lastName: string; email: string; password: string; dateOfBirth?: string; address?: string;       phoneNumber?: string;   profession?: string; registrationNumber?: string;  institution?: string;    accountType: string;}
+export interface RegisterUserData { firstName: string; lastName: string; email: string; password: string; dateOfBirth?: string; address?: string;       phoneNumber?: string; hospitalNumber?: string;  profession?: string; registrationNumber?: string;  institution?: string;    accountType: string;}
 
 export interface RegisterResult { success: boolean; userId?: string;  error?: string; }
 
@@ -43,7 +43,7 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterResu
           : 'PATIENT'; // Default to patient
 
     // Create the user with all provided fields
-    const user = await prisma.user.create({ data: { email: data.email, hashedPassword, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined, address: data.address,   phoneNumber: data.phoneNumber,      profession: data.profession,  registrationNumber: data.registrationNumber,  institution: data.institution,       role, status: 'PENDING',  }});
+    const user = await prisma.user.create({ data: { email: data.email, hashedPassword, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined, address: data.address,   phoneNumber: data.phoneNumber,hospitalNumber: data.hospitalNumber,     profession: data.profession,  registrationNumber: data.registrationNumber,  institution: data.institution,       role, status: 'PENDING',  }});
 
     
 return { success: true, userId: user.id};
@@ -158,7 +158,7 @@ return { success: false, error: 'Failed to search for clinicians. Please try aga
   }
 }
 
-export async function checkUserDuplicates(email: string, phoneNumber?: string, registrationNumber?: string) {
+export async function checkUserDuplicates(email: string, phoneNumber?: string, registrationNumber?: string,hospitalNumber?: string) {
   try { const emailExists = await prisma.user.findUnique({ where: { email }, }) !== null;
 
     const phoneExists = phoneNumber
@@ -169,10 +169,15 @@ export async function checkUserDuplicates(email: string, phoneNumber?: string, r
       ? await prisma.user.findFirst({ where: { registrationNumber },}) !== null
       : false;
 
-    return { emailExists, phoneExists, registrationNumberExists };
+    const hospitalNumberExists = hospitalNumber
+      ? await prisma.user.findFirst({ where: { hospitalNumber } }) !== null
+      : false;
+
+    return { emailExists, phoneExists, registrationNumberExists,hospitalNumberExists };
   } catch (error) {
     console.error("Error checking duplicates:", error);
     
-return { emailExists: false, phoneExists: false, registrationNumberExists: false };
+return { emailExists: false, phoneExists: false, registrationNumberExists: false ,hospitalNumberExists: false };
   }
 }
+

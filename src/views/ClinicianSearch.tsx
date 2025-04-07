@@ -4,10 +4,24 @@ import React, { useState, useRef, useEffect } from 'react'
 
 import Image from 'next/image'
 
-import { Box, Typography, TextField, Button, Link } from '@mui/material'
+import { 
+  Box, 
+  Typography, 
+  TextField, 
+  Button, 
+  Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton
+} from '@mui/material'
 import { alpha } from '@mui/material/styles'
 
+import { toast } from 'react-toastify'
+ 
 import { searchClinicians } from '@/actions/register/registerActions'
+import { sendInvitation } from '@/actions/patientSettings/userActions' 
 
 export interface Clinician {
   id: string
@@ -29,9 +43,15 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
   const [searchEmail, setSearchEmail] = useState('')
   const [clinicianList, setClinicianList] = useState<Clinician[]>([])
   const [selectedClinician, setSelectedClinician] = useState<Clinician | null>(null)
-  const [searchPerformed, setSearchPerformed] = useState(false)
   const [visibleCount, setVisibleCount] = useState(10)
   const observerRef = useRef(null)
+  
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+
+  const [inviteMessage, setInviteMessage] = useState(
+    'Dear clinician,\n\nYour patient would like to share their symptom data with you on our platform.\nRegister your account to view their spider-grams track their data.\n\nKind regards,\nThe Spider team'
+  )
 
   const loadMoreClinicians = () => {
     setVisibleCount(prev => prev + 10)
@@ -54,10 +74,41 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
     return () => observer.disconnect()
   }, [])
 
+
+  const handleOpenInviteModal = () => {
+    setInviteModalOpen(true)
+  }
+
+  const handleCloseInviteModal = () => {
+    setInviteModalOpen(false)
+  }
+
+  const handleSendInvitation = async () => {
+    if (!inviteEmail) {
+      toast?.error("Please enter the clinician's email") || console.error("Please enter the clinician's email")
+      
+return
+    }
+
+    try {
+      const invite = await sendInvitation(inviteEmail, inviteMessage)
+
+      if (!invite.success) {
+        throw new Error((invite as any).message || 'Failed to send the invitation')
+      }
+
+      toast?.success('Invitation sent successfully') || console.log('Invitation sent successfully')
+      handleCloseInviteModal()
+    } catch (error) {
+      console.error('Failed to send invitation:', error)
+      toast?.error((error as any).message || 'Failed to send the invitation')
+      console.error((error as any).message || 'Failed to send the invitation')
+    }
+  }
+
   // Search for clinicians
   const handleSearchClinician = async () => {
-    console.log('🔍 Searching for clinicians...')
-    setSearchPerformed(true)
+  
 
     // Clear previous search results
     setClinicianList([])
@@ -75,8 +126,8 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
     // Check if at least one search parameter exists
     if (Object.keys(searchParams).length === 0) {
       console.log('Please enter at least one search parameter')
-
-      return
+      
+return
     }
 
     const response = await searchClinicians(searchParams)
@@ -125,7 +176,6 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
     setSearchInstitution('')
     setSearchEmail('')
     setClinicianList([])
-    setSearchPerformed(false)
     setSelectedClinician(null)
   }
 
@@ -178,6 +228,8 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
       </Box>
     )
   }
+
+  const shouldShowInvitePrompt = clinicianList.length === 0;
 
   return (
     <>
@@ -265,11 +317,19 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
         </Button>
       </Box>
 
-      {searchPerformed && clinicianList.length === 0 && (
+      {shouldShowInvitePrompt && (
         <Box sx={theme => ({ textAlign: 'center', marginTop: 2, color: theme.palette.text.secondary })}>
           <Typography variant='body2'>
             Cannot find your clinician?{' '}
-            <Link sx={theme => ({ color: theme.palette.primary.light })}>Invite them to create an account</Link>
+            <Link 
+              sx={theme => ({ 
+                color: theme.palette.primary.light,
+                cursor: 'pointer' 
+              })}
+              onClick={handleOpenInviteModal}
+            >
+              Invite them to create an account
+            </Link>
           </Typography>
         </Box>
       )}
@@ -328,6 +388,74 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
           </Button>
         </Box>
       )}
+
+      <Dialog open={inviteModalOpen} onClose={handleCloseInviteModal} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Invite Clinician
+          <IconButton
+            color="secondary"
+            onClick={handleCloseInviteModal}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <i className="ri-close-line" />
+          </IconButton>
+          <Typography color="secondary" variant="body2" sx={{ alignItems: 'center' }}>
+            Invite your clinician to the platform to share your data with them.
+          </Typography>
+        </DialogTitle>
+        
+        <DialogContent>
+          <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2} sx={{ mt: 3 }}>
+            <TextField
+              label="First Name"
+              fullWidth
+              value={searchFirstName}
+              onChange={(e) => setSearchFirstName(e.target.value)}
+            />
+            <TextField
+              label="Last Name"
+              fullWidth
+              value={searchLastName}
+              onChange={(e) => setSearchLastName(e.target.value)}
+            />
+          </Box>
+          
+          <Box display="grid" gridTemplateColumns="repeat(1, 1fr)" gap={2} sx={{ mt: 3 }}>
+            <TextField
+              label="Email"
+              fullWidth
+              required
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+            />
+            <TextField
+              label="Message"
+              fullWidth
+              multiline
+              rows={6}
+              value={inviteMessage}
+              onChange={(e) => setInviteMessage(e.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        
+        <DialogActions sx={{ justifyContent: 'flex-start', px: 3, pb: 3, mt: 3 }}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={handleSendInvitation}
+          >
+            Send Invitation
+          </Button>
+          <Button 
+            variant="outlined" 
+            color="secondary" 
+            onClick={handleCloseInviteModal}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
