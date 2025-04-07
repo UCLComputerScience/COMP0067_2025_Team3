@@ -1,15 +1,13 @@
+import { NextPage } from 'next';
 import ResetPasswordPage from '@views/ResetPassword';
 
-interface PageProps {
+type Props = {
   params: {
     token: string;
   };
-  searchParams?: {
-    [key: string]: string | string[] | undefined;
-  };
-}
+};
 
-const ResetPassword = async ({ params }: PageProps) => {
+const ResetPassword: NextPage<Props> = ({ params }) => {
   return <ResetPasswordPage token={params.token} />;
 };
 
