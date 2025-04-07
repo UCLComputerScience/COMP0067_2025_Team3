@@ -9,8 +9,7 @@ interface PageProps {
 const Page = async ({ params }: PageProps) => {
   const { token } = await params
 
-  
-return <ResetPasswordPage token={token} />
+  return <ResetPasswordPage token={token} />
 }
 
 export default Page
