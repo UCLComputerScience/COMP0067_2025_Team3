@@ -34,7 +34,6 @@
     "@mui/x-date-pickers": "^7.27.3",
     "@prisma/client": "^6.4.1",
     "@sendgrid/mail": "^8.1.4",
-    "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "classnames": "2.5.1",
     "country-list-js": "^3.1.8",
