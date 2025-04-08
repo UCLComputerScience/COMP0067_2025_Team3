@@ -55,8 +55,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   const [openModal, setOpenModal] = useState(false)
   const [clinicianError, setClinicianError] = useState<string | null>(null)
 
-  const [email, setEmail] = useState('');
-
+ 
   useEffect(() => {
     if (clinicianError) {
       toast.error(clinicianError)
@@ -65,6 +64,10 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value })
+  }
+
+  const handleInviteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInvite({ ...invite, [e.target.name]: e.target.value })
   }
 
   const handleSearch = () => {
@@ -146,6 +149,14 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
     email: ''
   })
 
+  // New state for invitation
+  const [invite, setInvite] = useState({
+    firstName: '',
+    lastName: '',
+    email: ''
+  })
+
+
   // Open the modal
   const handleOpenModal = () => {
     setOpenModal(true)
@@ -158,11 +169,16 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
   }
 
   const handleSendInvitation = async () => {
-    if (email) {
+    if (invite.email) {
       try {
-        const invite = await sendInviteEmail(email)
+        // Determine the name value based on invite.firstName
+        const name = invite.firstName 
+          ? `${invite.firstName} ${invite.lastName || ''}`.trim() 
+          : 'Clinician';
 
-        if (!invite.success) {
+        const invitation = await sendInviteEmail(name, invite.email, id.id)
+
+        if (!invitation.success) {
           throw new Error('Failed to send the invitation')
         }
 
@@ -319,15 +335,15 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                           label='First Name'
                           name='firstName'
                           fullWidth
-                          value={searchCriteria.firstName}
-                          onChange={handleSearchChange}
+                          value={invite.firstName}
+                          onChange={handleInviteChange}
                         />
                         <TextField
                           label='Last Name'
                           name='lastName'
                           fullWidth
-                          value={searchCriteria.lastName}
-                          onChange={handleSearchChange}
+                          value={invite.lastName}
+                          onChange={handleInviteChange}
                         />
                       </Box>
                       <Box display='grid' gridTemplateColumns='repeat(1, 1fr)' gap={2} sx={{ mt: 3 }}>
@@ -335,8 +351,8 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
                           label='Email'
                           name='email'
                           fullWidth
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={invite.email}
+                          onChange={handleInviteChange}
                         />
                       </Box>
                     </DialogContent>
