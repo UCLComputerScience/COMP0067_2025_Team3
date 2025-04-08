@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
 import { useSession } from 'next-auth/react'
-import { Role } from '@prisma/client'
+import { AccountStatus, Role } from '@prisma/client'
 
 import type { ChildrenType } from '@core/types'
 import AuthRedirect from '@/components/AuthRedirect'
@@ -22,6 +22,18 @@ export default function AuthGuard({ children }: ChildrenType) {
     if (!session) {
       setIsLoading(false)
 
+      return
+    }
+
+    const userStatus = session.user.status
+
+    if (userStatus === AccountStatus.INACTIVE) {
+      router.push('/account-inactive')
+      return
+    }
+
+    if (userStatus === AccountStatus.PENDING) {
+      router.push('/account-pending')
       return
     }
 
