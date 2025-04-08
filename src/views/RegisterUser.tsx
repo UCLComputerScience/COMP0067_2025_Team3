@@ -11,9 +11,10 @@ import Stack from '@mui/material/Stack'
 import type { SelectChangeEvent } from '@mui/material/Select'
 
 import type {CountryCode} from 'libphonenumber-js';
+
 import { parsePhoneNumberFromString} from 'libphonenumber-js'
 
-import 'react-phone-input-2/lib/material.css'
+import 'react-phone-input-2/lib/style.css'
 
 import {
   Grid,

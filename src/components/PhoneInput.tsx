@@ -3,7 +3,7 @@
 import  React, {  useEffect,useState } from 'react';
 
 import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/material.css';
+import 'react-phone-input-2/lib/style.css'
 import { useTheme } from '@mui/material/styles';
 import { Typography, Box } from '@mui/material';
 
