@@ -1,8 +1,5 @@
 'use client'
 
-// Hook Imports
-// import { useImageVariant } from '@core/hooks/useImageVariant'
-
 // React Imports
 import { useState, useEffect } from 'react'
 
@@ -10,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 // NextAuth Imports
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -98,27 +95,7 @@ const LoginV2 = ({ mode }: { mode: string }) => {
         localStorage.removeItem('userPassword')
       }
 
-      // Get user session which contains user information including role
-      const session = await getSession()
-      const userRole = session?.user?.role || 'default'
-
-      // Redirect based on user role
-      switch (userRole) {
-        case 'patient':
-          router.push('/my-records')
-          break
-        case 'clinician':
-          router.push('/clinician-allpatients')
-          break
-        case 'researcher':
-          router.push('/researcher-download')
-          break
-        case 'admin':
-          router.push('/admin-allusers')
-          break
-        default:
-          router.push('/home')
-      }
+      router.push('/home')
     }
   }
 
@@ -131,6 +108,11 @@ const LoginV2 = ({ mode }: { mode: string }) => {
         </Link>
         <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] border border-divider rounded-lg p-6 bg-backgroundPaper'>
           <Typography variant='h4' className='text-center'>{`Log in`}</Typography>
+          {error && (
+            <Typography variant='caption' className='text-center mt-3' color='var(--mui-palette-error-main)'>
+              {error}
+            </Typography>
+          )}
           <form onSubmit={handleLogin} className='flex flex-col gap-5'>
             <TextField
               autoFocus
@@ -188,11 +170,7 @@ const LoginV2 = ({ mode }: { mode: string }) => {
             <Button fullWidth variant='contained' type='submit'>
               Log In
             </Button>
-            {error && (
-              <Typography variant='caption' color='error' className='text-center mt-3'>
-                {error}
-              </Typography>
-            )}
+
             <Typography className='text-center mt-4'>
               Don&apos;t have an account?
               <Link href='/register' className='text-primary underline ml-2'>

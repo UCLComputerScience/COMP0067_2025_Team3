@@ -57,7 +57,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          role: user.role
+          role: user.role,
+          status: user.status
         }
       }
     })
@@ -108,6 +109,7 @@ export const authOptions: NextAuthOptions = {
          */
         token.role = user.role
         token.id = user.id
+        token.status = user.status
       }
 
       return token
@@ -117,6 +119,7 @@ export const authOptions: NextAuthOptions = {
         // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
         session.user.role = token.role
         session.user.id = token.id
+        session.user.status = token.status
       }
 
       return session
