@@ -11,13 +11,19 @@ interface ParsedAnswer {
   scores?: { [key: string]: number }
 }
 
+const todayDate = new Date().toLocaleDateString('en-GB', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric'
+})
+
 // Functions to get the correct data to pass to the Result component
 function getData(data: ParsedAnswer[]) {
   return data
     .filter(entry => entry.domain !== 'Spidergram')
     .map(entry => ({
       subject: entry.domain,
-      date: entry.averageScore ?? 0
+      [todayDate]: entry.averageScore ?? 0
     }))
 }
 
@@ -34,14 +40,9 @@ function getDomainData(data: ParsedAnswer[]) {
 function getPerceivedSpidergramData(data: ParsedAnswer[]) {
   const spidergramData = data.find(entry => entry.domain === 'Spidergram')
 
-  if (!spidergramData || !Array.isArray(spidergramData.scores)) {
-    return []
-  }
+  if (!spidergramData || !Array.isArray(spidergramData.scores)) return []
 
-  return spidergramData?.scores.map(item => ({
-    subject: item.label,
-    value: item.score ?? 0
-  }))
+  return spidergramData?.scores
 }
 
 const Page = () => {
