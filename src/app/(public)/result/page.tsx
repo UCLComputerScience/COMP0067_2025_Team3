@@ -4,30 +4,44 @@ import { useSearchParams } from 'next/navigation'
 
 import Result from '@/components/Result'
 
-// Functions to get the correct data to pass to the SingleRecord
-function getData(data: any) {
+interface ParsedAnswer {
+  domain: string
+  averageScore?: number
+  totalScore?: number
+  scores?: { [key: string]: number }
+}
+
+// Functions to get the correct data to pass to the Result component
+function getData(data: ParsedAnswer[]) {
   return data
     .filter(entry => entry.domain !== 'Spidergram')
     .map(entry => ({
       subject: entry.domain,
-      value: entry.averageScore
+      date: entry.averageScore ?? 0
     }))
 }
 
-function getDomainData(data) {
+function getDomainData(data: ParsedAnswer[]) {
   return data
     .filter(entry => entry.domain !== 'Spidergram')
     .map(entry => ({
       domain: entry.domain,
-      totalScore: entry.totalScore,
-      averageScore: entry.averageScore
+      totalScore: entry.totalScore ?? 0,
+      averageScore: entry.averageScore ?? 0
     }))
 }
 
-function getPerceivedSpidergramData(data) {
+function getPerceivedSpidergramData(data: ParsedAnswer[]) {
   const spidergramData = data.find(entry => entry.domain === 'Spidergram')
 
-  return spidergramData?.scores
+  if (!spidergramData || !Array.isArray(spidergramData.scores)) {
+    return []
+  }
+
+  return spidergramData?.scores.map(item => ({
+    subject: item.label,
+    value: item.score ?? 0
+  }))
 }
 
 const Page = () => {
