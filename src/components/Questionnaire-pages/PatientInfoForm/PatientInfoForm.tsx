@@ -10,8 +10,6 @@ import country from 'country-list-js'
 
 import { useSession } from 'next-auth/react'
 
-import { toast } from 'react-toastify'
-
 import { v4 as uuidv4 } from 'uuid'
 
 // MUI Imports
@@ -28,6 +26,7 @@ import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 
 import DialogsAlert from '@/components/DialogsAlert'
 
@@ -88,6 +87,8 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   }
 
   // States
+  const [openDialog, setOpenDialog] = useState(false)
+
   const [formData, setFormData] = useState<FormDataType>({
     age: '',
     sex_at_birth: '',
@@ -181,20 +182,18 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
         const userInfo = await getUserDemographicAndClinical(userId)
 
         console.log(userInfo)
+        setOpenDialog(true)
 
         if (userInfo) {
-          // If query is successful run toast notification
-          if (!toast.isActive('correctInfo')) {
-            toast.info('Is this information still correct?', { toastId: 'correctInfo' })
-          }
-
           let taking_medication = ''
 
           // Change null values to strings for the form
-          if (userInfo.medications === null) {
+          if (userInfo.medications === 'n/a') {
             taking_medication = 'No'
 
             userInfo.medications = 'n/a'
+          } else {
+            taking_medication = 'Yes'
           }
 
           if (userInfo.otherConditions === null) {
@@ -227,9 +226,24 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     loadUserInfo()
   }, [userId])
 
+  const handleDialogClose = () => {
+    setOpenDialog(false)
+  }
+
   return (
     // Return the Information form
     <Box>
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Patient Information</DialogTitle>
+        <DialogContent>
+          <Typography variant='body1'>Please review and update any necessary information</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color='primary'>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
       <form onSubmit={e => e.preventDefault()}>
         <CardContent>
           <Grid container spacing={5}>
@@ -554,17 +568,9 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 handleReset()
               }}
             />
-            <DialogsAlert
-              triggerButtonLabel='Submit'
-              triggerButtonVariant='contained'
-              dialogTitle='Confirm Data'
-              dialogText='Are you sure this information is up to date?'
-              confirmButtonLabel="Yes, I'm sure"
-              cancelButtonLabel="No, I'll double check"
-              onConfirm={() => {
-                handleSubmit
-              }}
-            />
+            <Button type='submit' variant='contained' className='mie-2' onClick={handleSubmit}>
+              Next
+            </Button>
           </Box>
         </CardActions>
       </form>
