@@ -1,5 +1,3 @@
-//TO DO: pagination
-
 'use client'
 
 import * as React from 'react'
@@ -48,7 +46,6 @@ const UsersList = ({ users }: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  const [rows] = React.useState<Users[]>(users)
 
   // Filter users based on selected filters and search query
   const filteredUsers = users.filter(user => {
@@ -95,13 +92,13 @@ const UsersList = ({ users }: Props) => {
   }
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredUsers.length) : 0
 
   const visibleRows = React.useMemo(
-    () => [...rows].slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
     [page, rowsPerPage, filteredUsers]
   )
+
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -224,7 +221,7 @@ const UsersList = ({ users }: Props) => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component='div'
-            count={rows.length}
+            count={filteredUsers.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
