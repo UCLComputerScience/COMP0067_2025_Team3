@@ -44,19 +44,6 @@ const Footer = () => {
                 <Typography variant='body2' className='text-white opacity-[0.92]'>
                   About
                 </Typography>
-                <div className='flex gap-4'>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-facebook-fill text-white text-lg' />
-                  </IconButton>
-                  <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
-                    <i className='ri-twitter-fill text-white text-lg' />
-                  </IconButton>
-                </div>
               </div>
             </Grid>
             <Grid>
@@ -64,19 +51,6 @@ const Footer = () => {
                 <Typography variant='body2' className='text-white opacity-[0.92]'>
                   Team
                 </Typography>
-                <div className='flex gap-4'>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-pinterest-fill text-white text-lg' />
-                  </IconButton>
-                  <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
-                    <i className='ri-whatsapp-fill text-white text-lg' />
-                  </IconButton>
-                </div>
               </div>
             </Grid>
             <Grid>
@@ -84,24 +58,6 @@ const Footer = () => {
                 <Typography variant='body2' className='text-white opacity-[0.92]'>
                   Resources
                 </Typography>
-                <div className='flex gap-4'>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-linkedin-box-fill text-white text-lg' />
-                  </IconButton>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-links-fill text-white text-lg' />
-                  </IconButton>
-                </div>
               </div>
             </Grid>
           </Grid>
