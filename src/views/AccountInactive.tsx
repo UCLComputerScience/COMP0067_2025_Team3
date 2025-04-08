@@ -1,13 +1,12 @@
 'use client'
 
-// Next Imports
-import Link from 'next/link'
-
 // MUI Imports
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
 // Type Imports
+import { signOut } from 'next-auth/react'
+
 import type { Mode } from '@core/types'
 
 // Component Imports
@@ -15,7 +14,6 @@ import Illustrations from '@components/Illustrations'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
-import { signOut } from 'next-auth/react'
 
 const AccountInactive = ({ mode }: { mode: Mode }) => {
   // Vars

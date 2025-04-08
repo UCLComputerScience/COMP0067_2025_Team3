@@ -29,12 +29,14 @@ export default function AuthGuard({ children }: ChildrenType) {
 
     if (userStatus === AccountStatus.INACTIVE) {
       router.push('/account-inactive')
-      return
+      
+return
     }
 
     if (userStatus === AccountStatus.PENDING) {
       router.push('/account-pending')
-      return
+      
+return
     }
 
     const userRole = session.user.role
