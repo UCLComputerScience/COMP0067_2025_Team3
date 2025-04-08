@@ -107,9 +107,9 @@ const Questionnaire = () => {
         return 'Not Present'
       }
 
-      const labelTheFucker = labelRules[domain] || labelRules.default
+      const labelTheQuestion = labelRules[domain] || labelRules.default
 
-      return labelTheFucker(valueAsNumber)
+      return labelTheQuestion(valueAsNumber)
     }
 
     console.log('Submitting answers:', answers)
