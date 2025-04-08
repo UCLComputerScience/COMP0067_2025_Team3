@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useSession } from 'next-auth/react'
 import { AccountStatus } from '@prisma/client'
+
 import type { ChildrenType } from '@core/types'
 
 export default function StatusCheck({ children }: ChildrenType) {

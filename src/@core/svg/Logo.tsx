@@ -1,7 +1,8 @@
 'use client'
 
-import { useSettings } from '../hooks/useSettings'
 import Image from 'next/image'
+
+import { useSettings } from '../hooks/useSettings'
 
 const Logo = ({ className }: { className?: string }) => {
   const { settings } = useSettings()
