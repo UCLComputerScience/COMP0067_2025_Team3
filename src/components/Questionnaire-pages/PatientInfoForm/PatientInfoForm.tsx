@@ -29,6 +29,8 @@ import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 
+import DialogsAlert from '@/components/DialogsAlert'
+
 import { savePatientInfo } from '@/actions/submit-response/info-submission-action'
 
 import { getUserDemographicAndClinical } from '@/actions/all-users/userAction'
@@ -226,7 +228,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   }, [userId])
 
   return (
-
     // Return the Information form
     <Box>
       <form onSubmit={e => e.preventDefault()}>
@@ -542,18 +543,29 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
         </CardContent>
         <Divider />
         <CardActions>
-          <Button type='submit' variant='contained' className='mie-2' onClick={handleSubmit}>
-            Next
-          </Button>
-          <Button
-            type='reset'
-            variant='outlined'
-            onClick={() => {
-              handleReset()
-            }}
-          >
-            Reset
-          </Button>
+          <Box display='flex' justifyContent='space-between' width='100%'>
+            <DialogsAlert
+              triggerButtonLabel='Reset'
+              dialogTitle='Confirm Reset'
+              dialogText='Are you sure you want to reset all values in the form?'
+              confirmButtonLabel='Yes'
+              cancelButtonLabel='Cancel'
+              onConfirm={() => {
+                handleReset()
+              }}
+            />
+            <DialogsAlert
+              triggerButtonLabel='Submit'
+              triggerButtonVariant='contained'
+              dialogTitle='Confirm Data'
+              dialogText='Are you sure this information is up to date?'
+              confirmButtonLabel="Yes, I'm sure"
+              cancelButtonLabel="No, I'll double check"
+              onConfirm={() => {
+                handleSubmit
+              }}
+            />
+          </Box>
         </CardActions>
       </form>
     </Box>
