@@ -1,8 +1,9 @@
 'use server';
 
+import sgMail from '@sendgrid/mail';
+
 import { prisma } from '@/prisma/client'
 
-import sgMail from '@sendgrid/mail';
 
 
 export interface User {
