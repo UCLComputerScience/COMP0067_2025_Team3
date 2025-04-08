@@ -78,9 +78,22 @@ const Questionnaire = () => {
         const totalScore = scores.reduce((sum, score) => sum + score, 0)
         const averageScore = scores.length > 0 ? totalScore / scores.length : 0
 
-        return {
-          domain,
-          averageScore: Math.round(averageScore) // Round to nearest integer if needed
+        // Return the answers in the desired format
+        if (domain !== 'Spidergram') {
+          return {
+            domain,
+            averageScore: Math.round(averageScore),
+            totalScore: totalScore // Round to nearest integer if needed
+          }
+        } else {
+          // Return the perceived spidergram data in the correct format
+          return {
+            domain,
+            scores: Object.entries(questionSet).map(([label, entry]: [string, { score: number }]) => ({
+              subject: label,
+              value: entry.score
+            }))
+          }
         }
       })
 

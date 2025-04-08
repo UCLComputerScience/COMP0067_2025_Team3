@@ -73,6 +73,45 @@ const Questionnaire = () => {
   const handlePrev = () => setActiveStep(prev => (prev > 0 ? prev - 1 : 0))
 
   const handleSubmit = async () => {
+    // Add functions to get the correct label
+
+    const labelRules: Record<string, (score: number) => string> = {
+      25: score => {
+        if (score === 0) return 'Never'
+        if (score === 33.3) return '1-2 Times'
+        if (score === 66.6) return '3 Times'
+        if (score === 100) return 'Over 3 Times'
+
+        return 'Unknown Frequency this is an error'
+      },
+
+      default: score => {
+        if (score === 0) return 'No Impact'
+        if (score === 25) return 'Mild Impact'
+        if (score === 50) return 'Moderate Impact'
+        if (score === 75) return 'Marked Impact'
+        if (score === 100) return 'Disabling'
+
+        return 'Unknown Impact this is an error'
+      }
+    }
+
+    const getLabel = (value: any, domain: string): string => {
+      if (Array.isArray(value)) {
+        return value.join(',')
+      }
+
+      const valueAsNumber = Number(value)
+
+      if (isNaN(valueAsNumber)) {
+        return 'Not Present'
+      }
+
+      const labelTheQuestion = labelRules[domain] || labelRules.default
+
+      return labelTheQuestion(valueAsNumber)
+    }
+
     console.log('Submitting answers:', answers)
     const submitAnswers = safeParse(QuestionnaireSchema, answers)
 
@@ -95,7 +134,7 @@ const Questionnaire = () => {
               userId,
               questionId: Number(questionId),
               score,
-              label: String(score),
+              label: getLabel(value, questionId),
               domain,
               submissionId
             }

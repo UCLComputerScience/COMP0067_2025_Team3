@@ -10,8 +10,6 @@ import country from 'country-list-js'
 
 import { useSession } from 'next-auth/react'
 
-import { toast } from 'react-toastify'
-
 import { v4 as uuidv4 } from 'uuid'
 
 // MUI Imports
@@ -28,6 +26,9 @@ import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
+import { Dialog, DialogTitle, DialogContent, DialogActions, FormHelperText } from '@mui/material'
+
+import DialogsAlert from '@/components/DialogsAlert'
 
 import { savePatientInfo } from '@/actions/submit-response/info-submission-action'
 
@@ -86,6 +87,10 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   }
 
   // States
+  const [openDialog, setOpenDialog] = useState(false)
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
   const [formData, setFormData] = useState<FormDataType>({
     age: '',
     sex_at_birth: '',
@@ -152,6 +157,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     console.log('Formatted patient data: ', formatPatientInfo(formData, userId))
 
     if (result.success) {
+      setFormErrors({})
       console.log('Success!', result.output)
       console.log(formData)
       const databaseResult = await savePatientInfo(formatPatientInfo(formData, userId))
@@ -166,7 +172,21 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
 
       handleNext()
     } else {
+      // Find errors for each field
       console.log('Error!', result.issues)
+
+      const errors = result.issues.reduce(
+        (acc, issue) => {
+          const key = (issue.path ?? []).map(p => (typeof p === 'object' && 'key' in p ? p.key : String(p))).join('.')
+
+          acc[key] = issue.message
+
+          return acc
+        },
+        {} as Record<string, string>
+      )
+
+      setFormErrors(errors)
       alert('Please fill out all fields correctly')
     }
   }
@@ -179,20 +199,18 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
         const userInfo = await getUserDemographicAndClinical(userId)
 
         console.log(userInfo)
+        setOpenDialog(true)
 
         if (userInfo) {
-          // If query is successful run toast notification
-          if (!toast.isActive('correctInfo')) {
-            toast.info('Is this information still correct?', { toastId: 'correctInfo' })
-          }
-
           let taking_medication = ''
 
           // Change null values to strings for the form
-          if (userInfo.medications === null) {
+          if (userInfo.medications === 'n/a') {
             taking_medication = 'No'
 
             userInfo.medications = 'n/a'
+          } else {
+            taking_medication = 'Yes'
           }
 
           if (userInfo.otherConditions === null) {
@@ -225,10 +243,27 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     loadUserInfo()
   }, [userId])
 
+  const handleDialogClose = () => {
+    setOpenDialog(false)
+  }
+
+  console.log(formErrors)
+
   return (
 
     // Return the Information form
     <Box>
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Patient Information</DialogTitle>
+        <DialogContent>
+          <Typography variant='body1'>Please review and update any necessary information</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color='primary'>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
       <form onSubmit={e => e.preventDefault()}>
         <CardContent>
           <Grid container spacing={5}>
@@ -244,13 +279,15 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 label='Age'
                 value={formData.age}
                 onChange={e => setFormData({ ...formData, age: e.target.value })}
+                error={!!formErrors.age}
+                helperText={formErrors.age}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>{'What sex were you assigned at birth? '}</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.sex_at_birth}>
                 <InputLabel>Select Sex</InputLabel>
                 <Select
                   label='Select Sex'
@@ -269,7 +306,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
               <Typography className={Styles.info_questions}>What Best Describes your gender?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.gender}>
                 <InputLabel>Select Gender</InputLabel>
                 <Select
                   label='Select Gender'
@@ -282,6 +319,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.gender && <FormHelperText>{formErrors.gender}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -291,7 +329,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.gender_same_as_sex}>
                 <InputLabel>Select</InputLabel>
                 <Select
                   label='Select'
@@ -302,13 +340,14 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                   <MenuItem value='false'>No</MenuItem>
                   <MenuItem value='null'>Prefer not to say</MenuItem>
                 </Select>
+                {formErrors.gender_same_as_sex && <FormHelperText>{formErrors.gender_same_as_sex}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>What is your ethnicity?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.ethnicity}>
                 <InputLabel>Select Ethnicity</InputLabel>
                 <Select
                   label='Select Ethnicity'
@@ -326,13 +365,14 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.ethnicity && <FormHelperText>{formErrors.ethnicity}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>What is your country of residence?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.country}>
                 <InputLabel>Select Country</InputLabel>
                 <Select
                   label='Select Country'
@@ -345,13 +385,14 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.country && <FormHelperText>{formErrors.country}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>What is your employment status?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.employment_status}>
                 <InputLabel>Select employment status</InputLabel>
                 <Select
                   label='Select Employment'
@@ -364,6 +405,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.employment_status && <FormHelperText>{formErrors.employment_status}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -372,7 +414,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.education_level}>
                 <InputLabel>Select Education</InputLabel>
                 <Select
                   label='Select Education'
@@ -385,13 +427,14 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.education_level && <FormHelperText>{formErrors.education_level}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>How active would you say you are?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.activity_level}>
                 <InputLabel>Select</InputLabel>
                 <Select
                   label='Select Activity Level'
@@ -404,6 +447,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.activity_level && <FormHelperText>{formErrors.activity_level}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -419,6 +463,8 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 label='Enter your input here'
                 value={formData.minutes_of_exercise}
                 onChange={e => setFormData({ ...formData, minutes_of_exercise: e.target.value })}
+                error={!!formErrors.minutes_of_exercise}
+                helperText={formErrors.minutes_of_exercise}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}></Grid>
@@ -433,7 +479,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.diagnosis_confirmed}>
                 <InputLabel>Select</InputLabel>
                 <Select
                   label='Select Diagnosis State'
@@ -452,6 +498,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.diagnosis_confirmed && <FormHelperText>{formErrors.diagnosis_confirmed}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -462,7 +509,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.healthcare_professional}>
                 <InputLabel>Select</InputLabel>
                 <Select
                   label='Select Healthcare Professional'
@@ -485,13 +532,16 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {formErrors.healthcare_professional && (
+                  <FormHelperText>{formErrors.healthcare_professional}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography className={Styles.info_questions}>Are you taking medications?</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!formErrors.taking_medications}>
                 <InputLabel>Select</InputLabel>
                 <Select
                   label='Select Medication'
@@ -507,6 +557,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                   <MenuItem value='Yes'>Yes</MenuItem>
                   <MenuItem value='No'>No</MenuItem>
                 </Select>
+                {formErrors.taking_medications && <FormHelperText>{formErrors.taking_medications}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -525,10 +576,14 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                     setFormData({ ...formData, medications: e.target.value })
                   }
                 }}
+                error={!!formErrors.medications}
+                helperText={formErrors.medications}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography className={Styles.info_questions}>Do you have other medical conditions?</Typography>
+              <Typography className={Styles.info_questions}>
+                Do you have other medical conditions? (Optional)
+              </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -542,18 +597,21 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
         </CardContent>
         <Divider />
         <CardActions>
-          <Button type='submit' variant='contained' className='mie-2' onClick={handleSubmit}>
-            Next
-          </Button>
-          <Button
-            type='reset'
-            variant='outlined'
-            onClick={() => {
-              handleReset()
-            }}
-          >
-            Reset
-          </Button>
+          <Box display='flex' justifyContent='space-between' width='100%'>
+            <DialogsAlert
+              triggerButtonLabel='Reset'
+              dialogTitle='Confirm Reset'
+              dialogText='Are you sure you want to reset all values in the form?'
+              confirmButtonLabel='Yes'
+              cancelButtonLabel='Cancel'
+              onConfirm={() => {
+                handleReset()
+              }}
+            />
+            <Button type='submit' variant='contained' className='mie-2' onClick={handleSubmit}>
+              Next
+            </Button>
+          </Box>
         </CardActions>
       </form>
     </Box>

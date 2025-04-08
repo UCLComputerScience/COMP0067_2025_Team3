@@ -3,7 +3,6 @@ import Image from 'next/image'
 
 import Grid from '@mui/material/Grid2'
 import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -41,67 +40,29 @@ const Footer = () => {
             </Grid>
             <Grid>
               <div className='flex flex-col items-start gap-6'>
-                <Typography variant='body2' className='text-white opacity-[0.92]'>
-                  About
-                </Typography>
-                <div className='flex gap-4'>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-facebook-fill text-white text-lg' />
-                  </IconButton>
-                  <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
-                    <i className='ri-twitter-fill text-white text-lg' />
-                  </IconButton>
-                </div>
+                <Link href='https://www.thespidertool.com'>
+                  <Typography variant='body2' className='text-white opacity-[0.92]'>
+                    About
+                  </Typography>
+                </Link>
               </div>
             </Grid>
             <Grid>
               <div className='flex flex-col items-start gap-6'>
-                <Typography variant='body2' className='text-white opacity-[0.92]'>
-                  Team
-                </Typography>
-                <div className='flex gap-4'>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-pinterest-fill text-white text-lg' />
-                  </IconButton>
-                  <IconButton component={Link} size='small' href='https://twitter.com/Theme_Selection' target='_blank'>
-                    <i className='ri-whatsapp-fill text-white text-lg' />
-                  </IconButton>
-                </div>
+                <Link href='https://www.thespidertool.com/background-information'>
+                  <Typography variant='body2' className='text-white opacity-[0.92]'>
+                    Team
+                  </Typography>
+                </Link>
               </div>
             </Grid>
             <Grid>
               <div className='flex flex-col items-start gap-6'>
-                <Typography variant='body2' className='text-white opacity-[0.92]'>
-                  Resources
-                </Typography>
-                <div className='flex gap-4'>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-linkedin-box-fill text-white text-lg' />
-                  </IconButton>
-                  <IconButton
-                    component={Link}
-                    size='small'
-                    href='https://www.facebook.com/ThemeSelections/'
-                    target='_blank'
-                  >
-                    <i className='ri-links-fill text-white text-lg' />
-                  </IconButton>
-                </div>
+                <Link href='https://www.thespidertool.com/resources-and-links'>
+                  <Typography variant='body2' className='text-white opacity-[0.92]'>
+                    Resources
+                  </Typography>
+                </Link>
               </div>
             </Grid>
           </Grid>

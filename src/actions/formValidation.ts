@@ -36,7 +36,7 @@ export const passwordSchema = object({
 
 // Patient Info Validation
 export const InfoSchema = object({
-  age: pipe(string('Your age must be a number')),
+  age: pipe(string('Your age must be a number'), nonEmpty('Enter your age')),
   sex_at_birth: pipe(string(), nonEmpty('Please Select')),
   gender: pipe(string(), nonEmpty('Please Select')),
   gender_same_as_sex: pipe(boolean()),

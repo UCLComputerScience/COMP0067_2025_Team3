@@ -38,6 +38,7 @@ interface QuestionType {
 
 export default function QuestionPage({ domain, answers, onUpdate, handleNext, handlePrev }: QuestionPageProps) {
   const [questions, setQuestions] = useState<QuestionType[]>([])
+  const [errors, setErrors] = useState<Record<number, string>>({})
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -68,7 +69,7 @@ export default function QuestionPage({ domain, answers, onUpdate, handleNext, ha
   }
 
   const validatePage = () => {
-    const schemaMap = {
+    const domainSchemas = {
       Neuromusculoskeletal: NeuromusculoskeletalSchema,
       Pain: PainSchema,
       Fatigue: FatigueSchema,
@@ -79,16 +80,33 @@ export default function QuestionPage({ domain, answers, onUpdate, handleNext, ha
       Depression: DepressionSchema
     }
 
-    const schema = schemaMap[domain as keyof typeof schemaMap]
+    const schema = domainSchemas[domain as keyof typeof domainSchemas]
 
-    if (!schema) return handleNext()
+    if (!schema) {
+      setErrors({})
+
+      return handleNext()
+    }
 
     const result = safeParse(schema, answers)
 
     if (result.success) {
       console.log('Success!', result.output)
+      setErrors({})
       handleNext()
     } else {
+      const pageErrors = result.issues.reduce(
+        (acc, issue) => {
+          const key = (issue.path ?? []).map(p => (typeof p === 'object' && 'key' in p ? p.key : String(p))).join('.')
+
+          acc[key] = issue.message
+
+          return acc
+        },
+        {} as Record<string, string>
+      )
+
+      setErrors(pageErrors)
       console.log('Validation Errors:', result.issues)
       toast.error('Please fill out all Questions')
     }
@@ -173,6 +191,7 @@ export default function QuestionPage({ domain, answers, onUpdate, handleNext, ha
               question={q.question}
               selectedValue={q.id === 19 ? answers[q.id] || [] : answers[q.id] || ''}
               onValueChange={e => (q.id === 19 ? handleCheckboxChange(q.id, e) : handleRadioChange(q.id, e))}
+              error={errors[q.id]}
               {...(q.note !== null ? { note: q.note } : {})}
             />
             <br />
