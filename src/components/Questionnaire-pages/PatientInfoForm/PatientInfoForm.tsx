@@ -28,8 +28,6 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import { Dialog, DialogTitle, DialogContent, DialogActions, FormHelperText } from '@mui/material'
 
-import { set } from 'lodash'
-
 import DialogsAlert from '@/components/DialogsAlert'
 
 import { savePatientInfo } from '@/actions/submit-response/info-submission-action'
@@ -252,6 +250,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   console.log(formErrors)
 
   return (
+
     // Return the Information form
     <Box>
       <Dialog open={openDialog} onClose={handleDialogClose}>

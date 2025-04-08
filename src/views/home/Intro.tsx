@@ -4,6 +4,7 @@ import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart'
 
 const Intro = () => {
   return (
+
     // bg-backgroundPaper
     <section className=' pt-10 px-4'>
       <Typography
