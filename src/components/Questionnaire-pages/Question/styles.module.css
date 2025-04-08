@@ -1,5 +1,4 @@
 .question {
-  color: var(--Light-Text-Primary, text-primary);
   font-feature-settings:
     'liga' off,
     'clig' off;

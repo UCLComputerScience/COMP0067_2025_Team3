@@ -4,9 +4,7 @@ import * as React from 'react'
 // eslint-disable-next-line import/no-unresolved
 import '@fontsource/outfit'
 
-import { Box, Grid2, Typography, Radio, Checkbox } from '@mui/material'
-
-import Tooltip from '@mui/material/Tooltip'
+import { Box, Grid2, Typography, Radio, Checkbox, Tooltip } from '@mui/material'
 
 import styles from './styles.module.css'
 
@@ -16,10 +14,11 @@ interface QuestionProps {
   question: string
   note?: string
   selectedValue: string | string[]
+  error?: string
   onValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-function Question({ id, question, note, selectedValue, onValueChange }: QuestionProps) {
+function Question({ id, question, note, selectedValue, error, onValueChange }: QuestionProps) {
   if (id === 19) {
     const selected = Array.isArray(selectedValue) ? selectedValue : []
 
@@ -35,7 +34,17 @@ function Question({ id, question, note, selectedValue, onValueChange }: Question
       <Box sx={{ padding: '15px' }}>
         <Grid2 container spacing={2}>
           <Grid2 size={2}>
-            <Typography className={styles.question} sx={{ fontFamily: 'Outfit' }}>
+            <Typography
+              className={styles.question}
+              sx={{
+                fontFamily: 'Outfit',
+                fontSize: '24px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '25px'
+              }}
+              color={error ? 'error.main' : 'text-primary'}
+            >
               {question}
               {note && (
                 <Tooltip title={note}>
@@ -60,7 +69,16 @@ function Question({ id, question, note, selectedValue, onValueChange }: Question
       <Box sx={{ padding: '15px' }}>
         <Grid2 container spacing={2}>
           <Grid2 size={2}>
-            <Typography className={styles.question} sx={{ fontFamily: 'Outfit' }}>
+            <Typography
+              sx={{
+                fontFamily: 'Outfit',
+                fontSize: '24px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '25px'
+              }}
+              color={error ? 'error.main' : 'text-primary'}
+            >
               {question}
               {'  '}
               {note && (
@@ -107,11 +125,21 @@ function Question({ id, question, note, selectedValue, onValueChange }: Question
     )
   } else {
     // Standard question
+
     return (
       <Box sx={{ padding: '15px' }}>
         <Grid2 container spacing={2}>
           <Grid2 size={1.71}>
-            <Typography className={styles.question} sx={{ fontFamily: 'Outfit' }}>
+            <Typography
+              sx={{
+                fontFamily: 'Outfit',
+                fontSize: '24px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '25px'
+              }}
+              color={error ? 'error.main' : 'text-primary'}
+            >
               {question}
               {'  '}
               {note && (
