@@ -154,7 +154,7 @@ const LoginV2 = ({ mode }: { mode: string }) => {
                 className='text-end'
                 color='primary.main'
                 component={Link}
-                href='/forgotpassword'
+                href='/forgot-password'
                 sx={{ textDecoration: 'underline' }}
               >
                 {' '}
