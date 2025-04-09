@@ -102,10 +102,9 @@ const LoginV2 = ({ mode }: { mode: string }) => {
   return (
     <div className='flex bs-full justify-center'>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
-        <Link className='absolute block-start-5 sm:block-start-[38px] inline-start-6 sm:inline-start-[38px]'>
-          {' '}
-          <Logo />
-        </Link>
+      <Link href="/home" className='absolute block-start-5 sm:block-start-[38px] inline-start-6 sm:inline-start-[38px]'>
+        <Logo />
+      </Link>
         <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] border border-divider rounded-lg p-6 bg-backgroundPaper'>
           <Typography variant='h4' className='text-center'>{`Log in`}</Typography>
           {error && (
@@ -185,3 +184,5 @@ const LoginV2 = ({ mode }: { mode: string }) => {
 }
 
 export default LoginV2
+
+

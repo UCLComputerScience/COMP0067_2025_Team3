@@ -192,7 +192,7 @@ export function ClinicianPatientList({ clinicianId }: { clinicianId: string }) {
           p.email, 
           p.dateOfBirth, 
           p.patientLink?.toUpperCase() ?? '',
-          p.agreedToShareData ? 'Yes' : 'No'
+          p.agreedToShareData ? 'True' : 'Flase'
         ])
 
         autoTable(doc, {
