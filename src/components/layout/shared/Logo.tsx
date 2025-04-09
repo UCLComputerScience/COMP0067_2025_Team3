@@ -2,6 +2,7 @@
 
 // React Imports
 import { useEffect, useRef } from 'react'
+
 import type { CSSProperties } from 'react'
 
 // Third-party Imports
@@ -12,7 +13,6 @@ import type { VerticalNavContextProps } from '@menu/contexts/verticalNavContext'
 
 // Component Imports
 import MaterioLogo from '@core/svg/Logo'
-
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -85,5 +85,6 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
 }
 
 export default Logo
+
 
 
