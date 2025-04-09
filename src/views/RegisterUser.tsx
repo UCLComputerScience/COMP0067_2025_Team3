@@ -10,6 +10,12 @@ import Stack from '@mui/material/Stack'
 
 import type { SelectChangeEvent } from '@mui/material/Select'
 
+import type {CountryCode} from 'libphonenumber-js';
+
+import { parsePhoneNumberFromString} from 'libphonenumber-js'
+
+import 'react-phone-input-2/lib/style.css'
+
 import {
   Grid,
   Box,
@@ -42,6 +48,8 @@ import { ClinicianRegister } from './RegisterClinician'
 import { ResearcherRegister } from './RegisterResearcher'
 
 import { PrivacyPolicyTerms } from './PrivacyPolicyTerms'
+
+import ThemedPhoneInput from '@/components/PhoneInput'
 
 import { checkUserDuplicates } from '@/actions/register/registerActions'
 
@@ -91,7 +99,7 @@ export const Register = () => {
   const [accountType, setAccountType] = useState('patient')
   const [success, setSuccess] = useState<string | null>(null)
   const [completedSteps, setCompletedSteps] = useState<boolean[]>([])
-  const [isPhoneFocused, setIsPhoneFocused] = useState(false)
+  const [, setIsPhoneFocused] = useState(false)
   const [openPrivacyTerms, setOpenPrivacyTerms] = useState<boolean>(false)
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false)
   const [isLastNameFocused, setIsLastNameFocused] = useState(false)
@@ -104,10 +112,6 @@ export const Register = () => {
   const [isInstitutionFocused, setIsInstitutionFocused] = useState(false)
   const [isProfessionFocused, setIsProfessionFocused] = useState(false)
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({})
-
-  const validatePhoneNumber = (phoneNumber: string): boolean => {
-    return /^\d{10,}$/.test(phoneNumber)
-  }
 
   const validateHospitalNumber = (hospitalNumber: string): boolean => {
     const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{7}$/;
@@ -177,13 +181,31 @@ return regex.test(hospitalNumber);
 
   const router = useRouter()
 
+  const formatToE164 = (phone: string, countryCode?: string) => {
+    try {
+      const parsed = parsePhoneNumberFromString(
+        phone,
+        (countryCode?.toUpperCase() as CountryCode) || 'GB'
+      )
+
+      
+return parsed?.number || phone.trim().replace(/\s/g, '')
+    } catch (err) {
+      return phone.trim().replace(/\s/g, '')
+    }
+  }
+
   // Define debouncedCheckDuplicates
-  const debouncedCheckDuplicates = useCallback((email: string, phoneNumber: string, registrationNumber: string,hospitalNumber: string) => {
+  const debouncedCheckDuplicates = useCallback((email: string, phoneNumber: string, registrationNumber: string,hospitalNumber: string,countryCode?: string) => {
     const checkDuplicates = debounce(async () => {
       if (email.trim() || phoneNumber.trim() || registrationNumber.trim() || hospitalNumber.trim()) {
         try {
-          const result: DuplicateCheckResult = await checkUserDuplicates(email, phoneNumber, registrationNumber,hospitalNumber)
+          const formattedPhone = formatToE164(phoneNumber, countryCode)
 
+          const result: DuplicateCheckResult = await checkUserDuplicates(
+            email, formattedPhone, registrationNumber,hospitalNumber)
+
+          console.log('[checkUserDuplicates result]', result)
           setFormErrors(prev => {
             const newErrors = { ...prev }
 
@@ -290,16 +312,12 @@ return regex.test(hospitalNumber);
     }
 
     if (shouldValidateField('phoneNumber')) {
-      if (formData.phoneNumber) {
-        if (!validatePhoneNumber(formData.phoneNumber)) {
-          errors.phoneNumber = 'Please enter a valid phone number'
-        } else if (!errors.phoneNumber?.includes('already exists')) {
-          errors.phoneNumber = ''
-        }
-      } else {
+      if (!formData.phoneNumber?.trim()) {
+        errors.phoneNumber = 'Phone number is required'
+      } else if (!errors.phoneNumber?.includes('already exists')) {
         errors.phoneNumber = ''
       }
-
+    
       isValid = isValid && !errors.phoneNumber
     }
 
@@ -440,7 +458,9 @@ return regex.test(hospitalNumber);
       }
 
       if (fieldName === 'phoneNumber') {
-        if (value && !validatePhoneNumber(value)) {
+        const digitsOnly = value.replace(/\D/g, '')
+      
+        if (value && digitsOnly.length < 10) {
           console.log('Phone validation failed')
           newErrors.phoneNumber = 'Please enter a valid phone number'
         } else {
@@ -495,28 +515,28 @@ return regex.test(hospitalNumber);
       }
     } else if (name === 'phoneNumber') {
       console.log('Processing phone number input')
+  
+      const fullValue = value.startsWith('+') ? value : `+${value}`
+  
+      const parsed = parsePhoneNumberFromString(fullValue)
+  
+      if (parsed?.isValid()) {
 
-      if (value && !validatePhoneNumber(value)) {
-        console.log('Phone validation failed in handleInputChange')
-        setFormErrors(prev => ({ ...prev, phoneNumber: 'Please enter a valid phone number' }))
+        console.log('Phone number is valid ✅')
+        setFormErrors(prev => ({ ...prev, phoneNumber: '' }))
+  
+        debouncedCheckDuplicates(
+          formData.email || '',
+          value,
+          accountType === 'clinician' ? formData.registrationNumber || '' : '',
+          accountType === 'patient' ? formData.hospitalNumber || '' : ''
+        )
       } else {
-        console.log('Phone validation passed in handleInputChange')
-        setFormErrors(prev => {
-          if (prev.phoneNumber && !prev.phoneNumber.includes('already exists')) {
-            return { ...prev, phoneNumber: '' }
-          }
-
-          return prev
-        })
-
-        if (value) {
-          debouncedCheckDuplicates(
-            formData.email || '',
-            value,
-            accountType === 'clinician' ? formData.registrationNumber || '' : '',
-            accountType === 'patient' ? formData.hospitalNumber || '' : ''
-          )
-        }
+        console.log('Invalid phone number ❌')
+        setFormErrors(prev => ({
+          ...prev,
+          phoneNumber: 'Please enter a valid phone number for the selected country'
+        }))
       }
 
     } else if (name === 'hospitalNumber') {
@@ -777,27 +797,33 @@ return regex.test(hospitalNumber);
           />
         </Grid>
         <Grid item xs={12}>
-          {' '}
-          <TextField
-            label='Phone Number'
-            name='phoneNumber'
-            autoComplete='tel'
-            fullWidth
-            variant='outlined'
-            value={formData.phoneNumber}
-            onChange={handleInputChange}
-            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-              setTouchedFields(prev => ({ ...prev, phoneNumber: true }))
-              setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))
-              validateForm('phoneNumber')
-              setIsFirstNameFocused(!!e.target.value)
+          <ThemedPhoneInput
+            label="Phone Number"
+            value={formData.phoneNumber || ''}
+            onChange={(value) => {
+              setFormData(prev => ({ ...prev, phoneNumber: value }));
+              setTouchedFields(prev => ({ ...prev, phoneNumber: true }));
+            
+              if (value) {
+                debouncedCheckDuplicates(
+                  formData.email || '',
+                  value,
+                  accountType === 'clinician' ? formData.registrationNumber || '' : '',
+                  accountType === 'patient' ? formData.hospitalNumber || '' : ''
+                );
+              }
+            }}
+            onFocus={() => setIsPhoneFocused(true)}
+            onBlur={() => {
+              setIsPhoneFocused(!!formData.phoneNumber);
+              setTouchedFields(prev => ({ ...prev, phoneNumber: true }));
+              validateForm('phoneNumber');
             }}
             error={!!formErrors.phoneNumber}
             helperText={formErrors.phoneNumber}
-            InputLabelProps={{ shrink: isPhoneFocused || !!formData.phoneNumber }}
-            onFocus={() => setIsPhoneFocused(true)}
-            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
-          />{' '}
+            required={true}
+            country="gb"
+          />
         </Grid>
         <Grid item xs={12}>
           <TextField
@@ -1180,3 +1206,6 @@ return regex.test(hospitalNumber);
     </Box>
   )
 }
+
+
+

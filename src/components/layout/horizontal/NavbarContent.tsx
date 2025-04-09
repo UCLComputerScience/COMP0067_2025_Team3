@@ -1,107 +1,117 @@
-'use client'
+"use client"
 
 // Third-party Imports
-import { useEffect, useState } from 'react'
+import { Suspense } from 'react'
 
 import Image from 'next/image'
+import Link from 'next/link'
 
-import { usePathname } from 'next/navigation'
+import dynamic from 'next/dynamic'
 
 import classnames from 'classnames'
 
+// Component Imports
 import MenuItem from '@mui/material/MenuItem'
 
-import { signOut, useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 
-import { AccountStatus, Role } from '@prisma/client'
-
-import Link from '@/components/Link'
-
-// Component Imports
 import NavToggle from './NavToggle'
+
 import ModeDropdown from '@components/layout/shared/ModeDropdown'
+
+
+// NextAuth Imports
 
 // Hook Imports
 import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
-import { getPatientAgreedToResearch } from '@/actions/patient/consentActions'
-import { useSettings } from '@/@core/hooks/useSettings'
 
-const NavbarContent = () => {
+
+const NavbarContentInner = () => {
   // Hooks
-  const { data: session } = useSession()
   const { isBreakpointReached } = useHorizontalNav()
-  const [agreedToResearch, setAgreedToResearch] = useState(false)
-  const pathname = usePathname()
 
-  const { settings } = useSettings()
+  // Use NextAuth session
+  const { data: session, status } = useSession()
+  const loading = status === 'loading'
+  const user = session?.user
 
-  const userRole = session?.user?.role || 'GUEST'
-  const userId = session?.user?.id
-  const userStatus = session?.user.status
+  // Logout
+  const handleLogout = async () => {
+    console.log("Logout button clicked")
 
-  useEffect(() => {
-    const fetchResearchConsent = async () => {
-      if (userRole === Role.PATIENT && userId) {
-        const consent = await getPatientAgreedToResearch(userId)
-
-        setAgreedToResearch(consent)
-      }
+    try {
+      await signOut({ redirect: false })
+      window.location.href = '/home'
+    } catch (error) {
+      console.error('Failed to logout:', error)
     }
-
-    fetchResearchConsent()
-  }, [userRole, userId])
-
-  const getMenuItems = () => {
-    if (userStatus === AccountStatus.PENDING || userStatus === AccountStatus.INACTIVE) {
-      return [{ label: 'Home', href: '/home' }]
-    }
-
-    if (userRole === 'GUEST') {
-      return [
-        { label: 'Home', href: '/home' },
-        { label: 'The Spider', href: '/questionnaire' }
-      ]
-    } else if (userRole === Role.RESEARCHER) {
-      return [
-        { label: 'Home', href: '/home' },
-        { label: 'Download', href: '/download' },
-        { label: 'My Profile', href: '/my-profile' }
-      ]
-    } else if (userRole === Role.CLINICIAN) {
-      return [
-        { label: 'Home', href: '/home' },
-        { label: 'All Patients', href: '/all-patients' },
-        { label: 'My Profile', href: '/my-profile' }
-      ]
-    } else if (userRole === Role.PATIENT) {
-      const patientItems = [
-        { label: 'Home', href: '/home' },
-        { label: 'The Spider', href: '/my-questionnaire' },
-        { label: 'My Records', href: '/my-records' },
-        { label: 'My Profile', href: '/my-profile' }
-      ]
-
-      if (agreedToResearch) {
-        patientItems.splice(3, 0, { label: 'Studies', href: '/studies' })
-      }
-
-      return patientItems
-    } else if (userRole === Role.ADMIN) {
-      return [
-        { label: 'Home', href: '/home' },
-        { label: 'All Users', href: '/all-users' },
-        { label: 'Studies', href: '/studies' },
-        { label: 'My Profile', href: '/my-profile' }
-      ]
-    }
-
-    return []
   }
 
-  const menuItems = getMenuItems()
+  // loading
+  if (loading) { 
+    return (
+      <div className={classnames(horizontalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
+        <div className="p-4 text-gray-500">Loading...</div>
+      </div>
+    )
+  }
+
+  //Generate menu items based on user roles
+  const renderRoleSpecificMenuItems = () => {
+    if (!user) {
+      //  unregistered users
+      return (
+        <>
+          <MenuItem component={Link} href='/about'> The Spider</MenuItem>
+          <MenuItem component={Link} href='/login'> Log In</MenuItem>
+        </>
+      )
+    }
+
+    const role = user.role?.toLowerCase() || ''
+
+     // Returns specific menu items based on role
+    switch (role) {
+      case 'clinician':
+        return (
+          <>
+            <MenuItem component={Link} href="/clinician-allpatients">All Patients</MenuItem>
+            <MenuItem component={Link} href="/clinician-myprofile">My Profile</MenuItem>
+            <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+          </>
+        )
+      case "researcher":
+        return (
+          <>
+            <MenuItem component={Link} href="/researcher-download">Download Data</MenuItem>
+            <MenuItem component={Link} href="/researcher-myprofile">My Profile</MenuItem>
+            <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+          </>
+        )
+      case 'admin':
+        return (
+          <>
+            <MenuItem component={Link} href="/admin-allusers">All Users</MenuItem>
+            <MenuItem component={Link} href="/admin-myprofile">My Profile</MenuItem>
+            <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+          </>
+        )
+      case 'patient':
+        return (
+          <>
+            <MenuItem component={Link} href="/home">The Spider</MenuItem>
+            <MenuItem component={Link} href="/my-records">My Records</MenuItem>
+            <MenuItem component={Link} href="/patient-settings">My Profile</MenuItem>
+            <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+          </>
+        )
+      default:
+        return null
+    }
+  }
 
   return (
     <div
@@ -109,52 +119,54 @@ const NavbarContent = () => {
     >
       <div className='flex items-center gap-4'>
         <NavToggle />
+        {/* Hide Logo on Smaller screens */}
         {!isBreakpointReached && (
-          <Image
-            src={
-              settings.mode === 'dark' ? '/images/logos/spider-logo-dark.png' : '/images/logos/spider-logo-light.png'
-            }
-            alt='Spider Logo'
-            objectFit='cover'
-            width={200}
-            height={50}
-          />
+          <Link href="/">
+          <picture>
+            <source
+              srcSet="/images/logos/spider-logo-dark.png"
+              media="(prefers-color-scheme: dark)"
+            />
+            <Image
+              src="/images/logos/spider-logo-light.png"
+              alt="Spider Logo"
+              width={200}
+              height={50}
+            />
+          </picture>
+        </Link>
         )}
       </div>
       <div className='flex items-center'>
-        {menuItems.map(item => (
-          <MenuItem
-            key={item.href}
-            component={Link}
-            href={item.href}
-            className={classnames('font-small plb-3 pli-1.5 mr-2 hover:text-primary', {
-              'text-primary': pathname.includes(item.href),
-              'font-medium': pathname.includes(item.href)
-            })}
-          >
-            {item.label}
-          </MenuItem>
-        ))}
-        {session ? (
-          <MenuItem
-            onClick={() => signOut({ callbackUrl: '/home', redirect: true })}
-            className={classnames('font-small plb-3 pli-1.5 mr-2 hover:text-primary')}
-            style={{ cursor: 'pointer' }}
-          >
-            Log Out
-          </MenuItem>
-        ) : (
-          <MenuItem
-            component={Link}
-            href='/login'
-            className={classnames('font-small plb-3 pli-1.5 mr-2 hover:text-primary')}
-          >
-            Log In
-          </MenuItem>
-        )}
-        <ModeDropdown />
-      </div>
+          {!user && (
+            <MenuItem component={Link} href='/'>
+              Home
+            </MenuItem>
+          )}
+          
+          {/* Rendering role-based menu items */}
+          {renderRoleSpecificMenuItems()}
+          
+          <ModeDropdown />
+        </div>
     </div>
+  )
+}
+
+// dynamic loading，dont use SSR
+const DynamicNavbarContent = dynamic(() => Promise.resolve(NavbarContentInner), {
+  ssr: false
+})
+
+const NavbarContent = () => {
+  return (
+    <Suspense fallback={
+      <div className={classnames(horizontalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
+        <div className="p-4 text-gray-500">Loading navbar...</div>
+      </div>
+    }>
+      <DynamicNavbarContent />
+    </Suspense>
   )
 }
 
