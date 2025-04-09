@@ -48,7 +48,10 @@ export const DateOfBirthPicker = ({
               error: error,
               helperText: helperText,
               placeholder: 'dd/mm/yyyy',
-              inputProps: { 'aria-label': label }
+              inputProps: {
+                readOnly: true,    
+                'aria-label': label
+              }
             }
           }}
           format='dd/MM/yyyy'
