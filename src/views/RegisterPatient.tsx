@@ -92,7 +92,8 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
           setError(registerResult.error || 'Failed to register user');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
         
         if (!registerResult.userId) {
@@ -100,7 +101,8 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
           setError('User ID is missing after successful registration');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
         
         finalUserId = registerResult.userId;

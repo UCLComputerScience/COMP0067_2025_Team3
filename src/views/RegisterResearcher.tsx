@@ -136,14 +136,16 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
           setError(registerResult.error || 'Failed to register user');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
         
         if (!registerResult.userId) {
           setError('User ID is missing after successful registration');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
 
         newUserId = registerResult.userId
@@ -159,7 +161,8 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
         setError(completionResult.error || 'Failed to complete registration');
         setOpenErrorDialog(true);
         setIsLoading(false);
-        return;
+        
+return;
       }
 
       const formDataApp = new FormData()
@@ -199,7 +202,8 @@ export const ResearcherRegister: React.FC<RegisterResearcherProps> = ({ onBack, 
         setError('Application creation failed');
         setOpenErrorDialog(true);
         setIsLoading(false);
-        return;
+        
+return;
       }
 
       setSuccess('Congratulations! Your account has been created successfully!')

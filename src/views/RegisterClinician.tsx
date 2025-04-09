@@ -77,14 +77,16 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
           setError(registerResult.error || 'Failed to register user');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
         
         if (!registerResult.userId) {
           setError('User ID is missing after successful registration');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
 
         const newUserId: string = registerResult.userId
@@ -99,7 +101,8 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
           setError(completionResult.error || 'Failed to complete registration');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
       } else {
         const completionResult = await completeRegistration(
@@ -112,7 +115,8 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
           setError(completionResult.error || 'Failed to complete registration');
           setOpenErrorDialog(true);
           setIsLoading(false);
-          return; 
+          
+return; 
         }
       }
 
