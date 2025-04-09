@@ -107,11 +107,6 @@ const LoginV2 = ({ mode }: { mode: string }) => {
       </Link>
         <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] border border-divider rounded-lg p-6 bg-backgroundPaper'>
           <Typography variant='h4' className='text-center'>{`Log in`}</Typography>
-          {error && (
-            <Typography variant='caption' className='text-center mt-3' color='var(--mui-palette-error-main)'>
-              {error}
-            </Typography>
-          )}
           <form onSubmit={handleLogin} className='flex flex-col gap-5'>
             <TextField
               autoFocus
@@ -170,6 +165,12 @@ const LoginV2 = ({ mode }: { mode: string }) => {
               Log In
             </Button>
 
+            {error && (
+            <Typography variant='caption' className='text-center mt-3' color='var(--mui-palette-error-main)'>
+              {error}
+            </Typography>
+          )}
+
             <Typography className='text-center mt-4'>
               Don&apos;t have an account?
               <Link href='/register' className='text-primary underline ml-2'>
@@ -184,5 +185,6 @@ const LoginV2 = ({ mode }: { mode: string }) => {
 }
 
 export default LoginV2
+
 
 

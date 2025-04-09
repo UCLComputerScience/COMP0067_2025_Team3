@@ -16,12 +16,14 @@ import {
   DialogActions,
   IconButton
 } from '@mui/material'
+
 import { alpha } from '@mui/material/styles'
 
 import { toast } from 'react-toastify'
  
 import { searchClinicians } from '@/actions/register/registerActions'
-import { sendInvitation } from '@/actions/patientSettings/userActions' 
+
+import { sendInviteEmailDuringRegistration } from '@/actions/email/sendInvite';
 
 export interface Clinician {
   id: string
@@ -74,7 +76,6 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
     return () => observer.disconnect()
   }, [])
 
-
   const handleOpenInviteModal = () => {
     setInviteModalOpen(true)
   }
@@ -85,24 +86,28 @@ export const ClinicianSearch = ({ onSaveClinician, savedClinicians }: ClinicianS
 
   const handleSendInvitation = async () => {
     if (!inviteEmail) {
-      toast?.error("Please enter the clinician's email") || console.error("Please enter the clinician's email")
+      toast?.error("Please enter the clinician's email");
       
-return
+return;
     }
-
+  
     try {
-      const invite = await sendInvitation(inviteEmail, inviteMessage)
-
-      if (!invite.success) {
-        throw new Error((invite as any).message || 'Failed to send the invitation')
+      const name = searchFirstName 
+        ? `${searchFirstName} ${searchLastName || ''}`.trim() 
+        : 'Clinician';
+      
+      const invitation = await sendInviteEmailDuringRegistration(name, inviteEmail);
+  
+      if (invitation.success) {
+        toast?.success('Invitation sent successfully');
+        handleCloseInviteModal();
+        setInviteEmail('');
+      } else {
+        throw new Error(invitation.error || 'Failed to send the invitation');
       }
-
-      toast?.success('Invitation sent successfully') || console.log('Invitation sent successfully')
-      handleCloseInviteModal()
     } catch (error) {
-      console.error('Failed to send invitation:', error)
-      toast?.error((error as any).message || 'Failed to send the invitation')
-      console.error((error as any).message || 'Failed to send the invitation')
+      console.error('Failed to send invitation:', error);
+      toast?.error((error as any).message || 'Failed to send the invitation');
     }
   }
 
@@ -459,3 +464,7 @@ return
     </>
   )
 }
+
+
+
+
