@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -88,14 +89,21 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
         console.log('Register Result:', registerResult)
 
         if (!registerResult.success) {
-          throw new Error(registerResult.error || 'Failed to register user')
+          setError(registerResult.error || 'Failed to register user');
+          setOpenErrorDialog(true);
+          setIsLoading(false);
+          return; 
         }
-
+        
         if (!registerResult.userId) {
-          throw new Error('User ID is missing after successful registration')
-        }
 
-        finalUserId = registerResult.userId
+          setError('User ID is missing after successful registration');
+          setOpenErrorDialog(true);
+          setIsLoading(false);
+          return; 
+        }
+        
+        finalUserId = registerResult.userId;
       }
 
       // Complete registration with privacy settings
@@ -133,7 +141,7 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
   return (
     <Box sx={{ maxWidth: '600px', marginX: 'auto' }}>
       {/* Error and Success dialog */}
-      <Dialog open={openErrorDialog} onClose={() => setOpenErrorDialog(false)} aria-labelledby='error-dialog-title'>
+      <Dialog open={openErrorDialog} onClose={() => setOpenErrorDialog(false)} aria-labelledby='error-dialog-title' maxWidth="sm" fullWidth >
         <DialogTitle id='error-dialog-title'>Error</DialogTitle>
         <DialogContent>
           <Typography variant='body1'>{error}</Typography>
@@ -153,6 +161,8 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
         open={openSuccessDialog}
         onClose={() => setOpenSuccessDialog(false)}
         aria-labelledby='success-dialog-title'
+        maxWidth="sm"
+        fullWidth
       >
         <DialogTitle id='success-dialog-title'>Success</DialogTitle>
         <DialogContent>
@@ -259,3 +269,5 @@ export const PatientRegister: React.FC<RegisterPatientProps> = ({ onBack, accoun
     </Box>
   )
 }
+
+

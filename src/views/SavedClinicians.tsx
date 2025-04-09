@@ -1,10 +1,10 @@
+
 'use client'
 
 import React from 'react'
 
-import Image from 'next/image'
-
 import { Box, Typography, IconButton, Card, CardContent } from '@mui/material'
+
 import { alpha } from '@mui/material/styles'
 
 import type { Clinician } from './ClinicianSearch'
@@ -48,13 +48,7 @@ export const SavedClinicians: React.FC<SavedCliniciansProps> = ({ clinicians, on
           })}
         >
           <CardContent sx={{ display: 'flex', alignItems: 'center', p: 1, pr: 3, width: '100%' }}>
-            <Image
-              src='/images/pages/savedclinician-logo.png'
-              alt='Hospital Logo'
-              width={40}
-              height={40}
-              style={{ marginRight: 8 }}
-            />
+          <i className='ri-hospital-line' style={{ color: 'orange' }}></i>
             <Box sx={{ flexGrow: 1 }}>
               <Typography sx={theme => ({ fontWeight: 'bold', fontSize: '14px', color: theme.palette.text.primary })}>
                 {clinician.firstName} {clinician.lastName}
@@ -86,3 +80,5 @@ export const SavedClinicians: React.FC<SavedCliniciansProps> = ({ clinicians, on
     </Box>
   )
 }
+
+
