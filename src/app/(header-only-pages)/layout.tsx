@@ -10,6 +10,7 @@ import type { ChildrenType } from '@core/types'
 import Providers from '@components/Providers'
 import BlankLayout from '@layouts/BlankLayout'
 import FrontLayout from '@components/layout/front-pages'
+import StatusCheck from '@/components/hocs/StatusCheck'
 
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
@@ -26,9 +27,11 @@ const Layout = async ({ children }: ChildrenType) => {
 
   return (
     <Providers direction='ltr'>
-      <BlankLayout systemMode={systemMode}>
-        <FrontLayout>{children}</FrontLayout>
-      </BlankLayout>
+      <StatusCheck>
+        <BlankLayout systemMode={systemMode}>
+          <FrontLayout>{children}</FrontLayout>
+        </BlankLayout>
+      </StatusCheck>
     </Providers>
   )
 }
