@@ -13,15 +13,13 @@ import MenuItem from '@mui/material/MenuItem'
 
 import { signOut, useSession } from 'next-auth/react'
 
-import { Role } from '@prisma/client'
+import { AccountStatus, Role } from '@prisma/client'
 
 import Link from '@/components/Link'
 
 // Component Imports
-
 import NavToggle from './NavToggle'
 import ModeDropdown from '@components/layout/shared/ModeDropdown'
-import SpiderLogo from '@components/layout/horizontal/spider_logo_1.png'
 
 // Hook Imports
 import useHorizontalNav from '@menu/hooks/useHorizontalNav'
@@ -29,6 +27,7 @@ import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
 import { getPatientAgreedToResearch } from '@/actions/patient/consentActions'
+import { useSettings } from '@/@core/hooks/useSettings'
 
 const NavbarContent = () => {
   // Hooks
@@ -37,8 +36,11 @@ const NavbarContent = () => {
   const [agreedToResearch, setAgreedToResearch] = useState(false)
   const pathname = usePathname()
 
+  const { settings } = useSettings()
+
   const userRole = session?.user?.role || 'GUEST'
   const userId = session?.user?.id
+  const userStatus = session?.user.status
 
   useEffect(() => {
     const fetchResearchConsent = async () => {
@@ -53,6 +55,10 @@ const NavbarContent = () => {
   }, [userRole, userId])
 
   const getMenuItems = () => {
+    if (userStatus === AccountStatus.PENDING || userStatus === AccountStatus.INACTIVE) {
+      return [{ label: 'Home', href: '/home' }]
+    }
+
     if (userRole === 'GUEST') {
       return [
         { label: 'Home', href: '/home' },
@@ -78,7 +84,6 @@ const NavbarContent = () => {
         { label: 'My Profile', href: '/my-profile' }
       ]
 
-      // Only add the Studies link if they've agreed to research
       if (agreedToResearch) {
         patientItems.splice(3, 0, { label: 'Studies', href: '/studies' })
       }
@@ -98,14 +103,23 @@ const NavbarContent = () => {
 
   const menuItems = getMenuItems()
 
-  
-return (
+  return (
     <div
       className={classnames(horizontalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}
     >
       <div className='flex items-center gap-4'>
         <NavToggle />
-        {!isBreakpointReached && <Image src={SpiderLogo} alt='Spider Logo' objectFit='cover' width={200} height={50} />}
+        {!isBreakpointReached && (
+          <Image
+            src={
+              settings.mode === 'dark' ? '/images/logos/spider-logo-dark.png' : '/images/logos/spider-logo-light.png'
+            }
+            alt='Spider Logo'
+            objectFit='cover'
+            width={200}
+            height={50}
+          />
+        )}
       </div>
       <div className='flex items-center'>
         {menuItems.map(item => (

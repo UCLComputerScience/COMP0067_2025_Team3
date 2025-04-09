@@ -123,6 +123,29 @@ export const updateUserProfile = async (formData: UserProfileData): Promise<{ su
 
     console.log(updateData)
 
+    if (formData.email !== existingUser.email) {
+      const emailExists = await prisma.user.findUnique({
+        where: { email: formData.email }
+      })
+
+      if (emailExists) {
+        return { success: false, message: 'Email address is already in use' }
+      }
+    }
+
+    if (formData.registrationNumber && formData.registrationNumber !== existingUser.registrationNumber) {
+      const regNumberExists = await prisma.user.findFirst({
+        where: {
+          registrationNumber: formData.registrationNumber,
+          NOT: { id: formData.id }
+        }
+      })
+
+      if (regNumberExists) {
+        return { success: false, message: 'Registration number is already in use' }
+      }
+    }
+
     // Update the user in the database
     await prisma.user.update({
       where: { id: formData.id },
