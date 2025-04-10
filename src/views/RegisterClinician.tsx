@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -49,7 +50,7 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
     }
   }, [])
 
-  // Handle form submission
+  // handleSubmit
   const handleSubmit = async () => {
     try {
       setIsLoading(true)
@@ -73,11 +74,19 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
         })
 
         if (!registerResult.success) {
-          throw new Error(registerResult.error || 'Failed to register user')
+          setError(registerResult.error || 'Failed to register user');
+          setOpenErrorDialog(true);
+          setIsLoading(false);
+          
+return; 
         }
-
+        
         if (!registerResult.userId) {
-          throw new Error('User ID is missing after successful registration')
+          setError('User ID is missing after successful registration');
+          setOpenErrorDialog(true);
+          setIsLoading(false);
+          
+return; 
         }
 
         const newUserId: string = registerResult.userId
@@ -89,7 +98,11 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
         )
 
         if (!completionResult.success) {
-          throw new Error(completionResult.error || 'Failed to complete registration')
+          setError(completionResult.error || 'Failed to complete registration');
+          setOpenErrorDialog(true);
+          setIsLoading(false);
+          
+return; 
         }
       } else {
         const completionResult = await completeRegistration(
@@ -99,7 +112,11 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
         )
 
         if (!completionResult.success) {
-          throw new Error(completionResult.error || 'Failed to complete registration')
+          setError(completionResult.error || 'Failed to complete registration');
+          setOpenErrorDialog(true);
+          setIsLoading(false);
+          
+return; 
         }
       }
 
@@ -122,22 +139,21 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
   return (
     <Box sx={{ maxWidth: '600px', marginX: 'auto' }}>
       {/* Error dialog */}
-      <Dialog open={openErrorDialog} onClose={() => setOpenErrorDialog(false)} aria-labelledby='error-dialog-title'>
+      <Dialog open={openErrorDialog} onClose={() => setOpenErrorDialog(false)} aria-labelledby='error-dialog-title' maxWidth="sm" fullWidth    >
         <DialogTitle id='error-dialog-title'>Error</DialogTitle>
         <DialogContent>
           {' '}
           <Typography variant='body1'>{error}</Typography>
         </DialogContent>
         <DialogActions>
-          {' '}
-          <Button
-            onClick={onBack}
-            variant='contained'
-            sx={{ bgcolor: 'primary', color: 'white', '&:hover': { bgcolor: 'primary' }, borderRadius: '8px' }}
-          >
-            Back to Register
-          </Button>
-        </DialogActions>
+        <Button
+          onClick={() => setOpenErrorDialog(false)}
+          variant='contained'
+          sx={{ bgcolor: 'primary', color: 'white', '&:hover': { bgcolor: 'primary' }, borderRadius: '8px' }}
+        >
+          Close
+        </Button>
+      </DialogActions>
       </Dialog>
 
       {/* Success dialog */}
@@ -145,6 +161,8 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
         open={openSuccessDialog}
         onClose={() => setOpenSuccessDialog(false)}
         aria-labelledby='success-dialog-title'
+        maxWidth="sm"
+        fullWidth 
       >
         <DialogTitle id='success-dialog-title'>Success</DialogTitle>
         <DialogContent>
@@ -210,3 +228,5 @@ export const ClinicianRegister: React.FC<RegisterClinicianProps> = ({ onBack, ac
     </Box>
   )
 }
+
+

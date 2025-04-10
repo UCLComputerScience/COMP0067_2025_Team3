@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -6,7 +7,6 @@ import { hash } from 'bcryptjs';
 
 import { prisma } from '@/prisma/client';
 
-
 export interface Clinician { id: string;firstName: string;lastName: string;institution: string;email: string;}
 
 interface DataPrivacyFormData {researchConsent: boolean;clinicianAccess: boolean;selectedClinicians: Clinician[];}
@@ -14,7 +14,6 @@ interface DataPrivacyFormData {researchConsent: boolean;clinicianAccess: boolean
 export interface RegisterUserData { firstName: string; lastName: string; email: string; password: string; dateOfBirth?: string; address?: string;       phoneNumber?: string; hospitalNumber?: string;  profession?: string; registrationNumber?: string;  institution?: string;    accountType: string;}
 
 export interface RegisterResult { success: boolean; userId?: string;  error?: string; }
-
 
 export async function registerUser(data: RegisterUserData): Promise<RegisterResult> {
     try {
@@ -43,7 +42,8 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterResu
           : 'PATIENT'; // Default to patient
 
     // Create the user with all provided fields
-    const user = await prisma.user.create({ data: { email: data.email, hashedPassword, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined, address: data.address,   phoneNumber: data.phoneNumber,hospitalNumber: data.hospitalNumber,     profession: data.profession,  registrationNumber: data.registrationNumber,  institution: data.institution,       role, status: 'PENDING',  }});
+    const initialStatus = role === 'PATIENT' ? 'ACTIVE' : 'PENDING';
+    const user = await prisma.user.create({ data: { email: data.email, hashedPassword, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined, address: data.address,   phoneNumber: data.phoneNumber,hospitalNumber: data.hospitalNumber,     profession: data.profession,  registrationNumber: data.registrationNumber,  institution: data.institution,       role,  status: initialStatus, }});
 
     
 return { success: true, userId: user.id};
@@ -55,26 +55,35 @@ return { success: false, error: 'Failed to register user. Please try again.'
   }
 }
 
-
 export async function saveDataPrivacyPreferences(
   userId: string,
   data: DataPrivacyFormData
 ) {
   try {
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true }
+    });
+
+    const isPatient = user?.role === 'PATIENT';
+
     // Update the user's research consent preference
     await prisma.user.update({ where: { id: userId }, data: {  agreedForResearch: data.researchConsent,},});
 
     // Create clinician relationships if clinician access is granted
     if (data.clinicianAccess && data.selectedClinicians.length > 0) {
+      const relationshipStatus = isPatient ? 'PENDING' : 'CONNECTED';
+
       // Create an array of clinician relationship objects
-      const clinicianRelationships = data.selectedClinicians.map((clinician) => ({ patient: { connect: { id: userId } },  clinician: { connect: { id: clinician.id } },  agreedToShareData: true, status: 'CONNECTED', }));
+      const clinicianRelationships = data.selectedClinicians.map((clinician) => ({ patient: { connect: { id: userId } },  clinician: { connect: { id: clinician.id } },  agreedToShareData: true, status: relationshipStatus, }));
       
       await prisma.$transaction(
         clinicianRelationships.map((relationship) =>
           prisma.clinicianPatient.upsert({
             where: {  patientId_clinicianId: {patientId: userId, clinicianId: relationship.clinician.connect!.id,  },},
-            update: { agreedToShareData: relationship.agreedToShareData, status: 'CONNECTED',},
-            create: { patient: { connect: { id: userId } }, clinician: { connect: { id: relationship.clinician.connect!.id } }, agreedToShareData: relationship.agreedToShareData, status: 'CONNECTED',},
+            update: { agreedToShareData: relationship.agreedToShareData,  status: relationshipStatus,},
+            create: { patient: { connect: { id: userId } }, clinician: { connect: { id: relationship.clinician.connect!.id } }, agreedToShareData: relationship.agreedToShareData,  status: relationshipStatus,},
           })
         )
       );
@@ -97,7 +106,6 @@ return { success: false, error: 'Failed to save data privacy preferences. Please
   }
 }
 
-
 export async function completeRegistration( userId: string, data: DataPrivacyFormData, accountType: string) {
   try {
     const result = await saveDataPrivacyPreferences(userId, data);
@@ -111,7 +119,10 @@ export async function completeRegistration( userId: string, data: DataPrivacyFor
 
     // upadate status or not based on accounttype
     if (accountType === 'Clinician') {
-      await prisma.user.update({ where: { id: userId }, data: { status: 'ACTIVE', },});
+      await prisma.user.update({ 
+        where: { id: userId }, 
+        data: { status: 'ACTIVE', },
+      });
     } else if (accountType === 'Researcher') {
     }
 
@@ -128,7 +139,6 @@ return {
     };
   }
 }
-
 
 export async function searchClinicians(searchParams: Record<string, string>) {
   try {
@@ -180,4 +190,5 @@ export async function checkUserDuplicates(email: string, phoneNumber?: string, r
 return { emailExists: false, phoneExists: false, registrationNumberExists: false ,hospitalNumberExists: false };
   }
 }
+
 

@@ -329,10 +329,8 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
     }
 
     if (shouldValidateField('hospitalNumber') && accountType === 'patient') {
-      if (!formData.hospitalNumber?.trim()) {
-        errors.hospitalNumber = 'The hospital number is required';
-      } else if (!validateHospitalNumber(formData.hospitalNumber)) {
-        errors.hospitalNumber = 'Please enter the  valid format.)';
+      if (formData.hospitalNumber?.trim() && !validateHospitalNumber(formData.hospitalNumber)) {
+        errors.hospitalNumber = 'Please enter the valid format.';
       } else if (errors.hospitalNumber && !errors.hospitalNumber.includes('already exists')) {
         errors.hospitalNumber = '';
       }
@@ -360,7 +358,7 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
     }
 
     if (shouldValidateField('profession') && accountType === 'clinician') {
-      errors.profession = !formData.profession?.trim() ? 'Profession is required' : ''
+      errors.profession = !formData.profession?.trim() ? 'Please select a profession' : ''
       isValid = isValid && !errors.profession
     } else {
       errors.profession = ''
@@ -473,10 +471,8 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
       }
 
       if (fieldName === 'hospitalNumber' && accountType === 'patient') {
-        if (!value.trim()) {
-          newErrors.hospitalNumber = 'The hospital number is required';
-        } else if (!validateHospitalNumber(value)) {
-          newErrors.hospitalNumber = 'Please enter the valid format)';
+        if (value.trim() && !validateHospitalNumber(value)) {
+          newErrors.hospitalNumber = 'Please enter the valid format.';
         } else if (newErrors.hospitalNumber && !newErrors.hospitalNumber.includes('already exists')) {
           newErrors.hospitalNumber = '';
         }
@@ -884,8 +880,8 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
         {accountType === 'patient' && (
         <>
           <Grid item xs={12}>
-            <TextField
-              label='Hospital Number'
+          <TextField
+              label='Hospital Number (Optional)'
               name='hospitalNumber'
               autoComplete='off'
               fullWidth
@@ -951,6 +947,7 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel shrink={isInstitutionFocused || !!formData.institution}>Institution</InputLabel>
                 <Select
+                  label='institution'
                   name='institution'
                   value={formData.institution}
                   onChange={(event: SelectChangeEvent<string>) =>
@@ -981,25 +978,40 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              {' '}
-              <TextField
-                label='Profession'
-                name='profession'
-                fullWidth
-                variant='outlined'
-                value={formData.profession}
-                onChange={handleInputChange}
-                onBlur={() => {
-                  setTouchedFields(prev => ({ ...prev, profession: true }))
-                  validateForm('profession')
-                  setIsFirstNameFocused(!!formData.profession)
-                }}
-                error={!!formErrors.profession}
-                helperText={formErrors.profession}
-                InputLabelProps={{ shrink: isProfessionFocused || !!formData.profession }}
-                onFocus={() => setIsProfessionFocused(true)}
-                sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
-              />{' '}
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel shrink={isProfessionFocused || !!formData.profession}>Profession</InputLabel>
+                <Select
+                  label='Profession'
+                  name='profession'
+                  value={formData.profession || ''}
+                  onChange={(event: SelectChangeEvent<string>) =>
+                    handleInputChange({
+                      target: { name: 'profession', value: event.target.value }
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
+                  onBlur={() => {
+                    setTouchedFields(prev => ({ ...prev, profession: true }))
+                    validateForm('profession')
+                    setIsProfessionFocused(!!formData.profession)
+                  }}
+                  onOpen={() => setIsProfessionFocused(true)}
+                  onClose={() => setIsProfessionFocused(!!formData.profession)}
+                  error={!!formErrors.profession}
+                >
+                  <MenuItem value='Rheumatologist'>Rheumatologist</MenuItem>
+                  <MenuItem value='General Practitioner'>General Practitioner</MenuItem>
+                  <MenuItem value='Geneticist'>Geneticist</MenuItem>
+                  <MenuItem value='Paediatrician'>Paediatrician</MenuItem>
+                  <MenuItem value='Physiotherapist'>Physiotherapist</MenuItem>
+                  <MenuItem value='Orthopaedic Consultant'>Orthopaedic Consultant</MenuItem>
+                  <MenuItem value='Other'>Other</MenuItem>
+                </Select>
+                {formErrors.profession && (
+                  <Typography variant='caption' sx={{ color: '#f44336' }}>
+                    {formErrors.profession}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
           </>
         )}
@@ -1010,6 +1022,7 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel shrink={isInstitutionFocused || !!formData.institution}>Institution</InputLabel>
               <Select
+              label='Institution'
                 name='institution'
                 value={formData.institution}
                 onChange={(event: SelectChangeEvent<string>) =>
@@ -1033,7 +1046,7 @@ return parsed?.number || phone.trim().replace(/\s/g, '')
                 <MenuItem value='Other'>Other</MenuItem>
               </Select>
               {formErrors.institution && (
-                <Typography variant='caption' color='error'>
+                <Typography variant='caption'sx={{ color: '#f44336' }}>
                   {formErrors.institution}
                 </Typography>
               )}
