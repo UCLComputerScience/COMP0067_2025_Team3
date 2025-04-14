@@ -34,7 +34,7 @@ services:
 
   nginx:
     build: ./nginx
-    container_name: nginx
+    container_name: nginx-main
     ports:
       - '80:80'
       - '443:443'
@@ -54,6 +54,6 @@ networks:
 volumes:
   pgdata:
   certbot-etc:
-    external: true
+    name: comp0067_2025_team3_certbot-etc
   certbot-www:
-    external: true
+    name: comp0067_2025_team3_certbot-www
