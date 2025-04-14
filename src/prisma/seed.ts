@@ -312,7 +312,10 @@ async function initialiseQuestions() {
 
 async function main() {
   await initialiseQuestions()
-  await initialiseUsersAndResponses()
+
+  if (process.env.NODE_ENV === 'development') {
+    await initialiseUsersAndResponses()
+  }
 }
 
 main()
