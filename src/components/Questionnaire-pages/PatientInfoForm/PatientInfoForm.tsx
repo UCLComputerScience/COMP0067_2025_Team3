@@ -54,7 +54,7 @@ type FormDataType = {
   age: string
   sex_at_birth: string
   gender: string
-  gender_same_as_sex: boolean
+  gender_same_as_sex: string
   ethnicity: string
   country: string
   employment_status: string
@@ -95,7 +95,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     age: '',
     sex_at_birth: '',
     gender: '',
-    gender_same_as_sex: true,
+    gender_same_as_sex: '',
     country: '',
     ethnicity: '',
     employment_status: '',
@@ -114,7 +114,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
       age: '',
       sex_at_birth: '',
       gender: '',
-      gender_same_as_sex: false,
+      gender_same_as_sex: '',
       ethnicity: '',
       country: '',
       employment_status: '',
@@ -250,7 +250,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   console.log(formErrors)
 
   return (
-
     // Return the Information form
     <Box>
       <Dialog open={openDialog} onClose={handleDialogClose}>
@@ -334,11 +333,15 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 <Select
                   label='Select'
                   value={formData.gender_same_as_sex}
-                  onChange={e => setFormData({ ...formData, gender_same_as_sex: !!e.target.value })}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      gender_same_as_sex: e.target.value === 'true' ? true : e.target.value === 'false' ? false : null
+                    })
+                  }
                 >
                   <MenuItem value='true'>Yes</MenuItem>
                   <MenuItem value='false'>No</MenuItem>
-                  <MenuItem value='null'>Prefer not to say</MenuItem>
                 </Select>
                 {formErrors.gender_same_as_sex && <FormHelperText>{formErrors.gender_same_as_sex}</FormHelperText>}
               </FormControl>

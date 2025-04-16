@@ -19,7 +19,6 @@ import {
   AnxietySchema,
   DepressionSchema
 } from '@/actions/formValidation'
-import '@fontsource/inter'
 
 interface QuestionPageProps {
   domain: string
