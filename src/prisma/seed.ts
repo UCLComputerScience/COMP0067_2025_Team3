@@ -1,5 +1,5 @@
 import { prisma } from './client'
-import { initialiseUsersAndResponses } from './seeds/users'
+import { initialiseAdmin, initialiseUsersAndResponses } from './seeds/users'
 
 async function initialiseQuestions() {
   const NMSK1 = await prisma.question.create({
@@ -315,6 +315,8 @@ async function main() {
 
   if (process.env.NODE_ENV === 'development') {
     await initialiseUsersAndResponses()
+  } else if (process.env.NODE_ENV === 'production') {
+    await initialiseAdmin()
   }
 }
 
