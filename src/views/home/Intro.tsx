@@ -11,6 +11,7 @@ const Intro = () => {
   const role = session?.user.role
 
   return (
+
     // bg-backgroundPaper
     <section className=' pt-10 px-4'>
       <Typography
