@@ -45,3 +45,6 @@ src/assets/iconify-icons/generated-icons.css
 # development
 /uploads
 sendgrid.env
+
+# production
+app-data/.seeded
