@@ -72,7 +72,7 @@ interface PatientInfoFormProps {
   handleNext: () => void
 }
 
-const COUNTRIES = country.names()
+const COUNTRIES = country.names().sort()
 
 // Give the Info form the handleNext prop defined in the stepper
 const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
@@ -250,7 +250,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   console.log(formErrors)
 
   return (
-
     // Return the Information form
     <Box>
       <Dialog open={openDialog} onClose={handleDialogClose}>
@@ -338,7 +337,6 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 >
                   <MenuItem value='true'>Yes</MenuItem>
                   <MenuItem value='false'>No</MenuItem>
-                  <MenuItem value='null'>Prefer not to say</MenuItem>
                 </Select>
                 {formErrors.gender_same_as_sex && <FormHelperText>{formErrors.gender_same_as_sex}</FormHelperText>}
               </FormControl>
