@@ -13,11 +13,12 @@ services:
       - NODE_ENV=production
     depends_on:
       - postgres
-    command: sh -c "cd src && npx prisma migrate deploy && npx prisma db seed && cd .. && npm start"
+    command: sh -c "cd src && npx prisma migrate deploy && [ -f /app/data/.seeded ] || (npx prisma db seed && touch /app/data/.seeded) && cd .. && npm start"
     networks:
       - app-network
     volumes:
       - ./src:/app/src
+      - ./app-data:/app/data
 
   postgres:
     image: postgres:15
