@@ -47,4 +47,5 @@ src/assets/iconify-icons/generated-icons.css
 sendgrid.env
 
 # production
-app-data/.seeded
+/app-data/*
+!/app-data/.gitkeep

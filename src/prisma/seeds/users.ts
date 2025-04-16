@@ -137,6 +137,20 @@ async function generateMultipleResearcher(num_researcher = 2) {
   }
 }
 
+export async function initialiseAdmin() {
+  const hashedPassword = await bcrypt.hash('1234567', 10)
+
+  await prisma.user.create({
+    data: {
+      email: 'admin1@mail.com',
+      hashedPassword: hashedPassword,
+      firstName: 'admin1',
+      lastName: 'admin1',
+      role: Role.ADMIN
+    }
+  })
+}
+
 export async function initialiseUsersAndResponses() {
   const hashedPassword = await bcrypt.hash('1234567', 10)
 
