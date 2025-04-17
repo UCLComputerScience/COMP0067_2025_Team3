@@ -54,7 +54,7 @@ type FormDataType = {
   age: string
   sex_at_birth: string
   gender: string
-  gender_same_as_sex: string
+  gender_same_as_sex: boolean
   ethnicity: string
   country: string
   employment_status: string
@@ -72,7 +72,7 @@ interface PatientInfoFormProps {
   handleNext: () => void
 }
 
-const COUNTRIES = country.names()
+const COUNTRIES = country.names().sort()
 
 // Give the Info form the handleNext prop defined in the stepper
 const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
@@ -95,7 +95,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
     age: '',
     sex_at_birth: '',
     gender: '',
-    gender_same_as_sex: '',
+    gender_same_as_sex: true,
     country: '',
     ethnicity: '',
     employment_status: '',
@@ -114,7 +114,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
       age: '',
       sex_at_birth: '',
       gender: '',
-      gender_same_as_sex: '',
+      gender_same_as_sex: false,
       ethnicity: '',
       country: '',
       employment_status: '',
@@ -333,12 +333,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 <Select
                   label='Select'
                   value={formData.gender_same_as_sex}
-                  onChange={e =>
-                    setFormData({
-                      ...formData,
-                      gender_same_as_sex: e.target.value === 'true' ? true : e.target.value === 'false' ? false : null
-                    })
-                  }
+                  onChange={e => setFormData({ ...formData, gender_same_as_sex: !!e.target.value })}
                 >
                   <MenuItem value='true'>Yes</MenuItem>
                   <MenuItem value='false'>No</MenuItem>
