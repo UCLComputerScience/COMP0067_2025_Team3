@@ -1,8 +1,15 @@
+'use client'
+
 import { Typography, Grid2, Box, Button } from '@mui/material'
+
+import { useSession } from 'next-auth/react'
 
 import RechartsRadarChart from '@/components/charts/recharts/RechartsRadarChart'
 
 const Intro = () => {
+  const { data: session } = useSession()
+  const role = session?.user.role
+
   return (
 
     // bg-backgroundPaper
@@ -93,7 +100,7 @@ const Intro = () => {
         may have.
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 10 }}>
-        <Button variant='contained' color='primary' href='/questionnaire'>
+        <Button variant='contained' color='primary' href={role === 'PATIENT' ? '/my-questionnaire' : '/questionnaire'}>
           Take The Test
         </Button>
       </Box>
