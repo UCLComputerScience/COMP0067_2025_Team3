@@ -39,6 +39,7 @@
     "bcryptjs": "^3.0.2",
     "classnames": "2.5.1",
     "country-list-js": "^3.1.8",
+    "cssesc": "^3.0.0",
     "date-fns": "^4.1.0",
     "export-to-csv": "^1.4.0",
     "html2canvas": "^1.4.1",

@@ -154,7 +154,7 @@ export default function QuestionPage({ domain, answers, onUpdate, handleNext, ha
 
       <form>
         {questions.map(q => (
-          <div key={q.id}>
+          <div key={q.id} id={q.id.toString()}>
             {q.id === 19 && (
               <Grid2 container spacing={2}>
                 <Grid2 size={2}></Grid2>

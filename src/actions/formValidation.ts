@@ -36,7 +36,11 @@ export const passwordSchema = object({
 
 // Patient Info Validation
 export const InfoSchema = object({
-  age: pipe(string('Your age must be a number'), nonEmpty('Enter your age')),
+  age: pipe(
+    string('Your age must be a number'),
+    nonEmpty('Please Enter Your Age'),
+    regex(/^\d+$/, 'Your age must be a number')
+  ),
   sex_at_birth: pipe(string(), nonEmpty('Please Select')),
   gender: pipe(string(), nonEmpty('Please Select')),
   gender_same_as_sex: pipe(boolean()),
@@ -45,12 +49,16 @@ export const InfoSchema = object({
   employment_status: pipe(string(), nonEmpty('Please Select')),
   education_level: pipe(string(), nonEmpty('Please Select')),
   activity_level: pipe(string(), nonEmpty('Please Select')),
-  minutes_of_exercise: pipe(string(), nonEmpty('Please Select')),
+  minutes_of_exercise: pipe(
+    string('You must enter an estimate'),
+    nonEmpty('Please enter minutes of exercise'),
+    regex(/^\d+$/, 'Your estimation must be a number')
+  ),
   diagnosis_confirmed: pipe(string(), nonEmpty('Please Select if confirmed')),
   healthcare_professional: pipe(string(), nonEmpty('Please Select Healthcare Professional')), // Optional in case user is not receiving treatment
   taking_medications: pipe(string(), nonEmpty('Please Select Yes or No')),
   medications: optional(pipe(string())), // Optional if user is not taking medications
-  other_conditions: optional(pipe(string(), nonEmpty('Please Enter If you have other conditions'))) // Optional field
+  other_conditions: optional(pipe(string())) // Optional field
 })
 
 export const NeuromusculoskeletalSchema = object({

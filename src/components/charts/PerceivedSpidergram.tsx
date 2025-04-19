@@ -197,6 +197,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
       <Card sx={{ maxWidth: 1000, mx: 'auto', mt: 2, mb: 2 }}>
         <CardContent>
           <Box
+            data-testid='spidergram'
             sx={{
               width: '100%',
               aspectRatio: '4 / 3',
