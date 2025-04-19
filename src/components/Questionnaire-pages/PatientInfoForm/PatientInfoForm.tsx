@@ -250,6 +250,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
   console.log(formErrors)
 
   return (
+
     // Return the Information form
     <Box>
       <Dialog open={openDialog} onClose={handleDialogClose}>

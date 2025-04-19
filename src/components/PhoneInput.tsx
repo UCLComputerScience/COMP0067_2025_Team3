@@ -158,6 +158,7 @@ const ThemedPhoneInput: React.FC<ThemedPhoneInputProps> = ({
           color: theme.palette.text.primary,
           borderColor: theme.palette.divider
         }}
+
         // @ts-ignore
         highlightCountryStyle={{
           backgroundColor: 'rgba(110, 65, 226, 0.2)',
