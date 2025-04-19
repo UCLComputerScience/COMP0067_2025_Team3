@@ -16,10 +16,10 @@ jest.mock('next-auth/react', () => ({
 }))
 import { getUserDemographicAndClinical } from '../../src/actions/all-users/userAction'
 
-jest.mock('../src/actions/all-users/userAction')
+jest.mock('../../src/actions/all-users/userAction')
 import { savePatientInfo } from '../../src/actions/submit-response/info-submission-action'
 
-jest.mock('../src/actions/submit-response/info-submission-action')
+jest.mock('../../src/actions/submit-response/info-submission-action')
 
 import PatientInfoForm from '../../src/components/Questionnaire-pages/PatientInfoForm/PatientInfoForm'
 

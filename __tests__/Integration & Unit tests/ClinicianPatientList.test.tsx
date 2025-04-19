@@ -8,7 +8,7 @@ const mockUpdate = jest.fn()
 const mockDelOne = jest.fn()
 const mockDelMany = jest.fn()
 
-jest.mock('../src/actions/clinician-patientlist/PatientListAction', () => ({
+jest.mock('../../src/actions/clinician-patientlist/PatientListAction', () => ({
   getPatients: (filters: any, clinicianId: string) => mockGet(filters, clinicianId),
   updatePatientLink: (cid: string, pid: string, status: string) => mockUpdate(cid, pid, status),
   deletePatientLink: (cid: string, pid: string) => mockDelOne(cid, pid),
@@ -23,13 +23,20 @@ describe('ClinicianPatientList integration', () => {
   const basePatients = [
     {
       id: 'p1',
-      name: 'Alice A',
-      email: 'a@x.com',
+      name: 'Ernest Moeran',
+      email: 'ernest@eynsford.org',
       dateOfBirth: '1990-01-01',
       patientLink: 'PENDING',
       agreedToShareData: false
     },
-    { id: 'p2', name: 'Bob B', email: 'b@x.com', dateOfBirth: '1985-05-05', patientLink: null, agreedToShareData: true }
+    {
+      id: 'p2',
+      name: 'Peter Warlock',
+      email: 'phillip@heseltine.net',
+      dateOfBirth: '1985-05-05',
+      patientLink: null,
+      agreedToShareData: true
+    }
   ]
 
   beforeEach(() => {
@@ -45,15 +52,15 @@ describe('ClinicianPatientList integration', () => {
       expect(mockGet).toHaveBeenCalledWith(expect.objectContaining({ page: 1, pageSize: 10 }), clinicianId)
     )
 
-    expect(screen.getByText('Alice A')).toBeInTheDocument()
-    expect(screen.getByText('Bob B')).toBeInTheDocument()
+    expect(screen.getByText('Ernest Moeran')).toBeInTheDocument()
+    expect(screen.getByText('Peter Warlock')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('Patient'), { target: { value: 'Bob' } })
-    expect(screen.queryByText('Alice A')).not.toBeInTheDocument()
-    expect(screen.getByText('Bob B')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Patient'), { target: { value: 'Peter Warlock' } })
+    expect(screen.queryByText('Ernest Moeran')).not.toBeInTheDocument()
+    expect(screen.getByText('Peter Warlock')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: '@x.com' } })
-    expect(screen.getByText('Bob B')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'phillip@heseltine.net' } })
+    expect(screen.getByText('Peter Warlock')).toBeInTheDocument()
   })
 
   test('Connects to a pending patient', async () => {
@@ -68,11 +75,11 @@ describe('ClinicianPatientList integration', () => {
     })
 
     render(<ClinicianPatientList clinicianId={clinicianId} />)
-    await waitFor(() => screen.getByText('Alice A'))
+    await waitFor(() => screen.getByText('Ernest Moeran'))
 
     const editButtons = screen
       .getAllByRole('button', { name: '' })
-      .filter(btn => btn.closest('tr')?.textContent?.includes('Alice A'))
+      .filter(btn => btn.closest('tr')?.textContent?.includes('Ernest Moeran'))
 
     fireEvent.click(editButtons[0])
 
@@ -97,7 +104,7 @@ describe('ClinicianPatientList integration', () => {
 
     render(<ClinicianPatientList clinicianId='clin1' />)
 
-    await waitFor(() => expect(screen.getByText('Alice A')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Ernest Moeran')).toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('checkbox', { name: /select all/i }))
 
@@ -111,8 +118,8 @@ describe('ClinicianPatientList integration', () => {
     })
 
     await waitFor(() => {
-      expect(screen.queryByText('Alice A')).not.toBeInTheDocument()
-      expect(screen.queryByText('Bob B')).not.toBeInTheDocument()
+      expect(screen.queryByText('Ernest Moeran')).not.toBeInTheDocument()
+      expect(screen.queryByText('Peter Warlock')).not.toBeInTheDocument()
     })
   })
 })
