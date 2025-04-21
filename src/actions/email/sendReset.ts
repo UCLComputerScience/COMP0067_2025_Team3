@@ -44,7 +44,7 @@ export async function sendPasswordReset(email: string) {
       return { success: false, error: 'Failed to update user in database.' };
     }
 
-    const resetLink = `localhost:3000/reset-password/${token}`;
+    const resetLink = `https://team3docker.uksouth.cloudapp.azure.com//reset-password/${token}`;
 
     const msg = {
       to: email,
