@@ -190,6 +190,7 @@ const ClinicianLinkPage = ({ id, cliniciansList }: Props) => {
       }
     } else {
       console.log("Please enter you clinician's email before sending the message.")
+      toast.error("Please enter you clinician's email before sending the message.")
     }
   }
 
