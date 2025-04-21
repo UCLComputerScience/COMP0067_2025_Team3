@@ -334,7 +334,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
                 <Select
                   label='Select'
                   value={formData.gender_same_as_sex}
-                  onChange={e => setFormData({ ...formData, gender_same_as_sex: !!e.target.value })}
+                  onChange={e => setFormData({ ...formData, gender_same_as_sex: e.target.value === 'true' })}
                 >
                   <MenuItem value='true'>Yes</MenuItem>
                   <MenuItem value='false'>No</MenuItem>
@@ -587,7 +587,7 @@ const PatientInfoForm = ({ handleNext }: PatientInfoFormProps) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
-                label='Enter your input here'
+                label='Other Conditions'
                 value={formData.other_conditions}
                 onChange={e => setFormData({ ...formData, other_conditions: e.target.value })}
               />

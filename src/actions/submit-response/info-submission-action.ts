@@ -8,7 +8,7 @@ export async function savePatientInfo(data: {
   age: number
   sex: string
   gender: string
-  isSexMatchingGender: boolean
+  isSexMatchingGender: boolean | null
   ethnicity: string
   residenceCountry: string
   employment: string

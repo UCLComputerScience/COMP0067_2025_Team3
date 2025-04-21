@@ -16,6 +16,8 @@ import '@/app/globals.css'
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
 
+import '@fontsource/outfit'
+
 export const metadata = {
   title: 'The Spider - Hypermobility Symptom Questionnaire',
   description:

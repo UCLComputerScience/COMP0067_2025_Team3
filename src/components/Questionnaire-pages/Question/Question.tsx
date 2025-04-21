@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
+
 // eslint-disable-next-line import/no-unresolved
-import '@fontsource/outfit'
 
 import { Box, Grid2, Typography, Radio, Checkbox, Tooltip } from '@mui/material'
 
