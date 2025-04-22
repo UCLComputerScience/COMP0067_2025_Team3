@@ -36,7 +36,7 @@ export async function sendInviteEmail(name: string, email: string, patientId: st
         <p>Dear ${name},</p>
         <p>Your patient ${patientName} would like to share their symptoms data with you on our platform. </p>
         <p>Register your account to view their spidergrams and track their data.</p>
-        <p>Here is a link to our website: https://team3.uksouth.cloudapp.azure.com</p>
+        <p>Here is a link to our website: https://team3docker.uksouth.cloudapp.azure.com/register</p>
         <p>Kind regards,</p>
         <p>The Spider team</p>
       `,
