@@ -1,0 +1,24 @@
+import http from 'k6/http';
+import { sleep } from 'k6';
+
+export let options = {
+  stages: [
+    { duration: '1m', target: 100 },  // ramp up to 100 users
+    { duration: '2m', target: 100 },  // stay at 100 users
+    { duration: '1m', target: 0 },    // ramp down
+  ],
+};
+
+export default function () {
+  http.get('https://team3docker.uksouth.cloudapp.azure.com/home');
+  sleep(1);
+}
+
+// install homebrew and k6 if not installed: 
+// /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+// echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+// eval "$(/opt/homebrew/bin/brew shellenv)"
+// brew install k6
+
+// to run: k6 run "/Users/olabielas/Desktop/COMP0067_2025_Team3-1/__tests__/Stress Tests/stress-test"
+//  (or equivalent)
