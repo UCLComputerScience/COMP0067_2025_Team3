@@ -3,27 +3,26 @@
 import { useState, useEffect } from 'react'
 
 import {
+  Radar,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Tooltip,
   ResponsiveContainer,
   Customized
 } from 'recharts'
 import { Card, CardContent, Typography, Box, Button } from '@mui/material'
-
 import { toast } from 'react-toastify'
 
 const domains = [
   'Neuromusculoskeletal',
   'Pain',
-  'Fatigue',
-  'Gastrointestinal',
-  'Cardiac Dysautonomia',
   'Urogenital',
   'Anxiety',
-  'Depression'
+  'Depression',
+  'Fatigue',
+  'Gastrointestinal',
+  'Cardiac Dysautonomia'
 ]
 
 interface PerceivedSpidergramProps {
@@ -32,10 +31,10 @@ interface PerceivedSpidergramProps {
   onBack: () => void
   onSubmit: () => void
 }
+
 const MAX_VALUE = 100
 const GRID_LEVELS = 10
-const TICK_VALUES = Array.from({ length: GRID_LEVELS }, (_, i) => (i + 1) * 10)
-
+const TICK_VALUES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, MAX_VALUE]
 const initialData = domains.map((label, i) => ({ subject: label, value: 0, id: 1000 + i }))
 
 export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit }: PerceivedSpidergramProps) {
@@ -43,178 +42,170 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
   const [hoveredPoint, setHoveredPoint] = useState<{ axisIndex: number; value: number } | null>(null)
 
   useEffect(() => {
-    const mappedData = initialData.map(item => ({
+    const mapped = initialData.map(item => ({
       ...item,
-      value: values[item.subject]?.score || 0
+      value: values[item.subject]?.score ?? null
     }))
 
-    setData(mappedData)
+    setData(mapped)
   }, [values])
 
   interface InteractionEvent extends React.MouseEvent<HTMLDivElement> {
     currentTarget: HTMLDivElement
   }
-
   interface RingLevel {
     radius: number
     value: number
   }
 
-  const handleSubmitWithValidation = () => {
-    const allSpiderGramValues = data.map(d => d.value)
-    const allSet = allSpiderGramValues.every(value => value > 0)
-    const noneSet = allSpiderGramValues.every(value => value === 0)
+  const handleInteraction = (e: InteractionEvent, isClick: boolean = false) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+    const mouseX = e.clientX - left
+    const mouseY = e.clientY - top
+    const cx = width / 2
+    const cy = height / 2
 
-    if (allSet || noneSet) {
+    const dx = mouseX - cx
+    const dy = cy - mouseY // ← flip here
+
+    const RAD = Math.PI / 180
+    const sector = 360 / domains.length
+    let bestDot = -Infinity
+    let overlayIndex = 0
+
+    for (let i = 0; i < domains.length; i++) {
+      const angleDeg = (360 - i * sector) % 360
+      const rad = angleDeg * RAD
+
+      const ux = Math.cos(rad)
+      const uy = Math.sin(rad)
+      const dot = dx * ux + dy * uy
+
+      if (dot > bestDot) {
+        bestDot = dot
+        overlayIndex = i
+      }
+    }
+
+    const chartIndex = (domains.length - overlayIndex) % domains.length
+
+    const dist = Math.hypot(dx, dy)
+    const maxR = Math.min(width, height) * 0.45
+
+    const rings: RingLevel[] = [
+      { radius: 0, value: 0 },
+      ...Array.from({ length: GRID_LEVELS }, (_, i) => ({
+        radius: ((i + 1) / GRID_LEVELS) * maxR,
+        value: (i + 1) * 10
+      }))
+    ]
+
+    let closest = rings[0]
+    let md = Math.abs(dist - closest.radius)
+
+    for (const r of rings) {
+      const d = Math.abs(dist - r.radius)
+
+      if (d < md) {
+        md = d
+        closest = r
+      }
+    }
+
+    if (isClick) {
+      //console.log(`setting ${domains[overlayIndex]} to ${closest.value}`) useful to check tracking is correct
+
+      const updated = data.map((d, i) => (i === overlayIndex ? { ...d, value: closest.value } : d))
+
+      setData(updated)
+      onUpdate(Object.fromEntries(updated.map(d => [d.subject, { score: d.value }])))
+    } else {
+      setHoveredPoint({ axisIndex: chartIndex, value: closest.value })
+    }
+  }
+
+  const CustomOverlay = (props: any) => {
+    const { viewBox, width: propW, height: propH } = props
+    const viewX = viewBox?.x ?? 0
+    const viewY = viewBox?.y ?? 0
+    const width = viewBox?.width ?? propW ?? 0
+    const height = viewBox?.height ?? propH ?? 0
+
+    const RAD = Math.PI / 180
+    const cx = viewX + width / 2
+    const cy = viewY + height / 2
+    const radius = Math.min(width, height) * 0.45
+
+    const ringLevels: RingLevel[] = Array.from({ length: GRID_LEVELS }, (_, i) => ({
+      radius: ((i + 1) / GRID_LEVELS) * radius,
+      value: (i + 1) * 10
+    }))
+
+    const previewDot = hoveredPoint
+      ? (() => {
+          const angle = (360 / domains.length) * hoveredPoint.axisIndex
+          const rLevel = ringLevels.find(r => r.value === hoveredPoint.value)
+          const r = rLevel ? rLevel.radius : 0
+
+          return (
+            <circle
+              cx={cx + r * Math.cos(-angle * RAD)}
+              cy={cy + r * Math.sin(-angle * RAD)}
+              r={6}
+              fill='#16B1FF'
+              stroke='white'
+              strokeWidth={2}
+            />
+          )
+        })()
+      : null
+
+    return <>{previewDot}</>
+  }
+
+  const handleSubmit = () => {
+    const vals = data.map(d => d.value)
+
+    console.log('vals', data)
+
+    if (vals.every(v => v > 0) || vals.every(v => v !== null)) {
       onSubmit()
     } else {
       toast.error('Please set all values or none')
     }
   }
 
-  const handleInteraction = (e: InteractionEvent, isClick: boolean = false): void => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left
-    const mouseY = e.clientY - rect.top
-    const cx = rect.width / 2
-    const cy = rect.height / 2
-    const dx = mouseX - cx
-    const dy = mouseY - cy
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    const angleDeg = (Math.atan2(-dy, dx) * 180) / Math.PI
-    const angle = (angleDeg + 360) % 360
-
-    const sectionAngle = 360 / domains.length
-    let closestAxisIndex = 0
-    let minAxisDiff = Infinity
-
-    for (let i = 0; i < domains.length; i++) {
-      const axisAngle = sectionAngle * i
-      const diff = Math.abs(axisAngle - angle)
-      const wrappedDiff = Math.min(diff, 360 - diff)
-
-      if (wrappedDiff < minAxisDiff) {
-        minAxisDiff = wrappedDiff
-        closestAxisIndex = i
-      }
-    }
-
-    const ANGLE_THRESHOLD = 10
-
-    if (minAxisDiff > ANGLE_THRESHOLD) return setHoveredPoint(null)
-
-    const radius = Math.min(rect.width, rect.height) * 0.45
-
-    const ringLevels: RingLevel[] = Array.from({ length: GRID_LEVELS }, (_, i) => {
-      const r = ((i + 1) / GRID_LEVELS) * radius
-      const value = (i + 1) * 10
-
-      return { radius: r, value }
-    })
-
-    let closestRing = ringLevels[0]
-    let minRingDiff = Infinity
-
-    for (const ring of ringLevels) {
-      const diff = Math.abs(distance - ring.radius)
-
-      if (diff < minRingDiff) {
-        minRingDiff = diff
-        closestRing = ring
-      }
-    }
-
-    if (isClick) {
-      const updated = data.map((item, i) => (i === closestAxisIndex ? { ...item, value: closestRing.value } : item))
-
-      setData(updated)
-
-      const newValues = Object.fromEntries(updated.map(d => [d.subject, { score: d.value }]))
-
-      onUpdate(newValues)
-    } else {
-      setHoveredPoint({ axisIndex: closestAxisIndex, value: closestRing.value })
-    }
-  }
-
-  const CustomOverlay = ({ width, height }: { width: number; height: number }) => {
-    const RADIAN = Math.PI / 180
-    const cx = width / 2
-    const cy = height / 2
-    const radius = Math.min(width, height) * 0.45
-
-    const ringLevels = Array.from({ length: GRID_LEVELS }, (_, i) => {
-      const r = ((i + 1) / GRID_LEVELS) * radius
-      const value = (i + 1) * 10
-
-      return { radius: r, value }
-    })
-
-    const points = data.map((entry, index) => {
-      const angle = (360 / data.length) * index
-      const r = ringLevels.find(r => r.value === entry.value)?.radius || 0
-      const x = cx + r * Math.cos(-angle * RADIAN)
-      const y = cy + r * Math.sin(-angle * RADIAN)
-
-      return [x, y]
-    })
-
-    const filled = data.every(d => d.value > 0)
-
-    const previewDot = hoveredPoint
-      ? (() => {
-          const angle = (360 / domains.length) * hoveredPoint.axisIndex
-          const r = ringLevels.find(r => r.value === hoveredPoint.value)?.radius || 0
-          const x = cx + r * Math.cos(-angle * RADIAN)
-          const y = cy + r * Math.sin(-angle * RADIAN)
-
-          return <circle cx={x} cy={y} r={6} fill='#16B1FF' stroke='white' strokeWidth={2} />
-        })()
-      : null
-
-    const path = filled && points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x},${y}`).join(' ') + ' Z'
-
-    return (
-      <>
-        {filled && path && <path d={path} stroke='#8C57FF' strokeWidth={2} fill='#8C57FF' fillOpacity={0.4} />}
-        {points.map(([x, y], i) => (data[i].value > 0 ? <circle key={i} cx={x} cy={y} r={5} fill='#8C57FF' /> : null))}
-        {previewDot}
-      </>
-    )
-  }
-
   return (
     <>
-      <Typography sx={{ fontFamily: 'Outfit', fontSize: '48px', fontWeight: 600, lineHeight: '68px', padding: '20px' }}>
-        {'Perceived Spidergram'}
+      <Typography sx={{ fontFamily: 'Outfit', fontSize: 48, fontWeight: 600, lineHeight: '68px', p: 2 }}>
+        Perceived Spidergram
       </Typography>
-      <Typography
-        sx={{ fontFamily: 'Inter', fontSize: '24px', fontWeight: 400, lineHeight: '28px', paddingBottom: '79px' }}
-      >
+      <Typography sx={{ fontFamily: 'Inter', fontSize: 24, fontWeight: 400, lineHeight: '28px', pb: 10 }}>
         Mark on the graph how much these symptoms have impacted your daily life during the past ONE month. (Optional)
       </Typography>
-      <Card sx={{ maxWidth: 1000, mx: 'auto', mt: 2, mb: 2 }}>
+      <Card sx={{ maxWidth: 1000, mx: 'auto', my: 2 }}>
         <CardContent>
           <Box
             data-testid='spidergram'
-            sx={{
-              width: '100%',
-              aspectRatio: '4 / 3',
-              display: 'flex',
-              justifyContent: 'center',
-              position: 'relative'
-            }}
+            sx={{ width: '100%', aspectRatio: '4/3', position: 'relative' }}
             onClick={e => handleInteraction(e, true)}
             onMouseMove={e => handleInteraction(e)}
           >
             <ResponsiveContainer width='100%' height='100%'>
-              <RadarChart cx='50%' cy='50%' outerRadius='90%' data={data}>
+              <RadarChart
+                cx='50%'
+                cy='50%'
+                outerRadius='90%'
+                startAngle={360}
+                endAngle={0}
+                data={data}
+                dataKey={'subject'}
+              >
                 <PolarGrid gridType='polygon' />
                 <PolarAngleAxis dataKey='subject' />
-                <PolarRadiusAxis angle={90} domain={[0, MAX_VALUE]} ticks={TICK_VALUES as any} />
-                <Tooltip formatter={val => (typeof val === 'number' && val > 0 ? val : 'Click axis to set')} />
-                <Customized component={CustomOverlay as any} />
+                <PolarRadiusAxis domain={[0, MAX_VALUE]} ticks={TICK_VALUES as any} />
+                <Radar dataKey='value' stroke='#8C57FF' fill='#8C57FF' fillOpacity={0.4} />
+                <Customized component={CustomOverlay} />
               </RadarChart>
             </ResponsiveContainer>
           </Box>
@@ -222,7 +213,7 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
             <Button variant='outlined' onClick={onBack}>
               Back
             </Button>
-            <Button variant='contained' onClick={handleSubmitWithValidation}>
+            <Button variant='contained' onClick={handleSubmit}>
               Submit
             </Button>
           </Box>
