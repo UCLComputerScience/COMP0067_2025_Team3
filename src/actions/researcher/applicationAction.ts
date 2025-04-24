@@ -279,6 +279,7 @@ export async function updateApplication(formData: FormData, userId: string, appl
     const updatedApplication = await prisma.application.update({
       where: { id: applicationId },
       data: {
+        status: ApplicationStatus.PENDING,
         title: rawFormData.researchTitle as string,
         question: rawFormData.researchQuestion as string,
         institution: rawFormData.institution as string,
