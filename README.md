@@ -90,6 +90,12 @@ This section provides instructions for deploying the application to Azure.
    - Select inbound ports: HTTP (80), HTTPS (443), SSH (22)
 7. Click 'Review + create', then 'Create' to confirm and deploy
 
+
+>
+> **The Ubutun Sercer should be this:**
+> ![Screenshot 2025-04-28 135759](https://github.com/user-attachments/assets/d0fada4c-9f34-4ddf-9cfe-e1a2e1ba7ce7)
+
+
 > **⚠️ CHECKPOINT:** Record this important information:
 >
 > - Public IP address: (example: 20.77.24.37)
@@ -172,12 +178,19 @@ Execute the following commands one by one:
    ```
 
 5. Install Docker and related packages:
-
+   
    ```bash
    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
    ```
 
-6. Verify installation:
+    <details> <summary>Possible messages you will see after running the above code (and you can ignore it):</summary> <pre><code> E: Package 'docker-ce' has no installation candidate E: Unable to locate package docker-ce-cli E: Unable to locate package containerd.io E: Couldn't find any package by glob 'containerd.io' E: Couldn't find any package by regex 'containerd.io' E: Unable to locate package docker-buildx-plugin E: Unable to locate package docker-compose-plugin   </code></pre>
+    </details>
+
+   ```bash
+   sudo apt install docker-compose
+   ```
+
+7. Verify installation:
    ```bash
    sudo docker run hello-world
    ```
