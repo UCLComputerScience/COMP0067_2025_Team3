@@ -166,9 +166,9 @@ export default function PerceivedSpidergram({ values, onUpdate, onBack, onSubmit
   const handleSubmit = () => {
     const vals = data.map(d => d.value)
 
-    console.log('vals', data)
+    // console.log('vals', data)
 
-    if (vals.every(v => v > 0) || vals.every(v => v !== null)) {
+    if (vals.every(v => v > 0) || vals.every(v => v === null)) {
       onSubmit()
     } else {
       toast.error('Please set all values or none')
